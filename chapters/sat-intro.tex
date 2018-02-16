@@ -1,0 +1,136 @@
+\def\ant{\text{\em ant}}
+\def\bat{\text{\em bat}}
+\def\cat{\text{\em cat}}
+\def\dog{\text{\em dog}}
+\def\emu{\text{\em emu}}
+\def\fox{\text{\em fox}}
+
+
+\section{Boolean satisfiability (SAT)}
+\label{sec:SAT-intro}
+
+Imagine you are in a pet shop with a selection of animals: \ant, {\em bat, cat, dog, emu} and \fox.
+
+These animals are very particular about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants to live with its best friend bat. 
+But the bat is very aggressive towards all herbivores, and the emu is afraid of anything lighter than 2 kilograms. The ant hates all four-legged creatures, and the fox can only handle one flatmate with wings. 
+
+You need to decide on a subset of pets to buy---you love all animals, but due to their restrictions, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
+After some time, you decide on bat, cat, dog and fox, leaving the ant and the emu in the pet shop.
+
+\paragraph{Definition}
+
+This everyday situation is an example of \emph{Boolean satisfiability (SAT)} problem.
+The animals translate into \emph{variables}, %$\{ant, bat, cat, dog, emu, fox\}$.
+and the cohabiting restrictions of each animal translate into \emph{clauses},
+such that ``dog wants to live with cat'' becomes an implication $\dog \Rightarrow \cat$.
+Under the hood, all of these implications are translated into even simpler constructs: lists of disjunctions.
+For instance, ``dog wants to live with cat'' as a disjunction is %expressed as 
+$\neg\dog \vee \cat{}$, which means ``I don't buy the dog or I buy the cat''.
+%More complex implications need to be translated into two or more disjunctions.
+The representation as disjunctions is easier to handle algorithmically; however,
+for the rest of this thesis, we show our examples as implications, because they are easier to understand.
+The variables and the clauses are shown in Figure~\ref{fig:animalCohabitingProblem}.
+
+
+% Ultimately, the SAT-solver gets one large formula of disjunctions
+
+% These clauses are disjunctions of \emph{literals}: either a variable, such as \cat, or its negation, $\neg\cat$.
+% A positive literal \cat{} means that the animal comes with you, 
+% and conversely, $\neg\cat{}$ means it is left in the shop. 
+
+
+The objective is to find a \emph{model}: each variable is assigned a Boolean value, such that the conjunction of all clauses evaluates into true. A program called \emph{SAT-solver} takes the set of variables and clauses, and performs a search, like the mental calculations of the animal-lover in the shop.
+We can see that the assignment $\{\ant=0, \bat=1, \cat=1, \dog=1, \emu=0, \fox=1\}$
+satisfies the animals' wishes.
+Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, \fox=1\}$: you only choose the emu and the fox. 
+Some problems have a single solution, some problems have multiple solutions, and some are unsatisfiable, i.e. no combination of assignments can make the formula true.
+
+ \begin{figure}[t]
+  % $$\begin{array}{r | r @{~} l | l @{\quad \wedge \quad } l @{\quad \wedge \quad} l }
+  %  \textbf{Animal}
+  %               & \multicolumn{2}{l}{\textbf{Constraint}} 
+  %                                       & \multicolumn{3}{l}{\textbf{Constraint in conjunctive normal form}} \\ \hline
+
+  %   \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox 
+  %   								    & \neg{}\ant \vee \neg{}\cat 
+  %                                       & \neg{}\ant \vee \neg{}\dog 
+  %                                       & \neg{}\ant \vee \neg{}\fox \\
+
+  %  \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
+  %  								        & \neg{}\bat \vee \neg{}\ant 
+  %                                       & \multicolumn{2}{l}{\neg{}\bat \vee \neg{}\emu} \\
+  %  \cat         & \cat &\Rightarrow \bat & \multicolumn{3}{l}{\neg{}\cat \vee \bat} \\
+  %  \dog         & \dog &\Rightarrow \cat & \multicolumn{3}{l}{\neg{}\dog \vee \cat} \\
+  %  \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
+  %  										& \neg{}\emu \vee \neg{}\ant 
+  %                                       & \multicolumn{2}{l}{\neg{}\emu \vee \neg{}\bat} \\
+  %  \fox         & \fox &\Rightarrow \neg (\bat \wedge \emu) 
+  %  									    & foo 
+  %  									    & bar
+  %  									    & baz \\
+  %
+  % \end{array}$$ \\
+
+
+
+
+    $$\begin{array}{r | r @{~} l | l }
+   \textbf{Variable}
+                %& \multicolumn{2}{l}{\textbf{Constraint}} 
+                & & \textbf{~~~Constraint} 
+                                         & \textbf{Explanation} \\ \hline
+
+                & \ant & \vee \ \bat \vee \cat \vee \dog \vee \fox & \text{``You want to buy at least one pet.''} \\
+    \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox & \text{``Ant does not like four-legged animals.''} \\
+   \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
+                          & \text{``Bat does not like herbivores.''} \\ 
+   \cat         & \cat &\Rightarrow \bat & \text{``Cat wants to live with bat.''} \\
+   \dog         & \dog &\Rightarrow \cat & \text{``Dog wants to live with cat.''} \\
+   \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
+                                         &  \text{``Emu does not like small animals.''} \\
+   \fox         & \fox &\Rightarrow \neg (\bat \wedge \emu) 
+                                         & \text{``Fox cannot live with two winged animals.''} 
+  \end{array}$$ \\
+
+  \caption{Animals' cohabiting constraints translated into a SAT-problem.}
+  \label{fig:animalCohabitingProblem}
+\end{figure}
+
+
+% I actually like the CNF representation: it makes the problem look more low-level and simple. 
+% I hope it would make the point "look, we reduce a complex problem into a simple format."
+
+\paragraph{History and applications}
+
+SAT-solving as a research area dates back to 1970s.
+Throughout its history, it has been of interest for both theoretical and practical purposes. 
+SAT is a well-known example of an \emph{NP-complete} (Nondeterministic Polynomial time) problem \cite{cook1971complexity}: for all such problems, a potential solution can be \emph{verified} in polynomial time, but there is no known algorithm that would \emph{find} such a solution, in general case, in sub-exponential time. 
+This equivalence means that we can express any NP-complete problem as a SAT-instance, and use a SAT-solver to solve it.
+The class includes problems which are much harder than the animal example;
+nevertheless, all of them can be reduced into the same representation, just like $\neg\bat \vee \neg\emu$.
+
+
+% think of tasks such as job scheduling, where jobs are scheduled to different actors with minimal overhead---$x$ must be completed before $y$ can start, and $z$ must run constantly, but not all actors can perform all jobs. 
+% %This kind of optimisation is going on constantly in our computers, cars.
+% Nevertheless, all these problems can be reduced into the same representation as the animals in the shop: 
+% the massive effort of an operating system---or an autopilot---can be expressed as a set of simple disjunctions, just like $\neg\bat \vee \neg\emu$.
+
+%Since the 2000s, SAT-solving is widely used in practical applications \cite{marques_silva2010}. 
+The first decades of SAT-research was concentrated on the theoretical side, with little practical applications.
+But things changed in the 90s: there was a breakthrough in the SAT-solving techniques, 
+which allowed for scaling up and finding new use cases. As a result, modern SAT-solvers can deal with problems that have hundreds of thousands of variables and millions of clauses \cite{marques_silva2010}.
+
+What was behind these advances? SAT, as a general problem, remains NP-complete: 
+it is true that there are still SAT-problems that cannot be solved in sub-exponential time.
+However, there is a difference between a general case, where the algorithm must be prepared for any input, and an ``easy case'', where we can expect some helpful properties from the input.
+Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave in linear time, and we can even design heuristic sorting algorithms that exploit those properties.
+
+Analogously, the 90s breakthrough was due to the discovery of right kind of heuristics.
+%Turns out that many typical real-life scenarios can be formulated as a SAT-problem of the ``easy kind''.
+% when formulated as SAT-problem, can be solved efficiently with proper heuristics. 
+Much of the SAT-research in the last two decades has been devoted to optimising the solving algorithms, and finding more efficient methods of encoding various real-life problems into SAT.
+This development has led to an increasing amount of use cases since the early 2000s \cite{claessen2009satpractice}.
+One of the biggest success stories for a SAT-application is model checking \cite{sheeran1998modelchecking,biere1999modelchecking,bradley2011modelchecking}, used in software and hardware verification. Furthermore, SAT has been used in domains such as computational biology \cite{claessen2013compbioSAT} and AI planning \cite{selman_kautz92aiplanning}, just to pick a few examples.
+In summary, formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics for each problem independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
+
+% Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.

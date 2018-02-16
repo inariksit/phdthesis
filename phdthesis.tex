@@ -1,0 +1,240 @@
+%- DOCUMENT GEOMETRY ---------------------------------------------------------
+
+\documentclass[10pt,twoside]{book}
+
+\usepackage{soul}
+
+\usepackage{epstopdf}
+\usepackage[all]{nowidow}
+
+\usepackage{geometry}
+\geometry{
+  papersize={169mm,239mm}, % G5
+  inner={18mm},
+  outer={18mm},
+  top={28mm},
+  bottom={28mm},
+  bindingoffset={5mm}
+}
+
+%- DEFINITIONS ---------------------------------------------------------------
+
+\input{defs}
+% \input{styledefs}
+
+%- TYPOGRAPHY ----------------------------------------------------------------
+
+\usepackage[english]{babel}
+
+\usepackage{fontspec}
+
+\newcommand{\mainfontfamily}{Palatino}
+\setmainfont[
+  Ligatures=TeX,
+  Scale=0.9,
+]{\mainfontfamily}
+\newfontfamily\scshape[Letters=SmallCaps, Numbers=Uppercase]{texgyrepagella-regular.otf}%{TeX Gyre Pagella}
+
+\newcommand{\monofontfamily}{Monaco} % Courier
+\setmonofont[Scale=0.7]{\monofontfamily}
+
+%\DeclareMathSizes{<surrounding text size>}{<math text size>}{<math script size>}{<math scriptscript size>}
+\DeclareMathSizes{10pt}{9pt}{7pt}{6pt}
+
+\usepackage{setspace} \onehalfspacing % \doublespacing
+% \linespread{0.95833} % 11.5/12
+% \linespread{1.2}
+
+\usepackage{bm} %for \bfCL
+\usepackage{amsmath,amsthm}
+\usepackage{amssymb} %% for \nvDash
+\usepackage{dsfont} %% for \mathds{N}
+\usepackage{wasysym} % for clock
+
+%- BASIC PACKAGES ------------------------------------------------------------
+
+\usepackage[square,comma,numbers]{natbib} % refer: http://merkel.zoneo.net/Latex/natbib.php
+\renewcommand{\cite}{\citep}
+\usepackage{bibentry} % for reference entries in main text
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{framed}
+\usepackage[bf]{caption} \renewcommand{\captionfont}{\small}
+\usepackage{subcaption} % for subfigures
+
+%\usepackage{enumitem}
+\usepackage{paralist}
+\usepackage{mathtools}
+\usepackage{multicol}
+\setlength{\multicolsep}{0pt}
+
+\usepackage{fancyhdr}
+\fancyhead[LE,RO]{\leftmark}
+\fancyhead[RE,LO]{}
+% \fancyfoot[C]{}
+% \fancyfoot[LE,RO]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% These seem to do the opposite of eachother!
+% \setlength{\belowcaptionskip}{5pt} %% between text and caption (assuming caption above table)
+% \setlength{\abovecaptionskip}{5pt} %% between table and caption
+
+%- ADDITIONAL PACKAGES -------------------------------------------------------
+
+\usepackage{tocloft}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}} % leader in main ToC
+\setcounter{tocdepth}{0} % only chapters in TOC
+
+\usepackage{minitoc}
+\setcounter{minitocdepth}{2} % 2
+\setlength{\mtcindent}{0pt} % 24pt
+\renewcommand{\mtifont}{\Large\bf} % \large\bf
+%\renewcommand{\mtcfont}{} % \small\rm
+% \renewcommand{\mtcSfont}{} % \small\bf
+\renewcommand{\mtctitle}{Chapter contents} % Contents
+\mtcsetfeature{minitoc}{open}{\vspace{1em}}
+\nomtcrule
+% \nomtcpagenumbers
+\dominitoc
+\newcommand{\myminitoc}{\begin{spacing}{1.2}\minitoc\end{spacing}\cleardoublepage}
+
+% Fix boldness in minitocs
+\renewcommand{\cftsecfont}{\bfseries}
+\renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsecpagefont}{\bfseries}
+
+% \usepackage{tikz}
+% \usetikzlibrary{automata}
+% \usetikzlibrary{arrows.meta}
+% \usetikzlibrary{positioning, calc}
+% \font\nullfont=cmr10 % for debugging "nullfont" errors
+
+% \usepackage{longtable}
+% \renewcommand{\arraystretch}{1.1} % vertical spacing in tables
+
+\usepackage{listings} % Source code blocks
+\definecolor{muted}{gray}{0.75}
+\definecolor{light-gray}{gray}{0.95}
+\lstset{
+  escapeinside={\%}{\%},
+  basicstyle=\small\ttfamily\setstretch{1}, % small > footnotesize > scriptsize
+  backgroundcolor=\color{light-gray},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=4,
+  breaklines=true,
+  breakatwhitespace=false,
+  postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{muted}\hookrightarrow\space}}, % http://tex.stackexchange.com/a/116572/10924
+  morestring=[b]',
+  frame=tblr, framerule=3pt, rulecolor=\color{light-gray}
+}
+% \lstalias{GF}{}
+% \lstset{emph={
+%     abstract,concrete,flags,cat,fun,lincat,lin,param,oper,of,table,case
+%     },emphstyle={\bfseries}
+% }
+\usepackage{metalogo} % for XeTeX logos
+
+%- HyperRef package, for PDF outline & META info
+\usepackage{hyperref}
+\definecolor{blue}{rgb}{0,0,0.75}
+\hypersetup{
+  linktocpage=true,
+  colorlinks, urlcolor=blue, linkcolor=blue, citecolor=blue,
+  breaklinks,
+  pdftitle={\phdtitle},
+  pdfauthor={\phdauthor},
+  pdfkeywords={\phdkeywords},
+  pdfstartview=FitB
+}
+
+%- TO BE REMOVED BEFORE FINAL VERSION ----------------------------------------
+
+% \usepackage{draftwatermark}
+% \SetWatermarkColor[gray]{0.95}
+% \SetWatermarkText{\scshape Draft 1}
+
+% \usepackage{showframe}
+% \renewcommand{\ShowFrameColor}{\color{light-gray}}
+% \renewcommand{\ShowFrameLinethickness}{0.5pt}
+
+% \usepackage{blindtext}
+
+% \usepackage{refcheck} % Also use \nocite{*}
+
+%- NEW/REDEFINED COMMANDS ----------------------------------------------------
+
+\newcommand{\blankline}{\vspace{\baselineskip}}
+
+\input{macros}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+
+
+% Appendix after chapter 3
+\usepackage{appendix}
+\usepackage{chngcntr}
+\usepackage{etoolbox}
+\AtBeginEnvironment{subappendices}{
+  \chapter*{Appendix: SAT-encoding}
+  \addcontentsline{toc}{chapter}{Appendix: SAT-encoding}
+  \counterwithin{figure}{section}
+  \counterwithin{table}{section}
+}
+
+
+%= DOCUMENT ==================================================================
+
+\begin{document}
+\def\chapterautorefname{Chapter}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+
+\frontmatter
+\pagestyle{plain}
+  \pagenumbering{gobble}
+  \include{title}
+  \include{imprint}
+
+  % \pagenumbering{roman}
+  % \begingroup
+  % \let\cleardoublepage\clearpage
+  \include{abstract}
+  \include{acknowledgements}
+  % \endgroup
+
+  \tableofcontents
+  \vspace{3em}
+  % \addtocontents{toc}{~\hfill\textbf{Page}\par}
+  % \listoftables
+  % \listoffigures
+
+\mainmatter
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{{\scshape \chaptername} \thechapter.\ #1}{}}
+
+\include{chapters/thesis-intro}
+
+  \include{chapters/background}
+  \include{chapters/cg-analysis}
+
+\begin{subappendices}
+  \include{chapters/sat-appendix}
+\end{subappendices}  
+
+  \include{chapters/gf-testing}
+  \include{chapters/conclusion}
+
+
+
+\backmatter
+ % \include{glossary}
+  \include{bibliography}
+
+\end{document}
+

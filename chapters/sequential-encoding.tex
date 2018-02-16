@@ -1,0 +1,253 @@
+\subsection{Sequential scheme}
+
+
+We continue with the sequential scheme, as presented in Section~\ref{sec:orderedScheme}.
+In the parallel scheme, we simply translated every applicable rule into a clause, and asked the SAT-solver to find a model that satisfies all the clauses. 
+Now, we model the state of the sentence by creating new variables at each rule application. 
+To give an example, the sentence would look the following after applying the rule \t{REMOVE adj}:
+
+\begin{equation}
+\begin{array}{c c c c c}
+\sobrePr & \unaPrn & \aproximacionN & \masAdv      & \cientifica{}'_\adj \\
+\sobreN  & \unaDet &                & \mas{}'_\adj & \cientificaN \\
+         & \unaPrsPThree \\
+         & \unaPrsPOne \\
+         & \unaImp \\
+\end{array}
+\end{equation}
+
+In Section~\ref{sec:orderedScheme}, we explained how the version by \cite{lager_nivre01} is not a SAT-problem, but manipulation of Boolean expressions.
+Then we established that we can make it into a SAT-problem by leaving the variables on the first round unassigned, which gives us the question ``which variables were originally true'', and promised that it will all make sense in Chapter~\ref{chapterCGana}. Regardless whether we use the scheme as a SAT-problem or not, in the remainder of this appendix, we will show how the new variables are created. 
+We use the same rule types as we have seen for the parallel scheme.
+
+
+
+
+
+
+
+
+
+
+
+%The first rule accesses the initial input by the morphological analyser, 
+%and the $n^{th}$ rule accesses the sentence after the first $n-1$ rules have been run.
+%Similarly to \cite{lager_nivre01}, we model this as a composition of clauses, each accessing the state produced by the previous clause. 
+%Recall that all the variables start off as true, so we need no changes in the variables to be selected. The general procedure for rules with a single condition is explained in Section~\todo{write that section}; here we show the process for all rule types, as in the unordered scheme.
+
+%each time that a rule is applied to a target, a new variable for the target is created.
+%This makes it possible to separate two cases: a variable assigned a value, because some rule targets it, or a variable is assigned a value, because it appears in the condition of some other rule. Most importantly, it allows us to model the effect of time.
+
+
+
+
+% The main difference is that the sentence starts off with all variables assigned $True$. Contrast \ref{:allStartTrue} with \ref{eq:atleastOneTrue}; 
+
+% \begin{equation}
+% \begin{array}{c}
+% \sobrePr \wedge \sobreN \\
+% \unaPrn \wedge \unaDet \wedge \unaPrsPThree \wedge \unaPrsPOne \wedge \unaImp \\
+% \aproximacionN \\
+% \masAdv \wedge \masAdj \\
+% \cientificaAdj \wedge \cientificaN \\
+% \end{array}
+% \label{eq:allStartTrue}
+% \end{equation}
+
+
+
+
+% For subsequent rule applications, only the variables from the latest round are accessible: the $n^{th}$ rule may only access the variables that are created, or left unchanged, by the $n-1^{th}$ rule. 
+
+% 
+
+% \todo{Koen, you can stop reading here, this is still crap!}
+
+% \begin{equation}
+% \begin{array}{r @{~\eqdef~} l}
+% \text{condsHold}     & c1 \vee c2 \vee c3 ... \\
+% \text{someTrgIsTrue} & r1 \vee r2 \vee r3 ... \\
+% \text{noOtherIsTrue} & \neg r4 \wedge \neg r5 ... \\
+% \text{onlyTrgLeft}   & \text{someTrgIsTrue} \wedge \text{noOtherIsTrue} \\
+% \text{cannotApply}   & \neg \text{condsHold} \vee \text{onlyTrgLeft} \\
+% %
+% \newVar trg' &  trg \wedge \text{cannotApply}
+%               %  [ andl s newTrgName [ oldTrgLit     --wN<a> was also true, and
+%               %                      , cannotApply ] --rule cannot apply 
+%               %     | oldTrgLit <- trgPos
+%               %     , let newTrgName = show oldTrgLit ++ "'" ]
+% \end{array}
+% \end{equation}
+
+\subsubsection{No conditions} 
+
+
+\cgrule{REMOVE adj} Unconditionally removes all readings which contain the target. We simply create a new variable with the value False.
+
+\begin{equation}
+\centering
+  %\begin{array}{r @{~\eqdef~} l}
+    % \mas{}'_\adj        & \text{New variable} \\
+    % \cientifica{}'_\adj &  \text{New variable} \\
+    % \multicolumn{2}{c}{\neg{}\mas{}'_\adj}  \\
+    % \multicolumn{2}{c}{\neg{}\cientifica{}'_\adj}
+%
+\begin{array}{r @{~\eqdef~} l}
+    \newVar \mas{}'_\adj         & \text{ \em False} \\
+    \newVar \cientifica{}'_\adj  & \text{ \em False} \\
+  \end{array}
+\end{equation}
+
+\cgrule{SELECT adj} Unconditionally removes all other readings that appear in the same cohort with the target. 
+We treat ``{\sc select} target'' rules as ``{\sc remove} all but target'', and create new variables for everything but the target. 
+
+\begin{equation}
+\begin{array}{r @{~\eqdef~} l}
+    \newVar \mas{}'_\adv      & \text{ \em False} \\
+    \newVar \cientifica{}'_\n & \text{ \em False} \\
+\end{array}
+\label{eq:slAdjOrdered}
+\end{equation}
+
+
+
+\subsubsection{Positive conditions}
+
+\def\invConds{\text{invalid condition}}
+\def\onlyTrgLeft{\text{only target left}}
+
+\begin{align}
+%
+\intertext{\cgrule{REMOVE adj IF (1 adj)} Single condition.} 
+\newVar \mas{}'_\adj 
+      & \eqdef \masAdj\ 
+        \wedge\: ( \; \ob{\neg\cientificaAdj}^{\invConds} 
+        \vee  \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (1 adj) (-1 n)} Conjunction of conditions.}
+\newVar \mas{}'_\adj 
+      & \eqdef \masAdj\ 
+       \wedge\: ( \; \ob{\neg ( \cientificaAdj \wedge \aproximacionN )\;}^{\invConds} 
+       \vee  \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (1C adj)} Careful context.} %The condition for \cgrule{1C adj} is $\cientificaAdj \wedge \neg \cientificaN$; we know by the default rule that one of them must be true, so just making $\cientificaN$ positive, we negate this
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( \cientificaAdj \wedge \neg \cientificaN )\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft}  )  \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1* n)} Scanning.}
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( \aproximacionN \vee \sobreN )\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. }
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( \aproximacionN \vee (\sobreN \wedge \neg\unaDet))\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} )  \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier. }
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( \aproximacionN \vee (\sobreN \wedge \unaAny)) }^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context.} %The presence of $\sobrePr$, regardless of $\sobreN$, is enough to invalidate the C condition.}
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\aproximacionN \vee (\sobreN \wedge \neg\sobrePr))\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.}
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\aproximacionN \vee  (\sobreN \wedge \neg\sobrePr \wedge \neg\unaDet))\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} )  \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n CBARRIER det)} Scanning with careful context, up to a careful barrier.}
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\aproximacionN \vee  (\sobreN \wedge \neg\sobrePr \wedge \unaAny))\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) 
+\end{align}
+
+
+
+
+\subsubsection{Inverted conditions}
+
+
+\begin{align}
+\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition.}
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\neg \cientificaAdj)\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \notag \\
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \cientificaAdj
+     \vee  \neg\masAdv )  \\
+%
+\intertext{\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -1 n)} Conjunction of inverted conditions.}
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\neg \cientificaAdj \wedge \neg \aproximacionN)\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} )  \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 det LINK 1 n)} Inversion of a conjunction of conditions.}
+%
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\neg (\sobrePr \wedge \unaDet \wedge \aproximacionN))\;}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \notag \\
+     & \eqdef \masAdj\ 
+     \wedge\: ( \;  \sobrePr \wedge \unaDet \wedge \aproximacionN
+     \vee \neg\masAdv )   \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (NOT 1C adj)} Negated careful context. Condition cannot be unambiguously adjective.}
+%
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg (\neg (\cientificaAdj \wedge \neg\cientificaN ))\;}^{\invConds}
+     \vee \ob{\neg\masAdv }^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (NOT -1* n)} Scanning. There must be no nouns before the target.}
+%
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( \sobreN \vee \aproximacionN )\;}^{\invConds}
+     \vee \ob{\neg\masAdv }^{\onlyTrgLeft} ) \\
+%
+\intertext{\cgrule{REMOVE adj IF (NOT -1* n BARRIER det)} Scanning up to a barrier. There must be no nouns before the target, up to a determiner.}
+%
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( (\sobreN \vee \neg\unaDet) \vee \aproximacionN )\;}^{\invConds}
+     \vee \ob{\neg\masAdv }^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (NOT -1* n CBARRIER det)} Scanning up to a careful barrier.}
+%
+  \newVar \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg ( (\sobreN \vee \unaAny) \vee \aproximacionN )\;}^{\invConds}
+     \vee \ob{\neg\masAdv }^{\onlyTrgLeft} ) 
+%
+%
+%
+\end{align}
+
+
+% \todo{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}

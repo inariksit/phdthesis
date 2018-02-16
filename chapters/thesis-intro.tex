@@ -1,0 +1,138 @@
+\chapter{Introduction to this thesis}
+
+There are many approaches to natural language processing (NLP). 
+%Nowadays, many well-known end-user applications are based on machine learning.
+A data-driven approach is appropriate, when the target language is well-resourced (and grammatically simple), the domain is unlimited and correctness is not crucial.
+For example, a monolingual English speaker who wants to get the gist of any non-English web page will be happy with a free, wide-coverage online service, even if it makes some mistakes.
+
+Rule-based NLP has a different set of use cases. Writing grammar rules takes more human effort than training a machine learning model, but in many cases, it is the more feasible approach:
+%but the results are more general, predictable and adaptable. 
+
+
+
+\begin{itemize}
+\item \textbf{Quality over coverage.} 
+Think of producers instead of consumers of information: the producer needs high guarantees of correctness,
+but often there is only a limited domain to cover. %Grammars are ideal for such use cases.
+%In such a case, a domain-specific grammar %for translation or natural language generation
+%is much more feasible than a general-purpose tool, with wide coverage but limited quality.
+%A user 
+%In contrast, producers of information need strong guarantees that the information they provide is correct in all languages. 
+
+\item \textbf{Less language resources needed}. Most of the 6000+ languages of the world do not have the abundance of data needed for machine learning, making rule-based approach the only feasible one.
+
+\item \textbf{Grammatically complex languages} benefit proportionately more from a grammar-based approach. 
+%Think of a grammar as a compression method: a compact set of rules generates infinitely many sentences. 
+Grammars can also be used in conjunction with machine learning, e.g. synthesizing training data to prevent data sparsity.
+
+\item \textbf{Grammars are explainable}, and hence, testable. If there is a bug in a particular sentence, we can find the reason for it and fix it. In contrast, machine learning models are much more opaque, and the user can just tweak some parameters, without guarantees how it affects the model.
+
+\end{itemize}
+
+%Rule-based and data-driven NLP have different trade-offs: the first prioritizes quality over coverage, and vice versa. It is especially applicable for producers of information, as opposed to consumers: a user who just wants to get the gist of a web page in a foreign language benefits from a wide-coverage system, even if it makes mistakes. In contrast, producers of information need strong guarantees that the information they provide is correct in all languages.
+
+%Another area is lesser-resourced languages. Data-driven methods require large amounts of data, and while major languages such as English, Spanish and Chinese have an abundance of data, the majority of the 6000 \cite{citesomething} languages of the world are in a less fortunate.
+
+%In addition, more complex languages benefit proportionately more from rule-based approach. If a single noun or verb can have hundreds of inflection forms (as opposed to English, think \emph{dog} and \emph{dogs}), we would need much more training data in order to cover all of them. A grammar-based approach can be used to synthesize data, in conjunction with a data-driven approach such as deep learning.
+%This benefits even languages that are relatively well-off, such as Finnish.
+
+Testing grammars has one big difference from testing software: natural language has no formal specification, 
+so ultimately we must involve a human oracle. However, we can automate many useful subtasks: detect \emph{ambiguous constructions} and \emph{contradictory grammar rules}, as well as generate \emph{minimal and representative} set of examples that cover all the constructions. 
+Think of the whole grammar as a haystack, and we suspect there are a few needles---we cannot promise automatic needle-removal, but instead we help the human oracle to narrow down the search.
+% In the end, we need a human to confirm and decide what to do with the needles.
+
+In the following sections, we present our research on testing (computational) natural language grammars, showcasing two different types of grammar formalisms and testing methods.
+
+\section{Symbolic Evaluation of Constraint Grammar}
+
+Constraint Grammar (CG) \cite{karlsson1995constraint} is a robust and language-independent formalism 
+for part-of-speech tagging and shallow parsing. 
+A grammar consists of disambiguation rules for initially ambiguous, 
+morphologically analyzed text: the correct analysis for the sentence 
+is attained by removing improper readings from ambiguous words.
+Consider the word \emph{wish}: without context, it could be a noun or a verb.
+% singular noun, or a verb either in plural (``we wish\dots'') or infinite (``to wish\dots'').
+But any English speaker can easily tell that ``a wish'' is a noun.
+%The corresponding CG rule would be
+In CG, we can generalize the observation and write the following rule: 
+\texttt{SELECT noun IF (0 noun/verb) (-1 article)}.
+
+Wide-coverage grammars, containing some thousands of rules, 
+generally achieve very high accuracy: 
+thanks to the flexible formalism, new rules can be written 
+to address even the rarest phenomena, without compromising the general tendencies.
+%Even with a smaller set of rules, CG-based taggers have been competetive with statistical taggers.
+But there is a downside to this flexibility: large grammars are difficult to maintain
+and debug. There is no internal mechanism that prevents rules from contradicting 
+each other---furthermore, there are several implementations of CG with different kind of application orders,
+such as ``apply in the order introduced in the grammar file'' or ``apply in order of longer matching context''.
+A particular rule set may be written with one application order in mind, but another party may 
+run the grammar with another implementation---if there are any conflicting rule pairs, then the behaviour of the grammar is different.
+For that reason, we decided to apply software testing and verification methods to CGs.
+
+
+We model CG as a SAT-problem \cite{listenmaa_claessen2015}.
+The analyses of the word forms are translated into Boolean variables, 
+and the constraint rules into logical formulas operating on those variables.
+For instance, the analyses ``\emph{wish} is a noun'', ``\emph{wish} is a verb'' 
+are encoded as variables \emph{wish}$_{N}$, \emph{wish}$_{V}$,  
+and the rule ``a word cannot be both a noun and a verb at the same time'' as 
+$\neg($\emph{wish}$_{N}$ $\land$  \emph{wish}$_{V})$.
+Applying a rule becomes a task of assigning truth values to different analyses,
+such that ultimately each word should have one true analysis.
+
+This simple translation gives us properties that standard CG implementations do not have.
+Most importantly, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable. 
+While this is not necessarily a desirable property in a standard CG implementation, it is interesting as a separate tool for grammar analysis. 
+
+Our initial implementation \cite{listenmaa_claessen2015} was unordered, but we improved the tool in \cite{listenmaa_claessen2016} and also chose the most common variant of application order, which is the order of appearance in the grammar file.
+Instead of an actual piece of text, such as 
+``the\texttt{\small<article>} wish\texttt{\small <noun>/<verb>}'', we apply the rules to a {\em symbolic sentence}. 
+Every symbolic word contains every possible tag, and rule applications shape the sentence into a concrete one.
+For a given set of rules, we ask for a sentence that would pass through all of them and still be able to trigger the last one. 
+If such a sentence cannot be created, it means that some rule prevents the last rule from applying, \emph{regardless of the input sentence}; for instance, if an earlier rule removes all verbs unconditionally, then any rule that removes verbs in some specific context may not apply. 
+
+In addition to conflict detection, we have found symbolic sentences and example generation to be helpful in the process of grammar writing, 
+to give grammarians feedback on the rules under development.
+For instance, a grammar writer can take a set of rules and ask for a sequence that triggers some of them and not others.
+We tested the grammar analysis tools in collaboration with CG writers \cite{listenmaa_et_al2017}, and found the preliminary results promising.
+
+
+\section{Test Case Generation for Grammatical Framework}
+
+\todo{This is from Aarne's recommendation letter, write something similar with my own words! ``Natural language grammars have rarely if ever been examined by formal methods. Yet they are complex and large programs often developed by large groups of people at different times; for instance, the GF Resource Grammar Library (http://www.grammaticalframework.org/lib/doc/synopsis.html), which I started in 2001, has addressed almost 40 languages, had over 50 contributors, consists of 1900 program modules and 3 million lines of code. The typical development process involves formalization of grammar book knowledge, the programmer's own intuition, and fully or partly automatic extraction of grammar rules from data (of the 3 million lines mentioned, 2.3 million have been extracted in this way). Programs like this crave for systematic quality control, testing, and verification.''}
+
+
+
+
+
+
+
+\section{Structure of this thesis}
+
+The core of this thesis is an extension of three articles: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015}, ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}
+and \todo{Upcoming paper on testing GF}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
+
+Chapter 2 presents a general introduction to both software testing and computational grammars, aimed for a reader who is unfamiliar with the topics.
+Chapter 3 describes the method of analysing CG by using symbolic evaluation, along with evaluation on three different grammars.
+The chapter is followed by an appendix, which describes the SAT-encoding in detail.
+Chapter 4 presents the method of generating test cases for GF grammars, \todo{along with evaluation on one large-scale and one smaller grammar}.
+Chapter 5 concludes the thesis.
+
+
+\section{Contributions of the author}
+
+All articles \cite{listenmaa_claessen2015}, \cite{listenmaa_claessen2016}, \todo{GF-testing paper}
+are co-written by the author and Koen Claessen. In general, the ideas behind the publications were joint effort.
+For the first article, all of the implementation of SAT-CG is by the author,
+and all of the library SAT+ by Koen Claessen.
+%I was mainly responsible of writing the article. 
+The version appearing in this monograph, Chapter~\ref{chapterCGSAT}, is thoroughly rewritten by the author since the initial publication.
+
+For the second article, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen. 
+%Writing the article was joint effort of both authors. 
+The version appearing in Chapter~\ref{chapterCGana} is to large extent the same as the original article, with added detail and examples throughout the chapter.
+
+The work in the third article was joint effort: both authors participated in all parts of the implementation.
+
+

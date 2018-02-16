@@ -1,0 +1,131 @@
+
+
+
+Our work is inspired by previous approaches of encoding CG in logic \cite{lager98, lager_nivre01}.
+Lager \cite{lager98} presents a ``CG-like, shallow and reductionist system'' translated into a disjunctive logic program.
+Lager and Nivre \cite{lager_nivre01} build on that in a study which reconstructs
+four different formalisms in first-order logic. 
+CG is contrasted with Finite-State Intersection Grammar (FSIG) \cite{koskenniemi90} 
+and Brill tagging \cite{brill1995}; all three work on a set of constraint rules 
+which modify the initially ambiguous input, but with some crucial differences.
+On a related note, Yli-Jyrä \cite{yli-jyra2001} explores the structural correspondence 
+between FSIG and constraint-solving problems.
+In addition, logic programming has been applied for automatically inducing CG rules from tagged corpora \cite{lindberg_eineborg98ilp,asfrent14,lager01transformation}.
+
+There has been previous research on corpus-based methods in manual grammar development \cite{voutilainen2004}, as well as optimisation of hand-written CGs~\cite{bick2013tuning}.
+In addition, there is a large body of research on automatically
+inducing rules, e.g. \cite{inducing_cg1996,lindberg_eineborg98ilp,lager01transformation,asfrent14}.
+However, since our work is aimed to aid the process of hand-crafting rules, we omit those works from our discussion.
+
+
+\paragraph{Corpus-based methods in manual grammar development}
+
+Hand-annotated corpora are commonly used in the development of CGs, because they give immediate feedback whether a new rule increases or decreases accuracy.
+% This helps the grammar writer to arrange the rules in appropriate sections, with safest and most effective rules coming first.
+% However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve.
+Atro Voutilainen \cite{voutilainen2004} gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
+For a language with no free or tagset-compatible corpus available, Reynolds and Tyers \cite{tyers_reynolds2015} describe a method where they apply their rules to unannotated Wikipedia texts and pick 100 examples at random for manual check.
+
+CG rules are usually arranged in sections, and run in the following manner. 
+First apply rules from section 1, and repeat until nothing changes in the text. Then apply rules from sections 1--2, then 1--3 and so on, until the set includes all rules.
+The best strategy is to place the safest and most effective rules in the first sections,
+so that they make way for the following, more heuristic and less safe rules to act on.
+A representative corpus is arguably the best way to get concrete numbers---how many times a rule applied and how often it was correct---and to arrange the rules in sections based on that feedback.
+
+Voutilainen \cite{voutilainen2004} states that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
+This figure is very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms.
+However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve; neither does it guarantee a coherent whole of rules. 
+While the coverage information is easy to obtain from a corpus, there is no tool that would aid grammar writers in including wide coverage of different linguistic phenomena.
+
+
+\paragraph{Automatic optimisation of hand-written grammars }
+
+The corpus-based method can tell the effect of each single rule at their place in the rule sequence, and leaves the grammar writer to make changes in the grammar.
+As a step further, Eckhard Bick \cite{bick2013tuning} modifies the grammar automatically, by trying
+out different rule orders and altering the contexts of the rules. 
+Bick reports error reduction of 7--15\% compared to the original grammars.
+This is a valuable tool, especially for grammars that are so big that it's hard to keep track manually. A program can try all combinations whereas trying to make sense out of a huge set of rules would be hard for humans.
+As a downside, the grammar writer will likely not know why exactly does the tuned grammar perform better.
+%Previous work includes Inductive Logic Programming to learn CG rules from a tagged corpus
+% uses a Prolog-based system for transformation-based learning of CG rules. 
+
+
+
+%\todo{save or remove? \\
+%The logical reconstruction in \cite{lager_nivre01} helps to provide some clarity when comparing CG to FSIG.
+%In FSIG, the predicate ${\sc pos}$ is a statement of an analysis of a word; in case of uncertainty, disjunction is used to present all possible analyses. 
+%In CG, uncertainty is modelled by sets of analyses, and the predicate ${\sc pos}^i$ is a statement of the set of analyses of a word at a given stage of the rule sequence. The final result is obtained by composition of these clauses in the order of the rule sequence.}
+
+%%%%%%%%%%%%%%%%%%%%%%
+
+% The rules and analyses are represented as clauses, and if it is
+% possible to build a model which satisfies all clauses, then there is
+% an analysis for the sentence.
+% Take the unordered case first. The authors define predicates \emph{word}
+% and \emph{\sc{pos}}, and form clauses as follows. The variable $P$ is used to
+% denote any word, and the index $n$ its position.
+
+% \begin{align*}
+% \text{word(P, the)} \  &\Rightarrow \ \text{{\sc pos}(P, det)} \\
+% \text{word(P, bear)} \ &\Rightarrow \ \text{{\sc pos}(P, verb)} \vee \text{{\sc pos}(P, noun)} \\
+% \text{{\sc pos}(P$_n$, det)} \wedge \text{{\sc pos}(P$_{n+1}$, verb)} \ &\Rightarrow 
+% \end{align*}
+
+% \noindent The first clauses read as ``if the word is \emph{the}, it
+% is a determiner'' and ``if the word is \emph{bear}, it can be a verb or a noun''.
+% The third clause represents the rule which prohibits a verb after a
+% determiner. It normalises to $\neg \text{{\sc pos}(P$_n$, det)} \vee \neg \text{{\sc pos}(P$_{n+1}$, verb)}$, and we know that {\sc pos}(P, det) must be true for
+% the word \emph{the}, thus the verb analysis for \emph{bear} must be
+% false.
+
+% This representation models FSIG, where the rules are logically
+% unordered. For CG, the authors introduce a new predicate for each rule,
+% $\text{{\sc pos}}^i$, where $i$ indicates the index of the rule in the
+% sequence of all rules.
+% Each rule is translated into two
+% clauses: 1) the conditions hold, the target has >1 analysis\footnote{In \cite{listenmaa_claessen2015}, the default rules
+%   are given to the SAT solver as separate clauses; for every word
+%   $w$, at least one of its analyses \{$w_1$,$w_2$,...,$w_n$\} must be
+%   true. Then the clauses for each rule don't need to repeat the ``only
+%   if it doesn't remove the last reading'' condition.}, and the 
+% targetet reading is selected or removed; and
+% 2) the conditions don't hold or the target has only one analysis, and the target is left untouched. The general form of the clauses is shown below:
+
+% \begin{align*}
+% \text{{\sc pos}}^i\text{(P, T)} \: \wedge \: (\;\:\,  \text{conditions\_hold}
+% \wedge  \text{|T|} > 1) \  &\Rightarrow \  \text{{\sc pos}}^{i+1}\text{(P, T$\,\setminus\,$[target])} \\
+% \text{{\sc pos}}^i\text{(P, T)} \: \wedge \: (\neg \text{conditions\_hold} \vee
+% \text{|T|} = 1) \  &\Rightarrow \ \text{{\sc pos}}^{i+1}\text{(P, T)}
+% \end{align*}
+
+
+% To show a concrete example, the following shows the two rules in the specified order:
+% \begin{enumerate}
+% \item[] \begin{verbatim}REMOVE verb IF (-1 det) ;
+% REMOVE noun IF (-1 noun) ;
+% \end{verbatim}
+% \end{enumerate}
+
+% \begin{align*}
+% \text{{\sc pos}$^1$(P, [det])} \  &\Leftarrow \  \text{word(P, the)} \\
+% \text{{\sc pos}$^1$(P, [verb,noun])} \ &\Leftarrow \ \text{word(P, bear)} \\
+% \text{{\sc pos}$^1$(P, [verb,noun])} \ &\Leftarrow \ \text{word(P, sleeps)} \\ \\
+% \text{{\sc pos}$^2$(P$_n$, T$\,\setminus\,$[verb])} \ &\Leftarrow \ \text{{\sc pos}$^1$(P$_n$, T)}
+%  \wedge (\;\; \text{{\sc pos}$^1$(P$_{n-1}$, [det])}  \wedge  \text{T$\,\setminus\,$[verb] $\neq$ []}) \\
+% \text{{\sc pos}$^2$(P$_n$, T)} \ &\Leftarrow \  \text{{\sc pos}$^1$(P$_n$, T)} \wedge
+% (\neg \text{{\sc pos}$^1$(P$_{n-1}$, [det])} \vee \text{T$\,\setminus\,$[verb]
+%   $=$ []}) \\ \\
+% \text{{\sc pos}$^3$(P$_n$, T$\,\setminus\,$[noun])} \ &\Leftarrow \ \text{{\sc pos}$^2$(P$_n$, T)}
+%  \wedge (\;\; \text{{\sc pos}$^2$(P$_{n-1}$, [noun])}  \wedge  \text{T$\,\setminus\,$[noun] $\neq$ []}) \\
+% \text{{\sc pos}$^3$(P$_n$, T)} \ &\Leftarrow \  \text{{\sc pos}$^2$(P$_n$, T)} \wedge
+% (\neg \text{{\sc pos}$^2$(P$_{n-1}$, [noun])} \vee \text{T$\,\setminus\,$[noun]
+%   $=$ []})
+% \end{align*}
+
+% The logical reconstruction helps to provide some clarity when comparing CG
+% to FSIG. In FSIG, the predicate ${\sc pos}$ is a statement of an analysis of a
+% word; in case of uncertainty, disjunction is used to present all possible analyses. In CG, uncertainty is modelled by sets of analyses,
+% and the predicate ${\sc pos}^i$ is a statement of the
+% set of analyses of a word at a given stage of the rule sequence. The
+% final result is obtained by composition of these clauses in the order of
+% the rule sequence.

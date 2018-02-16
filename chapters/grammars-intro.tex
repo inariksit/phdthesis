@@ -1,0 +1,26 @@
+\section{Constraint Grammar}
+\label{sec:cg-intro}
+
+\todo{cut down the intro in my lic.}
+
+\section{Grammatical Framework}
+\label{sec:gf-intro}
+
+Grammatical Framework (GF) \cite{ranta2011gfbook} 
+is a framework for building multilingual grammar applications. Its main
+components are a functional programming language for writing grammars
+and a resource library that contains the linguistic details of many
+natural languages.
+A GF program consists of an \emph{abstract syntax} (a set of functions
+and their categories) and a set of one or more
+\emph{concrete syntaxes} which describe how the abstract
+functions and categories are linearized (turned into surface strings) in each
+respective concrete language. The resulting grammar
+describes a mapping between concrete language strings and
+their corresponding abstract trees (structures of function names).
+This mapping is bidirectional---strings can be \emph{parsed} to
+trees, and trees \emph{linearized} to strings.
+As an abstract syntax can have multiple corresponding concrete syntaxes,
+the respective languages can be automatically \emph{translated} from one to the other by
+first parsing a string into a tree and then linearizing the obtained tree
+into a new string.
