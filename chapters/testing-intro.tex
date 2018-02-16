@@ -8,28 +8,47 @@ Complete the syllogism:
 \item All software has bugs.
 \item Grammars are software.
 \end{itemize}
+We can approach the elimination of bugs in two ways: find them by
+catching concrete examples, or build safeguards into the program that
+make it more difficult for bugs to occur in the first place.
 
-We can approach the elimination of bugs in two ways: find them by catching concrete examples, or build safeguards into the program that make it more difficult for bugs to occur in the first place.
+Simplified model of programming languages: if it's easy to write
+programs in a language, it's easy to write buggy programs. There are
+languages that impose more checks and constraints, and thus make it
+harder to write buggy code, but the overall effect is that it's harder
+to write \emph{any} code. Some argue that the combination ``easy to
+write correct code, hard to write buggy code'' exists, but the the
+actual language to achieve this varies from person to
+person.\footnote{There is more of a consensus of the existence of
+programming languages that are hard to write correct but easy to write
+buggy.} 
 
-Simplified model of programming languages: if it's easy to write programs in a language, it's easy to write buggy programs. There are languages that impose more checks and constraints, and thus make it harder to write buggy code, but the overall effect is that it's harder to write \emph{any} code. Some argue that the combination ``easy to write correct code, hard to write buggy code'' exists, but the the actual language to achieve this varies from person to person.\footnote{There is more of a consensus of the existence of programming languages that are hard to write correct but easy to write buggy.}
-
-However interesting these points are from programming language research point of view, they are way beside the point for this thesis. We approach the problem from particular, existing grammar formalisms that already have millions of lines of code written in them. 
-Thus, we want to develop methods that help finding bugs in existing software.
+However interesting these points are from programming language
+research point of view, they are way beside the point for this
+thesis. We approach the problem from particular, existing grammar
+formalisms that already have millions of lines of code written in
+them. Thus, we want to develop methods that help finding bugs in
+existing software. 
 
 
 \paragraph{Unit testing}
 
 Write particular, concrete test cases: ``1+2 should be 3''.
 
-
 \paragraph{Property-based testing}
 
-Abstract properties that should hold for all test cases, and random generation to supply values. For example: ``for all integers $x$ and $y$, $x+y$ should be equal to $y+x$''.
+Abstract properties that should hold for all test cases, and random
+generation to supply values. For example: ``for all integers $x$ and
+$y$, $x+y$ should be equal to $y+x$''. 
 
 \paragraph{Symbolic evaluation}
 
-There are lots of things that can happen during the run of a program. What happens if we get a 3 from the user as an input? Does it crash if it's 29th of February and we get a 3 from the user? 
-\todo{is this a legit description? Symbolic evaluation simulates the run of a program with different inputs, using a constraint solver to find out where certain combinations lead into.}
+There are lots of things that can happen during the run of a
+program. What happens if we get a 3 from the user as an input? Does it
+crash if it's 29th of February and we get a 3 from the user?  Symbolic 
+evaluation simulates the run of a program with different inputs, using 
+a constraint solver to find out where certain combinations lead into.
+
 
 
 \input{chapters/sat-intro}
