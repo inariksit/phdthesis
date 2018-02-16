@@ -2,17 +2,16 @@
 \label{chapterGFtest}
 
 Traditionally, GF grammars are tested by the grammarians themselves,
-much like unit testing. % in traditional software development. When
-implementing some feature, such as relative clauses, the grammarian 
-comes up with a test suite of sentences that include relative clauses,
-and stores in the form of abstract syntax trees. In principle, a test
-suite created for one language can easily be reused for another,
-because the ASTs are identical. Ideally, every time someone touches
-relative clauses in the any concrete syntax, the trees in the test
-suite will be linearized with the changed concrete syntax, and
-verified by someone who speaks the language (or compared to the
-original gold standard, if there is one). 
-This scheme can fail for various reasons: 
+much like unit testing. When implementing some feature, such as 
+relative clauses, the grammarian comes up with a test suite of 
+sentences that include relative clauses, and stores in the form of 
+abstract syntax trees. In principle, a test suite created for one 
+language can easily be reused for another, because the ASTs are 
+identical. Ideally, every time someone touches relative clauses 
+in the any concrete syntax, the trees in the test suite will be 
+linearised with the changed concrete syntax, and verified by someone
+who speaks the language (or compared to the original gold standard, 
+if there is one). This scheme can fail for various reasons: 
 
 \begin{itemize}
 \item The original list is not exhaustive: for instance, it tests only
