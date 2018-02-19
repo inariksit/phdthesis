@@ -1,3 +1,6 @@
+\def{}
+
+
 \chapter{Test Case Generation for Grammatical Framework}
 \label{chapterGFtest}
 
@@ -26,6 +29,64 @@ does not realize that it affects relative clauses, and thus does not
 rerun the appropriate test suite. 
 \end{itemize}
 
+\section{How it works}
+
+
+\begin{figure}[h]
+  \caption{GF grammar}
+  \centering
+    \begin{verbatim}
+abstract Foods = {
+  flags startcat = Comment ;
+  cat
+    Comment ; Item ; Kind ; Quality ;
+  fun
+    Pred : Item -> Quality -> Comment ;
+    This, That, These, Those : Kind -> Item ;
+    Mod : Quality -> Kind -> Kind ;
+    Wine, Cheese, Fish, Pizza : Kind ;
+    Very : Quality -> Quality ;
+    Fresh, Warm, Good, Italian, 
+      Expensive, Delicious, Boring : Quality ;
+}
+    \end{verbatim}
+\end{figure}
+
+Figure~\ref{fig:exampleGrammar} shows a small example of a GF grammar. We refer to this grammar throughout the section.
+
+\paragraph{Test case} 
+The basic unit of a test case is a single constructor. 
+We start by building a set of trees using the constructor.
+The constructor can be of any arity: if we are interested in a 0-place function, such as \t{Pizza}, then the subtree \t{Pizza} is the full set of trees. If we choose a function with arguments, such as \t{Pred}, then we do the following:
+\begin{itemize}
+\item For each argument type (\t{Item} and \t{Quality}), compute the set of minimal and representative trees. This is a recursive process: to compute the set of trees in \t{Item}, we must consider all functions that create its argument types (\t{Kind}), until we have a set of 0-place functions which to choose from.
+\item Apply the constructor \t{Mod} to the combinations of the trees.
+\end{itemize}
+
+Let us consider a Spanish concrete syntax, and take the function \t{Very} to test.
+\t{Very} takes a Quality and generates a Quality.
+Examples must be minimal, so we can rule out arguments that are already using \t{Very} -- we only concentrate on the set \t{Fresh, Warm, Good, Italian, Expensive, Delicious, Boring}. 
+In Spanish, adjective phrases normally follow the noun, but a few exceptions, such as \emph{good}, can be placed in front of the noun. Thus in order to pick a representative set of adjectives, we need one premodifier and one postmodifier adjective. The two examples of the category \t{Quality}, could be e.g. \{\t{Good},\t{Fresh}\}.
+
+Now we have a set of argument trees, and we finish the test cases by applying the constructor to them. We end up with subtrees \{\t{Very Good},\t{Very Fresh}\}.
+
+
+\paragraph{Context} 
+
+Now we create contexts for those subtrees. They are of type \t{Quality}, so we create trees in the start category with a hole of \t{Quality}.
+
+There are two ways that a \t{Quality} can end up in a \t{Comment}: by using \t{Pred} or \t{Mod}. (It can also use another \t{Very}, but we exclude repetitions of the same constructor.) 
+
+So let's look at a tree where the hole is in a subtree created by \t{Mod}.
+Spanish nouns have gender, so we need at least one masculine and one feminine noun.
+Thus minimal and representative trees in category \t{Kind} could be e.g. \{\t{Pizza},\t{Cheese}\}. 
+
+We get \{\t{Mod (Very Good) Pizza},\t{Mod (Very Good) Cheese}\}. 
+
+For Pred, the gender is also relevant, this time the agreement comes from the subject and the adjective is in a predicative position. So we can just reuse the representative Kinds to create representative Items. 
+But actually now there's also number to consider, so we end up with 4 trees:
+
+ \{\t{This Pizza},\t{This Cheese}, \t{These Pizza},\t{These Cheese}\}. 
 
 \section{Technical details}
 
