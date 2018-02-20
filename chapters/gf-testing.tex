@@ -98,7 +98,7 @@ There are two ways that a \t{Quality} can end up in a \t{Comment}: by using \t{P
 We have our two examples of \t{Quality}, and we want to make sure that we see all the variation in them.
 Spanish nouns have gender, hence a minimal and representative set of trees in category \t{Kind} could be e.g. \t{\{Pizza, Cheese\}}, where pizza is feminine and cheese is masculine. 
 
-Applying the set of arguments \t{\{Very Good, Very Vegan\}} into the contexts \t{\{Mod ? Pizza, Mod ? Cheese\}}, we get the set \t{\{Mod (Very Good) Pizza, Mod (Very Good) Cheese, Mod (Very Vegan) Pizza, Mod (Very Vegan) Cheese\}}. Note that \t{Kind} is unspecified for number, because it is still waiting for a determiner (\t{This, That, These} or \t{Those}) to complete it into \t{Item}. The type of \t{Kind} contains both singular and plural variants, and by linearising these 4 trees, we get the strings shown in Figure~\ref{fig:veganCheese}.
+Applying the set of arguments \t{\{Very Good, Very Vegan\}} into the contexts \t{\{Mod ? Pizza, Mod ? Cheese\}}, we get the set \t{\{Mod (Very Good) Pizza, Mod (Very Good) Cheese, Mod (Very Vegan) Pizza, Mod (Very Vegan) Cheese\footnote{\url{http://realvegancheese.org/}}\}}. Note that \t{Kind} is unspecified for number, because it is still waiting for a determiner (\t{This, That, These} or \t{Those}) to complete it into \t{Item}. The type of \t{Kind} contains both singular and plural variants, and by linearising these 4 trees, we get the strings shown in Figure~\ref{fig:veganCheese}.
 
 \begin{figure}
 \centering
@@ -117,10 +117,23 @@ pizzas muy veganas          & quesos muy veganos \\ \hline
 \end{figure}
 
 \paragraph{Context created by \t{Pred}} 
-For Pred, the gender is also relevant, this time the agreement comes from the subject and the adjective is in a predicative position. So we can just reuse the representative Kinds to create representative Items. 
-But actually now there's also number to consider, so we end up with 4 trees:
+Secondly, let us look at the context created by \t{Pred : Item -> Quality -> Comment}. Now the \t{Quality} is in a predicative position: ``X is very good/very vegan''.
+We start by creating a representative and minimal set of arguments of type \t{Item}, in order to squeeze out all the variation from the test cases of type \t{Quality}.
 
- \t{\{This Pizza, This Cheese, These Pizza, These Cheese\}}.
+\t{Item} is formed by using one of the four functions \t{This, That, These, Those : Kind -> Item}.
+We remember from choosing \t{Kind}s that gender was important, and it is still relevant for \t{Item}: the predicative adjective should agree with the subject, so a pizza is \emph{vegana}, and cheese is \emph{vegano}. 
+We have already found a set of \t{Kind}s to represent all genders, so we can reuse that set to create a representative set of \t{Item}s. But we need something more too---\t{Item} has an inherent number, which comes from the constructor function. \t{This} and \t{That} are singular, \t{These} and \t{Those} are plural, so we should choose one of each. Hence we end up with the following trees: \t{\{This Pizza, This Cheese, These Pizza, These Cheese\}}.
+
+The presence or absence of additional adjectives wouldn't make any difference in Spanish: both \t{This Pizza} and \t{This (Very Italian) Pizza} result in choosing the string \emph{vegana} for the \t{Quality} in the predicative position. In the minimalist spirit, we prefer \t{This Pizza}: the resulting \t{Comment} is shorter, and it is easier for the oracle to judge the grammaticality of the predicative adjective, if there is only one adjective in the whole sentence.
+
+\paragraph{Putting it all together}
+
+piece the trees together
+
+\paragraph{Shrinking}
+We notice that only by testing one function, \t{Very}, we have actually quite a coverage of the grammar. 
+Lot of the considerations are the same: number and grammatical gender play a role in a lot of stuff.
+Easy step: don't show redundant trees to the user. One tree can actually test different phenomena.
 
 \section{Technical details}
 
