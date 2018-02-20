@@ -1,7 +1,160 @@
+We start by describing the two grammar formalisms: Constraint Grammar and Grammatical Framework.
+
+
 \section{Constraint Grammar}
 \label{sec:cg-intro}
 
-\todo{cut down the intro in my lic.}
+Constraint Grammar (CG) is a formalism for 
+disambiguating morphologically analysed text. 
+It was first introduced by Fred Karlsson  
+\cite{karlsson1990cgp,karlsson1995constraint}, and has been used for many tasks in
+computational linguistics, such as part-of-speech tagging, surface syntax and
+machine translation \cite{bick2011}.
+CG-based taggers are reported to achieve F-scores of over 99 \% for morphological disambiguation, 
+and around 95-97 \% for syntactic analysis \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}.
+CG disambiguates morphologically analysed input by using
+constraint rules which can select or remove a potential analysis (called \emph{reading})
+for a target word, depending on the context words around it. 
+Together these rules disambiguate the whole text.
+
+
+In the example below, we show an initially ambiguous sentence ``the bear
+sleeps''. 
+It contains three word forms, such as \t{"<bear>"}, each followed by its \emph{readings}.
+A reading contains one lemma, such as \t{"bear"}, and a list of morphological tags, such as \t{noun sg}.
+%Additional lemmas within one word form, such as clitic pronouns, are represented as \emph{subreadings}; each indented one more tab.
+A word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
+
+\begin{figure}[h]
+\centering
+\ttfamily
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l}
+"<the>"  &                & "<sleeps>"        \\
+    & "the" det def       &     & "sleep" noun pl \\
+"<bear>" &                &     & "sleep" verb pres p3 sg \\
+    & "bear" noun sg      & "<.>"                   \\
+    & "bear" verb pres    &     & "." sent          \\
+    & "bear" verb inf \\
+\end{tabular}
+\label{fig:theBearSleeps}
+\caption{Ambiguous sentence {\em the bear sleeps.}}
+\end{figure}
+
+
+\noindent We can disambiguate this sentence with two rules:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item \texttt{REMOVE verb IF (-1 det)}
+  `Remove verb after determiner'
+\item  \texttt{REMOVE noun IF (-1 noun)}
+  `Remove noun after noun'
+\end{enumerate}
+
+\noindent Rule 1 matches the word \emph{bear}: it is tagged as verb and is
+preceded by a determiner. The rule removes both verb readings from
+\emph{bear}, leaving it with an unambiguous analysis \texttt{noun sg}.
+Rule 2 is applied to the word \emph{sleeps}, and it removes the noun
+reading. The finished analysis is shown below:
+
+\begin{itemize}
+\item[] \begin{verbatim}
+"<the>"
+        "the" det def
+"<bear>"
+        "bear" noun sg
+"<sleeps>"
+        "sleep" verb pres p3 sg
+\end{verbatim}
+\end{itemize}
+
+It is also possible to add syntactic tags and dependency structure within CG \cite{vislcg3,bick2015}.
+However, for the remainder of this introduction, we will illustrate the examples with the 
+most basic operations, that is, disambiguating morphological tags.
+The syntactic disambiguation and dependency features are not fundamentally
+different from morphological disambiguation: the rules describe an \emph{operation}
+performed on a \emph{target}, conditional on a \emph{context}.
+
+\section{Related work}
+
+CG is one in the family of shallow and reductionist grammar formalisms. Disambiguation using constraint rules dates back to 1960s and 1970s---the closest system to modern CG was Taggit \cite{taggit}, which was used to tag the Brown Corpus.
+Karlsson \cite{karlsson1995constraint} lists various approaches to the disambiguation 
+problem, including manual intervention, statistical optimisation, unification and Lambek calculus. 
+For disambiguation rules based on local constraints, Karlsson mentions \cite{hindle1989disamrules,herz1991local}.
+
+CG itself was introduced in 1990. Around the same time, a related formalism was proposed: 
+finite-state parsing and disambiguation system using constraint rules \cite{koskenniemi90}, which was later named Finite-State Intersection Grammar (FSIG) in \cite{piitulainen1995}. 
+Like CG, a FSIG grammar contains a set of rules which remove impossible readings based on contextual tests, 
+in a parallel manner: a sentence must satisfy all individual rules in a given FSIG. 
+Due to these similarities, the name Parallel Constraint Grammar was also suggested \cite{koskenniemi97}.
+However, FSIG rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than CG. 
+In this thesis, we use the name FSIG to refer to the framework that is aimed at producing a full syntactic analysis with the more expressive rules, 
+and PCG to describe any CG-variant which happens to be parallel.
+Thus, we will call implementations such as \cite{voutilainen1994designing} an \emph{FSIG grammar} and a program that parses it an \emph{FSIG parser}.
+Conversely, the CG parser in \cite{listenmaa_claessen2015} 
+and the ``CG-like'' system in \cite{lager98} are instances of PCG.
+%We return to the comparison with FSIG in Sections~\ref{sec:ordering}~and~\ref{sec:expressivity}.
+
+Brill tagging \cite{brill1995} is based on transformation rules: the starting point of 
+an analysis is just one tag, the most common one, and subsequent rule applications transform 
+one tag into another, based on contextual tests. 
+Like CG, Brill tagging is known to be efficient and accurate. The contextual tests are very similar; \cite{lager01transformation} 
+has automatically learned both Brill rules and CG rules, using the same system.
+
+Similar ideas to CG have been also explored in other frameworks, such as finite-state automata \cite{gross1997local,grana2003fst},
+%, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst},
+logic programming \cite{oflazer97votingconstraints,lager98}, 
+constraint satisfaction \cite{padro1996csp}, 
+and dependency syntax \cite{tapanainen97fdg}. 
+ In addition, there are a number of reimplementations of CG using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
+
+\section{Properties of Constraint Grammar}\label{sec:properties}
+
+Karlsson \cite{karlsson1995constraint} lists 24 design principles and describes
+related work at the time of writing.
+Here we summarise a set of main features, and relate CG to the developments in grammar formalism since the initial description.
+
+CG is a \emph{reductionistic} system: the analysis starts from a list of alternatives,
+and removes those which are impossible or improbable.
+CG is designed primarily for analysis, not generation; its task is 
+to give correct analyses to the words in given sentences,
+not to describe a language as a collection of ``all and only the grammatical sentences''.
+
+The syntax is decidedly \emph{shallow}: the rules do not aim to
+describe all aspects of an abstract phenomenon such as noun phrase; 
+rather, each rule describes bits and pieces with concrete conditions.
+The rules are self-contained and mutually independent---this makes it 
+easy to add exceptions, and exceptions to exceptions, without 
+changing the more general rules.
+% The rules are self-contained and independent.
+% On the one hand, this provides no guarantee that a grammar is internally consistent.
+% On the other hand, these features provide flexibility that is hard to mimic by a deeper formalism.
+% As we have seen in the previous sections, rules can target individual words
+% or other properties that are not generalisable to a whole word class,
+% such as verbs that express cognitive processes.
+% Introducing a subset of verbs, even if they are used only in one rule,
+% is very cheap and does not create a complicated taxonomy of different verb types.
+
+% Most importantly, the independence of rules makes CG highly robust.
+% If one of the words is unknown or misspelt, a generative grammar would fail to produce any analysis. 
+% CG would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
+
+
+There are different takes on how \emph{deterministic} the rules are.
+The current state-of-the-art CG parser VISL CG-3 executes the rules strictly 
+based on the order of appearance, but there are other implementations which 
+apply their own heuristics, or remove the ordering completely, 
+applying the rules in parallel. 
+---furthermore, there are several implementations of CG with different kind of application orders,
+such as ``apply in the order introduced in the grammar file'' or ``apply in order of longer matching context''.
+A particular rule set may be written with one application order in mind, but another party may 
+run the grammar with another implementation---if there are any conflicting rule pairs, then the behaviour of the grammar is different.
+For that reason, we decided to apply software testing and verification methods to CG grammars.
+
+
+
+
 
 \section{Grammatical Framework}
 \label{sec:gf-intro}
@@ -19,8 +172,21 @@ respective concrete language. The resulting grammar
 describes a mapping between concrete language strings and
 their corresponding abstract trees (structures of function names).
 This mapping is bidirectional---strings can be \emph{parsed} to
-trees, and trees \emph{linearized} to strings.
+trees, and trees \emph{linearised} to strings.
 As an abstract syntax can have multiple corresponding concrete syntaxes,
 the respective languages can be automatically \emph{translated} from one to the other by
-first parsing a string into a tree and then linearizing the obtained tree
+first parsing a string into a tree and then linearising the obtained tree
 into a new string.
+
+\subsection{Theoretical background/related work}
+
+Type theory and logical frameworks; Montague grammar; Categorial grammar.
+
+Abstract and concrete syntax: compiler construction \& tectogrammatical/phenogrammatical \todo{cite (Curry 1961)}. Multi-source multi-target compiler is multilingual by design, but tecto/pheno stuff wasn't multilingual before GF.
+
+\cite{ranta2011gfbook} mentions \todo{cite relevant stuff}
+
+
+\subsection{Abstract syntax}
+
+\subsection{Concrete syntax}

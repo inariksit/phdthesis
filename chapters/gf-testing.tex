@@ -1,8 +1,14 @@
-\def{}
+\def\t#1{\texttt{#1}}
 
 
 \chapter{Test Case Generation for Grammatical Framework}
 \label{chapterGFtest}
+
+Now we change to a completely new topic. 
+Previously, we have enforced an internal logic to the grammar rules, without needing any interaction with the external world. We have taken for granted that the humans who write the rules know what they are doing; and even if this assumption is false, there are already methods that test whether a given rule takes effect in a corpus.
+
+
+\section{The problem}
 
 Traditionally, GF grammars are tested by the grammarians themselves,
 much like unit testing. When implementing some feature, such as 
@@ -63,12 +69,13 @@ The constructor can be of any arity: if we are interested in a 0-place function,
 \item Apply the constructor \t{Mod} to the combinations of the trees.
 \end{itemize}
 
-Let us consider a Spanish concrete syntax, and take the function \t{Very} to test.
-\t{Very} takes a Quality and generates a Quality.
-Examples must be minimal, so we can rule out arguments that are already using \t{Very} -- we only concentrate on the set \t{Fresh, Warm, Good, Italian, Expensive, Delicious, Boring}. 
-In Spanish, adjective phrases normally follow the noun, but a few exceptions, such as \emph{good}, can be placed in front of the noun. Thus in order to pick a representative set of adjectives, we need one premodifier and one postmodifier adjective. The two examples of the category \t{Quality}, could be e.g. \{\t{Good},\t{Fresh}\}.
+Let us consider a Spanish concrete syntax, and test the function \t{Very : Quality -> Quality}.
+\t{Very} takes a \t{Quality} and generates a \t{Quality}; for example, \emph{warm} to \emph{very warm}.
 
-Now we have a set of argument trees, and we finish the test cases by applying the constructor to them. We end up with subtrees \{\t{Very Good},\t{Very Fresh}\}.
+So we need first an argument of type \t{Quality} to \t{Very}. All generated examples must be minimal, so we can rule out arguments that are already using \t{Very}---we only concentrate on the set \t{Fresh, Warm, Good, Italian, Expensive, Delicious, Boring}, and pick as many as are needed to highlight different grammatical phenomena.
+The normal Spanish word order is noun--adjective, e.g. \emph{vino italiano} `Italian wine', but a few exceptions, such as \emph{good}, can be placed in front of the noun. Thus in order to pick a representative set of adjectives, we need one premodifier and one postmodifier adjective. The two examples of the category \t{Quality} could be e.g. \t{\{Good, Fresh\}}.
+
+Now we have a set of argument trees, and we finish the test cases by applying the constructor to them. We end up with subtrees \t{\{Very Good, Very Fresh\}}.
 
 
 \paragraph{Context} 
@@ -81,12 +88,12 @@ So let's look at a tree where the hole is in a subtree created by \t{Mod}.
 Spanish nouns have gender, so we need at least one masculine and one feminine noun.
 Thus minimal and representative trees in category \t{Kind} could be e.g. \{\t{Pizza},\t{Cheese}\}. 
 
-We get \{\t{Mod (Very Good) Pizza},\t{Mod (Very Good) Cheese}\}. 
+We get \t{\{Mod (Very Good) Pizza, Mod (Very Good) Cheese\}}. 
 
 For Pred, the gender is also relevant, this time the agreement comes from the subject and the adjective is in a predicative position. So we can just reuse the representative Kinds to create representative Items. 
 But actually now there's also number to consider, so we end up with 4 trees:
 
- \{\t{This Pizza},\t{This Cheese}, \t{These Pizza},\t{These Cheese}\}. 
+ \t{\{This Pizza, This Cheese, These Pizza, These Cheese\}}.
 
 \section{Technical details}
 

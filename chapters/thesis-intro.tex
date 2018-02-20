@@ -1,3 +1,5 @@
+\def\t#1{\texttt{#1}}
+
 \chapter{Introduction to this thesis}
 
 There are many approaches to natural language processing (NLP). 
@@ -43,67 +45,70 @@ Think of the whole grammar as a haystack, and we suspect there are a few needles
 
 In the following sections, we present our research on testing (computational) natural language grammars, showcasing two different types of grammar formalisms and testing methods.
 
-\section{Symbolic Evaluation of Constraint Grammar}
+\section{Symbolic evaluation of a reductionistic formalism}
 
 Constraint Grammar (CG) \cite{karlsson1995constraint} is a robust and language-independent formalism 
 for part-of-speech tagging and shallow parsing. 
 A grammar consists of disambiguation rules for initially ambiguous, 
-morphologically analyzed text: the correct analysis for the sentence 
+morphologically analysed text: the correct analysis for the sentence 
 is attained by removing improper readings from ambiguous words.
 Consider the word \emph{wish}: without context, it could be a noun or a verb.
-% singular noun, or a verb either in plural (``we wish\dots'') or infinite (``to wish\dots'').
 But any English speaker can easily tell that ``a wish'' is a noun.
-%The corresponding CG rule would be
-In CG, we can generalize the observation and write the following rule: 
+In CG, we can generalise the observation and write the following rule: 
 \texttt{SELECT noun IF (0 noun/verb) (-1 article)}.
 
-Wide-coverage grammars, containing some thousands of rules, 
+Wide-coverage CG grammars, containing some thousands of rules, 
 generally achieve very high accuracy: 
 thanks to the flexible formalism, new rules can be written 
 to address even the rarest phenomena, without compromising the general tendencies.
-%Even with a smaller set of rules, CG-based taggers have been competetive with statistical taggers.
 But there is a downside to this flexibility: large grammars are difficult to maintain
 and debug. There is no internal mechanism that prevents rules from contradicting 
-each other---furthermore, there are several implementations of CG with different kind of application orders,
-such as ``apply in the order introduced in the grammar file'' or ``apply in order of longer matching context''.
-A particular rule set may be written with one application order in mind, but another party may 
-run the grammar with another implementation---if there are any conflicting rule pairs, then the behaviour of the grammar is different.
-For that reason, we decided to apply software testing and verification methods to CGs.
+each other---the following is perfectly valid CG grammar:
+
+\begin{verbatim}
+SELECT noun IF (-1 article) ;
+SELECT verb IF (-1 article) ;
+\end{verbatim}
+
+Apart from obvious cases as above, with two rules saying contradicting truths about the language, there can be less direct conflicts between the rules. Take the following example:
+
+\begin{verbatim}
+REMOVE article ;
+SELECT noun IF (-1 article) ;
+\end{verbatim}
+
+The first rule removes all articles unconditionally, thus rendering the second rule invalid: it may never apply, because its condition is never matched. 
+
+In real life, these conflicts can be much more subtle, and appear far apart from each other. %Grammar writers keeping track is infeasible.
+The common way of testing grammars is to apply them into some test corpus, with a gold standard, and gather statistics how often the rules apply. While this method can reveal that \texttt{SELECT noun IF (-1 article)} never applied, it cannot tell whether it is just because no sentence in the test corpus happened to trigger the contextual test, or whether some other rule before it made it impossible to ever apply. 
+
+We use a method called \emph{symbolic evaluation}: in high level terms, we pretend to apply the grammar to every possible input, and track the consequences of each decision. 
+The rules become interconnected, and we can find the reason for a conflict. This allows us to answer questions such as ``given this set of 50 rules, is there an input that goes through the first 49 rules and still triggers the 50th rule?''
+
+\todo{This method can give the grammar writer insights about the rules within a grammar. 
+However, it does not tell whether some rule is \emph{useful} for real text, i.e. if it applies often, or if the result of the disambiguation makes any sense. This method is good to complement with other methods: corpus to find out if it applies often, and human grammarian to figure out if it makes sense.}
 
 
-We model CG as a SAT-problem \cite{listenmaa_claessen2015}.
-The analyses of the word forms are translated into Boolean variables, 
-and the constraint rules into logical formulas operating on those variables.
-For instance, the analyses ``\emph{wish} is a noun'', ``\emph{wish} is a verb'' 
-are encoded as variables \emph{wish}$_{N}$, \emph{wish}$_{V}$,  
-and the rule ``a word cannot be both a noun and a verb at the same time'' as 
-$\neg($\emph{wish}$_{N}$ $\land$  \emph{wish}$_{V})$.
-Applying a rule becomes a task of assigning truth values to different analyses,
-such that ultimately each word should have one true analysis.
+\section{Test case generation for a generative formalism}
 
-This simple translation gives us properties that standard CG implementations do not have.
-Most importantly, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable. 
-While this is not necessarily a desirable property in a standard CG implementation, it is interesting as a separate tool for grammar analysis. 
+Grammatical Framework \cite{ranta2011gfbook} is a generative, multilingual grammar formalism with a high level of abstraction.
+As opposed to CG, where the rules \emph{reduce} the number of possible readings, GF and other generative formalisms use rules to \emph{describe} a language from scratch. In other words, the language corresponding to a grammar is defined as the set of strings that the grammar rules generate.
 
-Our initial implementation \cite{listenmaa_claessen2015} was unordered, but we improved the tool in \cite{listenmaa_claessen2016} and also chose the most common variant of application order, which is the order of appearance in the grammar file.
-Instead of an actual piece of text, such as 
-``the\texttt{\small<article>} wish\texttt{\small <noun>/<verb>}'', we apply the rules to a {\em symbolic sentence}. 
-Every symbolic word contains every possible tag, and rule applications shape the sentence into a concrete one.
-For a given set of rules, we ask for a sentence that would pass through all of them and still be able to trigger the last one. 
-If such a sentence cannot be created, it means that some rule prevents the last rule from applying, \emph{regardless of the input sentence}; for instance, if an earlier rule removes all verbs unconditionally, then any rule that removes verbs in some specific context may not apply. 
+The most typical example of a generative grammar is a context-free grammar. GF is slightly more complex formalism, and we will present it in Section~\ref{sec:gf-intro}. To quickly illustrate the properties of a generative grammar, we use the following context-free grammar $G$:
 
-In addition to conflict detection, we have found symbolic sentences and example generation to be helpful in the process of grammar writing, 
-to give grammarians feedback on the rules under development.
-For instance, a grammar writer can take a set of rules and ask for a sequence that triggers some of them and not others.
-We tested the grammar analysis tools in collaboration with CG writers \cite{listenmaa_et_al2017}, and found the preliminary results promising.
+\begin{verbatim}
+              Sentence -> Noun Verb
+G =           Noun     -> "John" | "Mary"
+              Verb     -> "eats" | "sleeps"
+\end{verbatim}
 
+We call \t{Sentence} as the start category: all valid constructions in the language $G$ are sentences. There is only one way of forming sentences, which is to combine a \t{Noun} and a \t{Verb}, and each of them has two terminals (i.e. lexical items). Thus, the full language described by $G$ is \{\emph{John eats, John sleeps, Mary eats, Mary sleeps}\}. Again, the grammars we are really interested in are much larger, and the GF formalism has more complex machinery in place, such as taking care of agreement, i.e. allowing \emph{John sleeps} and \emph{I sleep}, but rejecting \emph{*I sleeps} and \emph{*John sleep}. But the basic mechanism is the same: a formal, rather compact description that describes a potentially infinite set of sentences.
 
-\section{Test Case Generation for Grammatical Framework}
+It is fully possible to write a ``bad'' generative grammar, in the sense that it produces sentences that any English speaker would deem grammatically incorrect. But there is no notion of internal inconsistency, like there was in CG---the question is simply ``does this grammar describe the English language adequately?''.
+In order to test this, we must go beyond the grammar itself, and find a human oracle to answer the question.
+But here we face a problem: what kind of subset of the grammar should we test? How do we know if we have tested enough?
 
-\todo{This is from Aarne's recommendation letter, write something similar with my own words! ``Natural language grammars have rarely if ever been examined by formal methods. Yet they are complex and large programs often developed by large groups of people at different times; for instance, the GF Resource Grammar Library (http://www.grammaticalframework.org/lib/doc/synopsis.html), which I started in 2001, has addressed almost 40 languages, had over 50 contributors, consists of 1900 program modules and 3 million lines of code. The typical development process involves formalization of grammar book knowledge, the programmer's own intuition, and fully or partly automatic extraction of grammar rules from data (of the 3 million lines mentioned, 2.3 million have been extracted in this way). Programs like this crave for systematic quality control, testing, and verification.''}
-
-
-
+The problem is relevant for any kind of software testing, and we use existing techniques of test case generation, applied to the GF formalism. We generate a minimal and representative set of example sentences that we give to humans to judge their grammaticality.
 
 
 
