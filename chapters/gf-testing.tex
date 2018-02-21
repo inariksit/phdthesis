@@ -5,7 +5,11 @@
 \label{chapterGFtest}
 
 Now we change to a completely new topic. 
-Previously, we have enforced an internal logic to the grammar rules, without needing any interaction with the external world. We have taken for granted that the humans who write the rules know what they are doing; and even if this assumption is false, there are already methods that test whether a given rule takes effect in a corpus.
+Previously, we have enforced an internal logic to the grammar rules,
+without needing any interaction with the external world. We have taken
+for granted that the humans who write the rules know what they are
+doing; and even if this assumption is false, there are already methods
+that test whether a given rule takes effect in a corpus.
 
 
 \section{The problem}
@@ -60,29 +64,53 @@ abstract Foods = {
 \label{fig:exampleGrammar}
 \end{figure}
 
-Figure~\ref{fig:exampleGrammar} shows a small example of a GF grammar. We refer to this grammar throughout the section.
+Figure~\ref{fig:exampleGrammar} shows a small example of a GF
+grammar. We refer to this grammar throughout the section. 
 
 \paragraph{Test case} 
 The basic unit of a test case is a single constructor. 
 We start by building a set of trees using the constructor.
-The constructor can be of any arity: if we are interested in a 0-place function, such as \t{Pizza}, then the subtree \t{Pizza} is the full set of trees. If we choose a function with arguments, such as \t{Pred}, then we do the following:
+The constructor can be of any arity: if we are interested in a 0-place
+function, such as \t{Pizza}, then the subtree \t{Pizza} is the full
+set of trees. If we choose a function with arguments, such as
+\t{Pred}, then we do the following: 
 \begin{itemize}
-\item For each argument type (\t{Item} and \t{Quality}), compute the set of minimal and representative trees. This is a recursive process: to compute the set of trees in \t{Item}, we must consider all functions that create its argument types (\t{Kind}), until we have a set of 0-place functions which to choose from.
+\item For each argument type (\t{Item} and \t{Quality}), compute the
+  set of minimal and representative trees. This is a recursive
+  process: to compute the set of trees in \t{Item}, we must consider
+  all functions that create its argument types (\t{Kind}), until we
+  have a set of 0-place functions which to choose from. 
 \item Apply the constructor \t{Mod} to the combinations of the trees.
 \end{itemize}
 
 \paragraph{Testing the function \t{Very}}
-Let us consider a Spanish concrete syntax, and test the function \t{Very : Quality -> Quality}.
-\t{Very} takes a \t{Quality} and generates a \t{Quality}; for example, \t{Warm} to \t{Very Warm}.
+Let us consider a Spanish concrete syntax, and test the function
+\t{Very : Quality -> Quality}. \t{Very} takes a \t{Quality} and
+generates a \t{Quality}; for example, \t{Warm} to \t{Very Warm}. 
 
-Firstly, we need a minimal and representative set of arguments of type \t{Quality}, to \t{Very}. We can exclude trees that use the same constructor twice (i.e. trees that are already using \t{Very}), so we only concentrate on the set \t{Fresh, Warm, Good, Italian, Expensive, Delicious, Vegan}, and pick as many as are needed to highlight different grammatical phenomena in the particular concrete syntax.
+Firstly, we need a minimal and representative set of arguments of type
+\t{Quality}, to \t{Very}. We can exclude trees that use the same
+constructor twice (i.e. trees that are already using \t{Very}), so we
+only concentrate on the set \t{Fresh, Warm, Good, Italian, Expensive,
+  Delicious, Vegan}, and pick as many as are needed to highlight
+different grammatical phenomena in the particular concrete syntax.
 
-The normal Spanish word order is noun--adjective, e.g. \emph{vino italiano} `Italian wine', but a few exceptional adjectives are placed in front of the noun, e.g. \emph{buen vino} `good wine'. Thus in order to cover the full spectrum of adjective placement, we need one premodifier and one postmodifier adjective. The two examples of the category \t{Quality} could be e.g. \t{\{Good, Vegan\}}. We finish the test cases by applying the constructor \t{Very} to them, which gives us the minimal and representative set \t{\{Very Good, Very Vegan\}}.
+The normal Spanish word order is noun--adjective, e.g. \emph{vino
+  italiano} `Italian wine', but a few exceptional adjectives are
+placed in front of the noun, e.g. \emph{buen vino} `good wine'. Thus
+in order to cover the full spectrum of adjective placement, we need
+one premodifier and one postmodifier adjective. The two examples of
+the category \t{Quality} could be e.g. \t{\{Good, Vegan\}}. We finish
+the test cases by applying the constructor \t{Very} to them, which
+gives us the minimal and representative set \t{\{Very Good, Very
+  Vegan\}}.
 
 
 \paragraph{Context} 
 
-Secondly, we create contexts for the previously chosen test cases. By \emph{context}, we mean simply a tree in some other category, with a \emph{hole} of type \t{Quality}.
+Secondly, we create contexts for the previously chosen test cases. By
+\emph{context}, we mean simply a tree in some other category, with a
+\emph{hole} of type \t{Quality}. 
 
 
 \begin{figure}[h]
@@ -92,13 +120,27 @@ Secondly, we create contexts for the previously chosen test cases. By \emph{cont
  \caption{Two trees of type \t{Comment}, with a hole of type \t{Quality}}
 \end{figure}
 
-There are two ways that a \t{Quality} can end up in a \t{Comment}: by using \t{Pred : Item -> Quality -> Comment} or \t{Mod : Quality -> Kind -> Kind}. (It can also be used by another \t{Very}, but we exclude repetitions of the same constructor.) 
+There are two ways that a \t{Quality} can end up in a \t{Comment}: by
+using \t{Pred : Item -> Quality -> Comment} or \t{Mod : Quality ->
+  Kind -> Kind}. (It can also be used by another \t{Very}, but we
+exclude repetitions of the same constructor.)
 
 \paragraph{Context created by \t{Mod}} Firstly, let us look at the context created by \t{Mod : Kind -> Quality}.
 We have our two examples of \t{Quality}, and we want to make sure that we see all the variation in them.
-Spanish nouns have gender, hence a minimal and representative set of trees in category \t{Kind} could be e.g. \t{\{Pizza, Cheese\}}, where pizza is feminine and cheese is masculine. 
+Spanish nouns have gender, hence a minimal and representative set of
+trees in category \t{Kind} could be e.g. \t{\{Pizza, Cheese\}}, where
+pizza is feminine and cheese is masculine.
 
-Applying the set of arguments \t{\{Very Good, Very Vegan\}} into the contexts \t{\{Mod ? Pizza, Mod ? Cheese\}}, we get the set \t{\{Mod (Very Good) Pizza, Mod (Very Good) Cheese, Mod (Very Vegan) Pizza, Mod (Very Vegan) Cheese\footnote{\url{http://realvegancheese.org/}}\}}. Note that \t{Kind} is unspecified for number, because it is still waiting for a determiner (\t{This, That, These} or \t{Those}) to complete it into \t{Item}. The type of \t{Kind} contains both singular and plural variants, and by linearising these 4 trees, we get the strings shown in Figure~\ref{fig:veganCheese}.
+Applying the set of arguments \t{\{Very Good, Very Vegan\}} into the
+contexts \t{\{Mod ? Pizza, Mod ? Cheese\}}, we get the set \t{\{Mod
+  (Very Good) Pizza, Mod (Very Good) Cheese, Mod (Very Vegan) Pizza,
+  Mod (Very Vegan)
+  Cheese\footnote{\url{http://realvegancheese.org/}}\}}. Note that
+\t{Kind} is unspecified for number, because it is still waiting for a
+determiner (\t{This, That, These} or \t{Those}) to complete it into
+\t{Item}. The type of \t{Kind} contains both singular and plural
+variants, and by linearising these 4 trees, we get the strings shown
+in Figure~\ref{fig:veganCheese}.
 
 \begin{figure}
 \centering
@@ -106,34 +148,84 @@ Applying the set of arguments \t{\{Very Good, Very Vegan\}} into the contexts \t
 \hline
 \t{Mod (Very Good) Pizza}   & \t{Mod (Very Good) Cheese} \\ 
 muy buena pizza             & muy buen queso \\
-muy buenas pizzas			& muy buenos quesos \\ \hline
+muy buenas pizzas           & muy buenos quesos \\ \hline
 
 \t{Mod (Very Vegan) Pizza}  & \t{Mod (Very Vegan) Cheese} \\
 pizza muy vegana            & queso muy vegano \\
 pizzas muy veganas          & quesos muy veganos \\ \hline
 \end{tabular}
-\caption{Variation of adjective forms and placement in category \t{Kind}}
+\caption{Variation of adjective forms and placement in attributive position}
 \label{fig:veganCheese}
 \end{figure}
 
 \paragraph{Context created by \t{Pred}} 
-Secondly, let us look at the context created by \t{Pred : Item -> Quality -> Comment}. Now the \t{Quality} is in a predicative position: ``X is very good/very vegan''.
-We start by creating a representative and minimal set of arguments of type \t{Item}, in order to squeeze out all the variation from the test cases of type \t{Quality}.
+Secondly, let us look at the context created by \t{Pred : Item ->
+  Quality -> Comment}. Now the \t{Quality} is in a predicative
+position: ``X is very good/very vegan''. We start by creating a
+representative and minimal set of arguments of type \t{Item}, in order
+to squeeze out all the variation from the test cases of type
+\t{Quality}.
 
 \t{Item} is formed by using one of the four functions \t{This, That, These, Those : Kind -> Item}.
-We remember from choosing \t{Kind}s that gender was important, and it is still relevant for \t{Item}: the predicative adjective should agree with the subject, so a pizza is \emph{vegana}, and cheese is \emph{vegano}. 
-We have already found a set of \t{Kind}s to represent all genders, so we can reuse that set to create a representative set of \t{Item}s. But we need something more too---\t{Item} has an inherent number, which comes from the constructor function. \t{This} and \t{That} are singular, \t{These} and \t{Those} are plural, so we should choose one of each. Hence we end up with the following trees: \t{\{This Pizza, This Cheese, These Pizza, These Cheese\}}.
+We remember from choosing \t{Kind}s that gender was important, and it
+is still relevant for \t{Item}: the predicative adjective should agree
+with the subject, so a pizza is \emph{vegana}, and cheese is
+\emph{vegano}. We have already found a set of \t{Kind}s to represent
+all genders, so we can reuse that set to create a representative set
+of \t{Item}s. But we need something more too---\t{Item} has an
+inherent number, which comes from the constructor function. \t{This}
+and \t{That} are singular, \t{These} and \t{Those} are plural, so we
+should choose one of each. Hence we end up with the following trees:
+\t{\{This Pizza, This Cheese, These Pizza, These Cheese\}}. 
 
-The presence or absence of additional adjectives wouldn't make any difference in Spanish: both \t{This Pizza} and \t{This (Very Italian) Pizza} result in choosing the string \emph{vegana} for the \t{Quality} in the predicative position. In the minimalist spirit, we prefer \t{This Pizza}: the resulting \t{Comment} is shorter, and it is easier for the oracle to judge the grammaticality of the predicative adjective, if there is only one adjective in the whole sentence.
+The presence or absence of additional adjectives wouldn't make any
+difference in Spanish: both \t{This Pizza} and \t{This (Very Italian)
+ Pizza} select the feminine form of the \t{Quality} in the predicative
+position. In the minimalist spirit, we prefer \t{This Pizza}: the
+resulting \t{Comment} is shorter, and it is easier for the oracle to
+judge the grammaticality of the predicative adjective, if there is
+only one adjective in the whole sentence. 
 
-\paragraph{Putting it all together}
+Applying the same process as before, we get the set of trees shown in 
+Figure~\ref{fig:goodCheese}. This is representative but not minimal,
+so we proceed to the next step, shrinking.
 
-piece the trees together
+\begin{figure}
+\centering
+\begin{tabular}{| l | l |}
+\hline
+\t{Pred (This Pizza) (Very Good)}   & \t{Pred (This Cheese) (Very Good)} \\ 
+esta pizza es muy buena             & este queso es muy bueno \\ \hline
+\t{Pred (These Pizza) (Very Good)}  & \t{Pred (These Cheese) (Very Good)} \\ 
+estas pizzas son muy buenas         & estes quesos son muy buenos \\ \hline
+\t{Pred (This Pizza) (Very Vegan)}   & \t{Pred (This Cheese) (Very Vegan)} \\ 
+esta pizza es muy vegana             & este queso es muy vegano \\ \hline
+\t{Pred (These Pizza) (Very Vegan)}  & \t{Pred (These Cheese) (Very Vegan)} \\ 
+estas pizzas son muy veganas         & estes quesos son muy veganos \\ \hline
+\end{tabular}
+\caption{Variation of adjective forms in the predicative position}
+\label{fig:goodCheese}
+\end{figure}
+
 
 \paragraph{Shrinking}
-We notice that only by testing one function, \t{Very}, we have actually quite a coverage of the grammar. 
-Lot of the considerations are the same: number and grammatical gender play a role in a lot of stuff.
-Easy step: don't show redundant trees to the user. One tree can actually test different phenomena.
+
+Two aspects to shrinking:
+
+Some distinctions are relevant only in certain
+contexts. Compare the eight strings we got from \t{Mod} context, and
+how they all showed different combination of gender, number and
+placement. But eight strings in predicative position (Figure~\ref{fig:goodCheese})
+are redundant: ``estos quesos son muy buenos'' is essentially the same
+as ``estos quesos son muy veganos''. In contrast, ``muy buen queso''
+and ``queso muy vegano'' differ in placement, so it is necessary to
+include both examples.
+
+We notice that only by testing one function, \t{Very}, we have
+actually quite a coverage of the grammar. Lot of the considerations
+are the same: number and grammatical gender play a role in a lot of
+stuff. Easy step: don't show redundant trees to the user. One tree can
+actually test different phenomena. 
 
 \section{Technical details}
 
