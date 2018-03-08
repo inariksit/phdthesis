@@ -12,6 +12,20 @@ doing; and even if this assumption is false, there are already methods
 that test whether a given rule takes effect in a corpus.
 
 
+\section{Experiences as a grammar writer}
+
+Concrete problems: the kind of bugs we set out to find
+* Empty categories
+* Empty fields
+* Eliminated arguments
+
+Pick ~3 bugs: 
+what tree was generated? why? likelihood of finding this bug without our method.
+
+Results
+
+
+
 \section{The problem}
 
 Traditionally, GF grammars are tested by the grammarians themselves,
@@ -279,6 +293,10 @@ the set would also include ``no horses''.
 
 
 \section{Future work}
+
+
+Generality -- turn any other grammar formalism into PGF, and you can use this method to test it.
+
 
 We plan to look into existing text corpora, and find trees that are
 structurally identical  to those that our program generates as a
