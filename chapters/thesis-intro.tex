@@ -129,8 +129,9 @@ as it grows and changes.
 
 \section{Structure of this thesis}
 
-The core of this thesis is an extension of three articles: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015}, ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}
-and \todo{Upcoming paper on testing GF}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
+The thesis is divided in two parts: one about Constraint Grammar (Chapter~\ref{chapterCGSAT}) and other about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapter~\ref{chapterCGSAT} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. A third article, ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, presents a practical application of the method on a Basque CG, and is included in the evaluation section.
+% and ``Exploring the expressivity of Constraint Grammar'' \cite{kokke2017expressivity}.
+Chapter~\ref{chapterGFtest} is an extension of one article, ``Automatic systematic test case generation for producing reliable grammars'' \cite{listenmaa_claessen2018} (under submission). For both parts, some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
 
 Chapter 2 presents a general introduction to both software testing and computational grammars, aimed for a reader who is unfamiliar with the topics.
 Chapter 3 describes the method of analysing CG by using symbolic evaluation, along with evaluation on three different grammars.
@@ -141,17 +142,18 @@ Chapter 5 concludes the thesis.
 
 \section{Contributions of the author}
 
-All articles \cite{listenmaa_claessen2015}, \cite{listenmaa_claessen2016}, \todo{GF-testing paper}
-are co-written by the author and Koen Claessen. In general, the ideas behind the publications were joint effort.
-For the first article, all of the implementation of SAT-CG is by the author,
+The three articles which present the general methods (\cite{listenmaa_claessen2015}, \cite{listenmaa_claessen2016}, \cite{listenmaa_claessen2018}) are co-written by the author and Koen Claessen.
+In general, the ideas behind the publications were joint effort.
+For the first article \cite{listenmaa_claessen2015}, all of the implementation of SAT-CG is by the author,
 and all of the library SAT+ by Koen Claessen.
 %I was mainly responsible of writing the article. 
 The version appearing in this monograph, Chapter~\ref{chapterCGSAT}, is thoroughly rewritten by the author since the initial publication.
 
-For the second article, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen. 
+For the second article \cite{listenmaa_claessen2016}, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen. 
 %Writing the article was joint effort of both authors. 
-The version appearing in Chapter~\ref{chapterCGana} is to large extent the same as the original article, with added detail and examples throughout the chapter.
+The version appearing in Chapter~\ref{chapterCGSAT} is to large extent the same as the original article, with added detail and examples throughout the chapter.
 
-The work in the third article was joint effort: both authors participated in all parts of the implementation.
+The work in the third article \cite{listenmaa_claessen2018} was joint effort: both authors participated in all parts of the implementation.
 
 
+%The two remaining articles about CG were written with different coauthors: \cite{listenmaa2017basque} is a practical application of the method where the author was in charge with the experiments, and \cite{kokke2017expressivity} is a rather theoretical side trip, w a smaller role of the implementation, but actively participating in the ideas behind the work.
