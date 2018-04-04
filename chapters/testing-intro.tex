@@ -2,12 +2,13 @@
 \label{sec:testing-intro} 
 
 
-Complete the syllogism:
-
 \begin{itemize}
 \item All software has bugs.
 \item Grammars are software.
 \end{itemize}
+
+An intelligent reader may complete the syllogism.
+
 We can approach the elimination of bugs in two ways: find them by
 catching concrete examples, or build safeguards into the program that
 make it more difficult for bugs to occur in the first place.
@@ -17,11 +18,10 @@ programs in a language, it's easy to write buggy programs. There are
 languages that impose more checks and constraints, and thus make it
 harder to write buggy code, but the overall effect is that it's harder
 to write \emph{any} code. Some argue that the combination ``easy to
-write correct code, hard to write buggy code'' exists, but the the
-actual language to achieve this varies from person to
-person.\footnote{There is more of a consensus of the existence of
-programming languages that are hard to write correct but easy to write
-buggy.} 
+write correct code, hard to write buggy code'' exists, but the actual
+language to achieve this varies from person to person.\footnote{There
+  is more of a consensus of the existence of programming languages
+  that are hard to write correct but easy to write buggy.} 
 
 However interesting these points are from programming language
 research point of view, they are way beside the point for this
@@ -30,16 +30,42 @@ formalisms that already have millions of lines of code written in
 them. Thus, we want to develop methods that help finding bugs in
 existing software. 
 
+%\paragraph{Test oracles}
+
 
 \paragraph{Unit testing}
 
-Write particular, concrete test cases: ``1+2 should be 3''.
+Write particular, concrete test cases: assume we want to test the
+addition function (+), we could write some facts we know, such as
+``1+2 should be 3''. In the context of grammars and natural language,
+we could assert translation equivalence between a pair of strings,
+e.g. ``\emph{la casa grande} $\Leftrightarrow$ \emph{the big house}'',
+or between a tree and its linearisation, e.g. ``\t{DetCN the\_Det
+  (AdjCN  big\_A house\_N)} $\Leftrightarrow$ \emph{the big house}''.
+Whenever a program is changed or updated, the collection of unit tests
+are run again, to make sure that the change has not broken something
+that previously worked.
 
 \paragraph{Property-based testing}
 
-Abstract properties that should hold for all test cases, and random
-generation to supply values. For example: ``for all integers $x$ and
-$y$, $x+y$ should be equal to $y+x$''. 
+The weakness of unit testing is that it only tests cases that the
+developer has thought of adding. Another approach is to use
+property-based testing: the developer defines bstract properties that
+should hold for all test cases, and uses random generation to supply
+values. If we want to test the (+) function again, we could write a
+property that says ``for all integers $x$ and $y$, $x+y$ should be
+equal to $y+x$''. Then we generate 100 random pairs of integers, and
+assert that all of them follow the property. 
+
+Of course, the single property of commutativity is not enough to
+define that (+) works as intended: if that were the only test, it
+would happily pass any function with similar property,
+e.g. multiplication, or some function $f(x, y) = 0$ for any $x$
+and $y$. To remedy this, we would need to test other properties of
+addition, or mix in some unit tests with specific values.
+
+\todo{Example related to grammar writing?}
+
 
 \paragraph{Symbolic evaluation}
 
@@ -48,7 +74,6 @@ program. What happens if we get a 3 from the user as an input? Does it
 crash if it's 29th of February and we get a 3 from the user?  Symbolic 
 evaluation simulates the run of a program with different inputs, using 
 a constraint solver to find out where certain combinations lead into.
-
 
 
 \input{chapters/sat-intro}
