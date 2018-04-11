@@ -1,3 +1,4 @@
+\def\pmcfg{\textsc{pmcfg}}
 
 \section{Constraint Grammar}
 \label{sec:cg-intro}
@@ -188,4 +189,108 @@ Abstract and concrete syntax: compiler construction \& tectogrammatical/phenogra
 
 \subsection{Abstract syntax}
 
+Abstract syntax is a description of the things we can say in the
+language: it doesn't tell how, but just
+what. Figure~\ref{fig:abstract_syntax} shows a small example grammar
+for greetings.
+%: ``Hello world'' and ``Hello friends''.
+
+
+\begin{figure}[h]
+  \centering
+\begin{verbatim}
+abstract Hello = {
+  flags startcat = Greeting ;
+
+  cat 
+    Greeting ; Recipient ;
+
+  fun
+    Hello : Recipient -> Greeting ;
+    World : Recipient ;
+    Friends : Recipient ; 
+}
+
+\end{verbatim}
+\caption{Abstract syntax of a small GF grammar}
+\label{fig:abstract_syntax}
+\end{figure}
+
+Section \t{cat} introduces the categories of the grammar:
+\t{Greeting} and \t{Recipient}. 
+Of the two categories, \t{Greeting} is the \emph{start category}.
+This means that greetings are complete constructions in the language,
+everything else (in this grammar, only \t{Recipient} is an
+intermediate stage. However, it is perfectly fine to inspect any
+category, and generate or parse examples in them. (As we will see later
+in Chapter~\ref{chapterGFtest}, it makes sense to test grammars in
+smaller pieces.)
+
+The next section \t{fun} introduces functions: they are either lexical
+items without arguments, or syntactic functions which manipulate their
+arguments and build new terms. In this grammar, we have two lexical
+items, \t{World} and \t{Friends}, both of type \t{Recipient}, and one
+syntactic function, \t{Hello}, which takes a \t{Recipient} as an
+argument and produces a \t{Greeting}. 
+
+This grammar is very simple: the exhaustive list of abstract syntax
+trees  is just \t{\{Hello World, Hello Friends\}}.
+
+
 \subsection{Concrete syntax}
+
+Concrete syntax is the implementation of the abstract syntax.
+
+\begin{figure}[h]
+  \centering
+\begin{verbatim}
+concrete HelloEng of Hello = {
+
+ lincat 
+   Greeting, Recipient = Str ;
+
+ lin
+   Hello rec = "hello" ++ rec ;
+   World     = "world" ;
+   Friends   = "friends" ;
+}
+\end{verbatim}
+\caption{English concrete syntax of the GF grammar in Figure~\ref{fig:abstract_syntax}}
+\label{fig:concrete_syntax_eng}
+\end{figure}
+
+The section \t{lincat} contains the concrete types of the categories. 
+It corresponds to \t{cat} in the abstract syntax: for every abstract category
+introduced in \t{cat}, we give a concrete implementation in \t{lincat}.
+Figure~\ref{fig:concrete_syntax_eng} shows the English concrete
+syntax, in which both \t{Greeting} and \t{Recipient} are just strings.
+
+The section \t{lin} contains the concrete implementation of the
+functions, introduced in \t{fun}. The lexical items \t{World} and
+\t{Friends} are just strings, and \t{Hello} simply prefixes the word
+``hello'' to its argument, resulting in ``hello world'' and ``hello friends''.
+
+However, the concrete syntax types can be more complex than just
+strings. GF compiles into a formalism called \pmcfg{}
+\cite{seki91pmcfg}, which is beyond context-free.
+
+\begin{figure}[h]
+  \centering
+\begin{verbatim}
+concrete HelloIce of Hello = {
+
+ lincat 
+   Greeting  = Str ;
+   Recipient = { s : Str ; n : Number } ;
+
+ lin
+   Hello rec = case rec.n of {
+                 Sg => "sæll" ;
+                 Pl => "sælir" } ++ rec ;
+   World     = {s = "heimur" ; n = Sg } ;
+   Friends   = {s = "vinir"  ; n = Pl } ;
+}
+\end{verbatim}
+\caption{Icelandic concrete syntax of the GF grammar in Figure~\ref{fig:abstract_syntax}}
+\label{fig:concrete_syntax_ice}
+\end{figure}

@@ -28,14 +28,14 @@ that test whether a given rule takes effect in a corpus.
 abstract NounPhrases = {
   flags startcat = NP ;
   cat
-    NP ; Adv ;                   -- Non-terminal categories
-    CN ; Det ; Adj ; Prep ;      -- Terminal (lexical) categories
+    NP ; Adv ;                           -- Non-terminal categories
+    CN ; Det ; Adj ; Prep ;              -- Terminal (lexical) categories
   fun
-    DetNP : Det -> NP ;          -- e.g. "this"; "yours"
-    DetCN : Det -> CN -> NP ;    -- e.g. "this house"
-    PrepNP : Prep -> NP -> Adv ; -- e.g. "without the house"
-    AdjCN : Adj -> CN -> CN ;    -- e.g. "small house"
-    AdvCN : Adv -> CN -> CN ;    -- e.g. "house on a hill"
+    DetNP : Det -> NP ;                  -- e.g. "this"; "yours"
+    DetCN : Det -> CN -> NP ;            -- e.g. "this house"
+    PrepNP : Prep -> NP -> Adv ;         -- e.g. "without the house"
+    AdjCN : Adj -> CN -> CN ;            -- e.g. "small house"
+    AdvCN : Adv -> CN -> CN ;            -- e.g. "house on a hill"
 
     a, the, this, these, your : Det ;
     good, small, blue, ready : Adj ;
