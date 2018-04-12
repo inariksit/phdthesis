@@ -1,11 +1,31 @@
 \chapter{Background}
 
+\epigraph{\it Much of the methodology of grammar testing is dictated by common sense.}{Miriam Butt et al.\\{\it A Grammar Writer's Cookbook}}
+
 In this chapter, we present the main areas of this thesis: computational natural language grammars and software testing.
 Section~\ref{sec:cg-intro} introduces the CG formalism and some of the different variants, along with the historical context and related work.
 For a description of any specific CG implementation, we direct the reader to the original source: CG-1 \cite{karlsson1990cgp,karlsson1995constraint}, CG-2 \cite{tapanainen1996}, VISL CG-3 \cite{bick2015,vislcg3}.
 Section~\ref{sec:gf-intro} introduces the GF formalism \cite{ranta2011gfbook} and the Resource Grammar Library \cite{ranta2009rgl}.
 
 Section~\ref{sec:testing-intro} is a brief and high-level introduction to software testing and verification, aimed to a reader with no prior knowledge on the topic. For a more thorough introduction on software testing in general, we recommend \todo{some book on testing}, and for SAT in particular, we recommend \cite{biere2009handbook}.
+
+
+
+
+% \todo{quote from a LFG book---maybe find some use for it}
+% \begin{quote}
+% Testing the grammar is an indispensable part of ensuring robustness
+% and increasing the performance of a grammar. Although individual constructions
+% can be tested with a few sample sentences as they are developed,
+% more systematic testing is required to maintain the quality of
+% the grammar over time and to catch unexpected results of the addition
+% of new rules and lexical items. Much of the methodology of grammar
+% testing is dictated by common sense. However, issues do arise with respect
+% to what kinds of testsuites to use, what other kinds of methods
+% apart from testsuites one might use to test the grammar for continued
+% consistency, and how to get a stable measure of the grammar's performance
+% as it grows and changes.
+% \end{quote}
 
 \input{chapters/grammars-intro}
 

@@ -13,7 +13,10 @@
 \chapter{Test Case Generation for Grammatical Framework}
 \label{chapterGFtest}
 
-Now we change to a completely new topic. 
+\epigraph{\it Fixpoint computation is the new SAT I'm afraid.}{Koen
+  Claessen, 2018}
+
+\noindent Now we change to a completely new topic. 
 Previously, we have enforced an internal logic to the grammar rules,
 without needing any interaction with the external world. We have taken
 for granted that the humans who write the rules know what they are
@@ -195,8 +198,8 @@ then we need several \emph{contexts} to squeeze out all the different
 forms. For example, a \t{CN} in English is open for number---\t{house}
 is really a table \{\t{Sg =>} \emph{``house''} \t{; Pl =>}
 \emph{``houses''}\}, and applying a determiner chooses the right form:
-\t{DetCN this house} linearizes to \emph{this house} and \t{DetCN
-  these house} linearizes to \emph{these houses}. 
+\t{DetCN this house} linearises to \emph{this house} and \t{DetCN
+  these house} linearises to \emph{these houses}. 
 
 \label{sec:wishlist_comments}
 The example grammar, with only 15-word lexicon and 5 syntactic functions,
@@ -204,8 +207,9 @@ generates over 10,000 %17,574
 trees\footnote{e.g. {\tt DetCN the (AdvCN (PrepNP on
 (DetCN a (AdjCN small hill)) (AdjCN blue house))} `the blue house on a
 small hill'}  up to depth 5. 
-However, as we have seen in the examples above, we can test complex morphosyntactic phenomena just with a set
-of 4, 8 or 12 trees, depending on the complexity of the language.
+However, as we have seen in the examples above, we can test complex
+morphosyntactic phenomena with just a set of 4, 8 or 12 trees,
+depending on the complexity of the language. 
 
 As mentioned previously, the base of a test case is one syntactic
 function, but often the same sentence ends up showcasing several
@@ -233,7 +237,7 @@ ${\tt A \Rightarrow \{ A_{pos\times{}sg\times{}masc}, \dots, A_{superl\times{}pl
 
 This compilation step can dramatically increase the number of categories of the grammar, but it also removes the need for dealing with these parameters explicitly when we generate test cases. Instead, each syntactic function from the original grammar turns into multiple syntactic functions into the \pgf{} -- one for each combination of parameters of its arguments.
 
-We now describe the generation of test cases for a given syntactic function. We assume that all test cases are trees with the same start (top-level) category, such as \t{NP} in our example grammar, or \t{S} (for sentence) for more general grammars. The requirement is that the start category is linearized as one string only. (In a \pmcfg{}, categories in general can be linearized to vectors of strings, which is perhaps unsuitable for test cases that are presented to a human.)
+We now describe the generation of test cases for a given syntactic function. We assume that all test cases are trees with the same start (top-level) category, such as \t{NP} in our example grammar, or \t{S} (for sentence) for more general grammars. The requirement is that the start category is linearised as one string only. (In a \pmcfg{}, categories in general can be linearised to vectors of strings, which is perhaps unsuitable for test cases that are presented to a human.)
 
 \paragraph{Enumerate functions} As we explained before, each syntactic function turns into multiple versions, one for each combination of parameters of its arguments. We test each of these versions seperately. This enumeration is the main reason we see several test cases in the examples in Section~\ref{sec:gf}.
 
@@ -241,9 +245,9 @@ In order to construct trees that use the syntactic function, we need to supply i
 
 \paragraph{Enumerate arguments} Some syntactic functions are simply a single lexical item (for example the word \emph{small}); in this case just the tree \t{small} is our answer. If we choose a function with arguments, such as for example \t{PrepNP}, then we have to supply it with argument trees. Each argument tree needs to be a tree belonging to the right category (in the example, \t{Prep} and \t{NP}, respectively).
 
-When we test a function, we want to see whether or not it uses the right information from its arguments, in the right way. The information that a syntactic function uses is any of the strings that come from linearizing its arguments. In order to be able to see which string in the result comes from which string from which arguments, we want to generate test cases that only contain unique strings (no duplicates).
+When we test a function, we want to see whether or not it uses the right information from its arguments, in the right way. The information that a syntactic function uses is any of the strings that come from linearising its arguments. In order to be able to see which string in the result comes from which string from which arguments, we want to generate test cases that only contain unique strings (no duplicates).
 
-For example, when we test a preposition together with a noun, we want to pick a noun that actually has different forms (unique strings) for different prepositions, rather than having identical forms, because the human would not be able to see if the \t{PrepVP} function picked the wrong form.
+For example, when we test a preposition together with a noun, we want to pick a noun that actually has different forms (unique strings) for different prepositions, rather than having identical forms, because the human would not be able to see if the \t{PrepNP} function picked the wrong form.
 
 It is often possible to generate one combination of arguments where all strings in the linearizations are different. However, it is not always possible to this, which is why we in general aim to generate a set of combinations of arguments, where for each pair of strings from the arguments, there is always one test case where those strings are different. In this way, if the syntactic function contains a mistake, there is always one test case that reveals it.
 
@@ -310,8 +314,9 @@ plural determiners. Both of these use their arguments in different
 ways (different strings from the hole appear in the result). So, both
 versions of \t{DetCN} lead to one context each. The final contexts are
 \t{DetCN this \_} and  \t{DetCN these \_}. Note that we do not have to enumerate all possible first arguments to \t{DetCN}. We insert the 4 test
-cases into the holes, and get 8 trees in total: \t{\{DetCN this (good
-  house), \dots, DetCN these (small hill)\}}. 
+cases into the holes, and get 8 trees in total: \t{\{DetCN this (AdjCN good house), \dots, DetCN these (AdjCN small hill)\}}.
+
+\todo{Explain fixpoints in much more detail. Separate subsection.}
 
 So, what we want to compute is, given the result category T of the syntactic function, and the start category S of the grammar, a minimal set of contexts in the start category S with hole of type T, such that any string appearing in the linearization of T also appears somewhere in the linearization of S. We compute this by setting up a system of equations for each category C in the grammar: for each C, we define all the relevant contexts with hole type C in terms of all the relevant contexts with hole type C' for other categories C' that use C. So, the answer for each category is expressed in terms of the answer for other categories. In general, this system of equations is \emph{recursive}, and we use a fixpoint iteration to compute the smallest solution.
 
@@ -327,6 +332,46 @@ this larger grammar, when we want to test adjectives, it is necessary
 to include two examples when in attributive position, but only one
 when in predicative position. 
 
+\todo{write this better}
+
+First I'll explain what *coercions* are, then why it may be
+interesting to show them. Let's take a Spanish Foods grammar, and
+consider the category `Quality`—those `Good Pizza` and `Vegan Pizza`
+that you saw in the previous section. `Good`
+"bueno/buena/buenos/buenas" goes before the noun it modifies, whereas
+`Vegan` "vegano/vegana/…" goes after, so these will become different
+*concrete categories* in the PGF:  {\tt Quality\_before} and
+{\tt Quality\_after}.
+
+Now, this difference is meaningful only when the adjective is modifying
+the noun: "la buena pizza" vs. "la pizza vegana". But when the
+adjective is in a predicative position, they both behave the same:
+"la pizza es buena" and "la pizza es vegana". For this, the grammar
+creates a {\it coercion}: both {\tt Quality\_before} and {\tt Quality\_after} may be
+treated as {\tt Quality\_whatever}. To save some redundant work, this coercion {\tt Quality\_whatever}
+appears in the type of predicative function, whereas the
+modification function has to be split into two different functions,
+one taking {\tt Quality\_before} and other {\tt Quality\_after}.
+
+Now you know what coercions are, this is how it looks like in the program:
+
+\begin{verbatim}
+> gftest -g Foods -l Spa --show-coercions
+* Coercions in the grammar:
+Quality_7--->_11
+Quality_8--->_11
+\end{verbatim}
+
+(Just mentally replace 7 with before, 8 with after and 11 with whatever.)
+
+So how do coercions help us pruning? Luckily I use overly long
+variable names, so you can just read the source code:
+
+\begin{verbatim}
+  (commonCtxs,reducedTrees) = case coercionsThatCoverAllGoalcats of
+    [] -> ([],[])        -- no coercion covers all goal cats -> all contexts are relevant
+    cs -> (cCtxs,rTrees) -- all goal cats coerce into same -> find redundant contexts
+\end{verbatim}
 
 \section{General features of \pmcfg: unused, equal,
   erased or empty fields}
@@ -348,7 +393,7 @@ the future---or remove it as redundant.
 possible to erase arguments: say that there is a bug, \t{AdjCN : Adj
   $\rightarrow$ CN  $\rightarrow$ CN} never actually adds the
 adjective to the new \t{CN}, in which case \t{AdjCN blue house} and
-\t{house} are linearized identically. Instead of testing every single
+\t{house} are linearised identically. Instead of testing every single
 function, we would like to know if there are any functions in the
 grammar that behave like this.
 
@@ -507,7 +552,7 @@ a lot of relevant trees.}.
 % chosen the wrong function.
 % In the second case, the application grammarian has correctly chosen
 % \t{spanish\_A} from the resource grammar, but that word itself is
-% linearized wrongly into ``Spaniard''.
+% linearised wrongly into ``Spaniard''.
 
 
 The third grammar is a restricted version of the \gf{} resource grammar,
