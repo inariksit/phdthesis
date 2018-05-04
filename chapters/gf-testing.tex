@@ -7,8 +7,16 @@
 \def\cfg{\textsc{cfg}}
 \def\pmcfg{\textsc{pmcfg}}
 \def\hpsg{\textsc{hpsg}}
+\def\feat{\textsc{feat}}
 \newcommand{\tts}[1]{{\tt #1}}
-
+\newcommand{\quality}[1]{${\tt AP_{#1}}$}
+\newcommand{\kind}[1]{${\tt CN_{#1}}$}
+\newcommand{\very}[1]{${\tt Very_{#1}}$}
+\newcommand{\comment}{${\tt S}$}
+\newcommand{\modFun}[2]{${\tt Mod_{#1\times#2}}$}
+\newcommand{\predFun}[3]{${\tt Pred_{#1\times#2\times#3}}$}
+\newcommand{\itemSpa}[2]{${\tt NP_{#1\times#2}}$}
+\newcommand{\itemEng}[1]{${\tt NP_{#1}}$}
 
 \chapter{Test Case Generation for Grammatical Framework}
 \label{chapterGFtest}
@@ -16,12 +24,50 @@
 \epigraph{\it Fixpoint computation is the new SAT I'm afraid.}{Koen
   Claessen, 2018}
 
-\noindent Now we change to a completely new topic. 
-Previously, we have enforced an internal logic to the grammar rules,
-without needing any interaction with the external world. We have taken
-for granted that the humans who write the rules know what they are
-doing; and even if this assumption is false, there are already methods
-that test whether a given rule takes effect in a corpus.
+\noindent What is the \emph{essence} of a language? When formalising
+and implementing a natural language grammar, which example sentences
+do we need to check in order to convince ourselves that the grammar is
+correct? 
+% Previously, we have enforced an internal logic to the grammar rules,
+% without needing any interaction with the external world. We have taken
+% for granted that the humans who write the rules know what they are
+% doing; and even if this assumption is false, there are already methods
+% that test whether a given rule takes effect in a corpus.
+
+Imagine we are formalising a grammar for English, and in particular we
+are working on the reflexive construct. In order to check correctness
+for the 3rd person singular, we need to test for three different
+subjects, because the object has to agree with the subject: ``he sees
+himself'', ``she sees herself'' and ``it sees itself''. Without seeing
+all three examples, we cannot be certain that the reflexive
+construction is implemented correctly. In contrast, the general
+pattern of a transitive verb with a non-reflexive object is enough to
+test with only one third person subject: \emph{he, she, it}, or any
+singular noun or proper name. The agreement only shows in the verb
+form, thus including both ``she sees a dog'' and ``John sees a dog''
+in the test suite is redundant.  
+
+Now, what is minimal and representative is highly language-dependent. 
+For instance, Basque transitive verbs agree with both subject and
+object, thus we need 6 $\times$ 6 examples just to cover all verb
+forms. In this paper, we are not interested in the morphology per se---there are
+easier methods to test for that---but the correctness of the syntactic
+function: does the function pick the correct verb form for the correct
+combination of subject and object? For that purpose, it is enough to
+test the syntactic construction ``transitive verb phrase'' with just a
+single transitive verb.
+
+We present a method that, given a grammar (that in general encompasses
+an infinite set of sentences), generates a finite set of sentences
+that can be used as test cases for the correctness of the grammar. Our
+concrete implementation is for a particular grammar formalism,
+namely parallel multiple context-free grammars ({\sc pmcfg})
+\cite{seki91pmcfg}, which is the core formalism used by the
+Grammatical Framework (\gf) \cite{ranta2004gf}. However, the general
+method works for any formalism that is at most as expressive as
+\pmcfg{}, including context-free grammars (\cfg), formalisms such as Tree-Adjoining Grammar (\tag)
+\cite{joshi1975tag}, and several variants of Categorial Grammar
+\cite{deGroote2004,steedman1988ccg}.
 
 \section{Grammar}
 
@@ -66,8 +112,9 @@ adverb (\t{Adv}) by combining a preposition (\t{Prep}) with an \t{NP},
 and those adverbs can modify yet another \t{CN}. 
 We refer to this grammar throughout the paper.
 
-As examples that help illustrate different testing needs for different languages, let us take three language-specific phenomena in the scope of our
-small grammar: preposition contraction in Dutch, adjective agreement
+As examples that help illustrate different testing needs for different
+languages, let us take three language-specific phenomena in the scope
+of our small grammar: preposition contraction in Dutch, adjective agreement
 in Estonian and determiner placement in Basque.
 
 \subsection{Preposition contraction in Dutch} In Dutch, some prepositions should
@@ -225,144 +272,240 @@ paradigms. But there are easier methods to test for such bugs---our
 goal is to test the more abstract, syntactic phenomena with as few
 trees as possible.  
 
-\section{How the tool works}
-\label{sec:details}
+\section{PMCFG}
+\label{sec:PMCFG}
 
-A \gf{} grammar compiles into a low-level format called \pgf{}
-(``Portable Grammar Format''), which is processed by our tool. For
-each category in the original grammar, the \gf{} compiler introduces a
-new category in the \pgf{} for each combination of parameters. For
-example for English adjectives, we get ${\tt A \Rightarrow \{ \tt A_{pos}, A_{comp}, A_{superl}}$\}, and for Spanish,
-${\tt A \Rightarrow \{ A_{pos\times{}sg\times{}masc}, \dots, A_{superl\times{}pl\times{}fem}}$\}. 
+\gf{} grammars are compiled into parallel multiple context-free
+grammars (\pmcfg), which are processed by our tool. Here we explain
+three key features for the test suite generation.
 
-This compilation step can dramatically increase the number of categories of the grammar, but it also removes the need for dealing with these parameters explicitly when we generate test cases. Instead, each syntactic function from the original grammar turns into multiple syntactic functions into the \pgf{} -- one for each combination of parameters of its arguments.
+\subsection{Concrete categories}
 
-We now describe the generation of test cases for a given syntactic function. We assume that all test cases are trees with the same start (top-level) category, such as \t{NP} in our example grammar, or \t{S} (for sentence) for more general grammars. The requirement is that the start category is linearised as one string only. (In a \pmcfg{}, categories in general can be linearised to vectors of strings, which is perhaps unsuitable for test cases that are presented to a human.)
+For each category in the original grammar, the \gf{} compiler
+introduces a new \emph{concrete category} in the \pmcfg{} for each combination of
+inherent parameters.  
+These concrete categories can be linearized to strings or vectors of
+strings. The start category (\t{S} in the Foods grammar) is in
+general a single string, but intermediate categories may have to keep
+several options open. 
 
-\paragraph{Enumerate functions} As we explained before, each syntactic function turns into multiple versions, one for each combination of parameters of its arguments. We test each of these versions seperately. This enumeration is the main reason we see several test cases in the examples in Section~\ref{sec:gf}.
+Consider the categories \t{NP}, \t{CN} and \t{AP} in the
+Spanish concrete syntax. Firstly, \t{NP} has inherent number
+and gender, so it compiles into four concrete categories:
+\itemSpa{sg}{masc}, \itemSpa{sg}{fem}, \itemSpa{pl}{masc} and
+\itemSpa{pl}{fem}, each of them containing one string. Secondly,
+\t{CN} has an inherent gender and variable number, so it compiles into
+two concrete categories: \kind{masc} and \kind{fem}, each of them a
+vector of two strings (singular and plural). Finally, \t{AP} needs to
+agree in number and gender with its head, but it has its position as
+an inherent feature.  Thus \t{AP} compiles into two concrete
+categories: \quality{pre} and \quality{post}, each of them a vector of
+four strings.
+% ({\stackanchor{\tt \small pl}{\tt \small sg}}
+%  $\times$ {\stackanchor{\tt \small masc}{\tt \small fem}}).
 
-In order to construct trees that use the syntactic function, we need to supply it with \emph{arguments}, as well as put the resulting tree into a \emph{context} that produces a tree in the correct start category.
+\subsection{Concrete functions}
+Just like categories, each syntactic function from the original
+grammar turns into multiple syntactic functions into the
+\pmcfg{}---one for each combination of parameters of its arguments.
 
-\paragraph{Enumerate arguments} Some syntactic functions are simply a single lexical item (for example the word \emph{small}); in this case just the tree \t{small} is our answer. If we choose a function with arguments, such as for example \t{PrepNP}, then we have to supply it with argument trees. Each argument tree needs to be a tree belonging to the right category (in the example, \t{Prep} and \t{NP}, respectively).
+\begin{itemize}
+\setlength\itemsep{0em}
+\item[--] \modFun{pre}{fem~~} \t{:} \quality{pre~} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
+\item[--]  \modFun{post}{fem~} \t{:} \quality{post} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
+\item[--]  \modFun{pre}{masc~~}\t{:} \quality{pre~} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
+\item[--] \modFun{post}{masc} \t{:} \quality{post} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
+\end{itemize}
 
-When we test a function, we want to see whether or not it uses the right information from its arguments, in the right way. The information that a syntactic function uses is any of the strings that come from linearising its arguments. In order to be able to see which string in the result comes from which string from which arguments, we want to generate test cases that only contain unique strings (no duplicates).
 
-For example, when we test a preposition together with a noun, we want to pick a noun that actually has different forms (unique strings) for different prepositions, rather than having identical forms, because the human would not be able to see if the \t{PrepNP} function picked the wrong form.
+\subsection{Coercions}
+\label{sec:Coercions}
+As we have seen, \t{AP} in Spanish compiles into \quality{pre} and
+\quality{post}. However, the difference of position is meaningful only when the
+adjective is modifying the noun: ``la \emph{buena} pizza'' vs. ``la pizza
+\emph{vegana}''. But when we use an adjective in a predicative position, both
+classes of adjectives behave the same: ``la pizza es \emph{buena}''
+and ``la pizza es \emph{vegana}''. As an optimization strategy, the
+grammar creates a {\it coercion}: both \quality{pre} and \quality{post}
+may be treated as \quality{*} when the distinction doesn't matter. 
+Furthermore, the function \t{Pred : NP $\rightarrow$ AP $\rightarrow$ S} uses
+the coerced category \quality{*} as its second argument, and thus
+expands only into 4 variants, despite there being 8 combinations of
+\t{NP}$\times$\t{AP}.
 
-It is often possible to generate one combination of arguments where all strings in the linearizations are different. However, it is not always possible to this, which is why we in general aim to generate a set of combinations of arguments, where for each pair of strings from the arguments, there is always one test case where those strings are different. In this way, if the syntactic function contains a mistake, there is always one test case that reveals it.
+\begin{itemize}
+\setlength\itemsep{0em}
+\item[--] \predFun{sg}{fem}{*~} \t{:} \itemSpa{sg}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item[--]  \predFun{pl}{fem}{*~} \t{:} \itemSpa{pl}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item[--]  \predFun{sg}{masc}{*} \t{:} \itemSpa{sg}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item[--] \predFun{pl}{masc}{*} \t{:} \itemSpa{pl}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\end{itemize}
 
-\paragraph{Example: Test cases using \t{AdjCN}} Let us test the function
-\t{AdjCN : Adj $\rightarrow$ CN $\rightarrow$ CN}, and take a Spanish
-concrete syntax as an example. 
-Firstly, we need a minimal and representative set of arguments of types
-\t{Adj} and \t{CN}. Consider the nouns first: Spanish has a
-grammatical gender, so in order to be representative, we need an
-example of both masculine and feminine. Out of the small lexicon,
-\t{house} (\emph{casa}) is feminine, and \t{hill} (\emph{cerro}) is
-masculine, so we return those two nouns as the full set of argument
-trees in \t{CN}. 
 
-Secondly, we consider the adjectives. Most commonly, adjectives follow
-the noun, e.g. \emph{casa peque\~{n}a} `small house', but some
-adjectives precede the noun, e.g. \emph{buena casa} `good house'. Thus 
-in order to cover the full spectrum of adjective placement, we need
-one premodifier and one postmodifier adjective. We pick the words
-\t{good} and \t{small} as the arguments of type \t{Adj}. 
+\section{Generating the test suite}
+\label{sec:testing}
 
-Now, our full set of test cases are \t{AdjCN} applied to the cross
-product of \{\stackanchor{\tt \small good}{\tt \small small}\}
-$\times$ \{ \stackanchor{\tt \small house}{\tt \small hill}\}.
-Note that \t{CN} is unspecified for number, because it is still waiting for a
-determiner (e.g. \t{this} or \t{these}) to complete it into an
-\t{NP}. Thus all the test cases contain both singular and plural
-variants, and by linearising these 4 trees, we get the 8 strings shown
-in Figure~\ref{fig:adjAttr}.
+We now have all building blocks for creating a representative and
+minimal set of test cases.
+In the previous section, we saw how a single abstract category
+compiles into multiple concrete categories, depending on the
+combinations of parameters. This compilation step can dramatically
+increase the number of categories of the grammar, but it also removes
+the need for dealing with these parameters explicitly when we generate
+test cases. 
 
-\begin{figure}
-\centering
+We use one syntactic function as the base for one set of test
+cases. For lexical categories, it also makes sense to test the whole
+category, i.e. generate all trees that show that \t{AP} is defined and
+handled correctly in the functions. However, we only explain in detail
+the method with one syntactic function as a base.
+
+We assume that all test cases are trees with the same start
+(top-level) category, such as \t{S} in our example grammar. The
+requirement is that the start category is linearized as one string only. 
+
+\subsection{Enumerate functions} As we explained before, each syntactic
+function turns into multiple versions, one for each combination of
+parameters of its arguments. We test each of these versions
+seperately. Each concrete syntactic function may produce one or several trees.
+
+In order to construct trees that use the syntactic function, we need
+to supply the function with \emph{arguments}, as well as put the resulting tree
+into a \emph{context} that produces a tree in the correct start
+category.
+
+\subsection{Enumerate arguments} Some syntactic functions are
+simply a single lexical item (for example the word \emph{good}); in
+this case just the tree \t{Good} is our answer.
+If we choose a function with arguments, such as \t{Pred}, then we have
+to supply it with argument trees. Each argument needs to be a
+tree belonging to the right category (in the example, \t{NP} and
+\t{AP}, respectively). 
+
+When we test a function, we want to see whether or not it uses the
+right information from its arguments, in the right way. The
+information that a syntactic function uses is any of the strings that
+come from linearizing its arguments. In order to be able to see which
+string in the result comes from which field from which argument, we
+want to generate test cases that only contain unique strings.
+For example, \t{Good} `bueno/buena/buenos/buenas' is a
+better argument than \t{Warm} `caliente/caliente/calientes/calientes',
+because the latter is invariable for gender.
+
+It is often possible to generate one combination of arguments where
+all strings in the linearizations are different. However, it is not
+always possible to do this, which is why we in general aim to generate
+a set of combinations of arguments, where for each pair of strings
+from the arguments, there is always one test case where those strings
+are different. In this way, if the syntactic function contains a
+mistake, there is always one test case that reveals it.
+
+In our implementation, we use the \feat{} framework \cite{feat} to enumerate possible combinations of argument trees, in size order. We stop when we have found a suitable set of combinations of arguments, according to the requirement above. We also stop (give up) when too many tries have been made (currently 10.000), but we have not seen this happen in practice.
+
+\paragraph{Example: Test cases using \t{Mod}} Let us test the function
+\t{Mod : AP $\rightarrow$ CN $\rightarrow$ CN} in the Spanish
+concrete syntax.
+Firstly, we need a minimal and representative set of arguments:
+one premodifier and one postmodifier \t{AP} (\t{Good} and
+\t{Vegan}), as well as one feminine and one masculine
+\t{CN} (\t{Pizza} and \t{Wine}). Now, our full set of test cases are
+\t{Mod} applied to the cross product of \{\stackanchor{\tt \small
+  Good}{\tt \small Vegan}\} $\times$ \{\stackanchor{\tt \small
+  Pizza}{\tt \small Wine}\}, as seen in Table~\ref{tab:adjAttr}.
+
+\begin{table}[h]
 \centering
 \begin{tabular}{| l | l |}
 \hline
-\t{AdjCN good house}   & \t{AdjCN good hill} \\ 
-\textsc{(sg)} buena casa             & \textsc{(sg)} buen cerro \\
-\textsc{(pl)} buenas casas           & \textsc{(pl)} buenos cerros \\ \hline
+\t{Mod Good Pizza}   & \t{Mod Good Wine} \\ 
+\textsc{(sg)} buena pizza             & \textsc{(sg)} buen vino \\
+\textsc{(pl)} buenas pizzas           & \textsc{(pl)} buenos vinos \\ \hline
 
-\t{AdjCN small house}   & \t{AdjCN small hill} \\ 
-\textsc{(sg)} casa  peque\~{n}a            & \textsc{(sg)} cerro  peque\~{n}o \\
-\textsc{(pl)} casas  peque\~{n}as          & \textsc{(pl)} cerros  peque\~{n}os \\ \hline
+\t{Mod Vegan Pizza}   & \t{Mod Vegan Wine} \\ 
+\textsc{(sg)} pizza vegana            & \textsc{(sg)} vino vegano \\
+\textsc{(pl)} pizzas veganas          & \textsc{(pl)} vinos veganos \\ \hline
 \end{tabular}
 \caption{Agreement and placement of adjectives in attributive position}
-\label{fig:adjAttr}
-\end{figure}
+\label{tab:adjAttr}
+\end{table}
 
-\paragraph{Enumerate contexts} The third and last enumeration we perform when generating test cases is to generate all possible \emph{uses} of a function. After we provide a function with arguments, we need to put the result into a context, so that we can generate a single string from the result (a sentence). We do this for all trees we have generated so far.
+\subsection{Enumerate contexts} The third and last enumeration we
+perform when generating test cases is to generate all possible
+\emph{uses} of a function. After we provide a function with arguments,
+we need to put the resulting tree into a context, so that we can generate a
+single string from the result (a sentence). Generating contexts thus requires the specification of a top-level \emph{start category}, which is typically the sentence category (\t{S} in our example).
 
-The important thing here is that the generated set of contexts shows all the possible different ways the tree can be used. For example, for a test tree with an inflection table of size 4, we would generate 4 different sentences in which each of the 4 inflections is used.
+The important thing here is that the generated set of contexts shows
+all the possible different ways the tree can be used. For example, for
+a test tree with an inflection table of 4 forms, we would generate 4 different sentences in which each of the 4 inflections is used.
 
-By \emph{context}, we mean a tree in
-the start category, with a \emph{hole} of type \t{CN}. A tree of type \t{CN} can be plugged into the hole to form a tree in the start category. In this grammar, the only category above \t{CN} is \t{NP}, and there is only
-one way that a \t{CN} can end up in an \t{NP}: by using the function
-\t{DetCN : Det $\rightarrow$ CN $\rightarrow$ NP}. 
+More specifically, by \emph{context}, we mean a tree in the start category (in our case \t{S}), with a \emph{hole} of the same type as the function under test (denoted by \t{\char`_}).
 
-Let us return to our running example. So far the relevant features have
-been grammatical gender an adjective placement---we have 4 trees with
-all combinations of \{masculine, feminine\} and \{pre,post\}. The
-resulting trees have \emph{variable} number, and we need to generate
-contexts that specify that number. In the \pgf{}, the function
-\t{DetCN} actually comes in two versions: one for singular and one for
-plural determiners. Both of these use their arguments in different
-ways (different strings from the hole appear in the result). So, both
-versions of \t{DetCN} lead to one context each. The final contexts are
-\t{DetCN this \_} and  \t{DetCN these \_}. Note that we do not have to enumerate all possible first arguments to \t{DetCN}. We insert the 4 test
-cases into the holes, and get 8 trees in total: \t{\{DetCN this (AdjCN good house), \dots, DetCN these (AdjCN small hill)\}}.
+As an example, consider generating contexts for a tree of category \t{CN}.
+Since \t{CN} is variable for number, we need two contexts: 
+one that picks out the singular form and other that picks out
+the plural form. 
+This suggests that we should apply two different
+\t{CN $\rightarrow$ NP} functions, for instance \t{This} and \t{These}, and
+give their results to the \t{Pred} function, which constructs a \t{S}.
+In contrast, the second argument to \t{Pred} doesn't make a difference
+in what form we pick out of the \t{CN}---we just want to pick
+something that has maximally different forms, so the program is sure
+not to pick \t{Warm}, which is invariable for gender. By random
+selection, let us pick \t{Italian}.
+The final two contexts are therefore \t{Pred (This \char`_) Italian} and \t{Pred (These \char`_) Italian}.
+We insert the 4 test cases from Figure~\ref{tab:adjAttr} into the
+holes, and get 8 trees in total as shown in Figure~\ref{tab:testCases}.
 
-\todo{Explain fixpoints in much more detail. Separate subsection.}
+\begin{table}
+\centering
+\begin{tabular}{| l | l |}
+\hline
+\t{Pred (This (Mod Good Pizza)) Italian} & \t{Pred (This (Mod Good Wine))
+                                        Italian} \\ 
+esta buena pizza es italiana          & este buen vino es italiano \\ \hline
+\t{Pred (These (Mod Good Pizza)) Italian} & \t{Pred (These (Mod Good Wine))
+                                        Italian} \\ 
+estas buenas pizzas son italianas          & estos buenos vinos son italianos \\ \hline
+\t{Pred (This (Mod Vegan Pizza)) Italian} & \t{Pred (This (Mod Vegan Wine))
+                                        Italian} \\ 
+esta pizza vegana es italiana          & este vino vegano es italiano \\ \hline
+\t{Pred (These (Mod Vegan Pizza)) Italian} & \t{Pred (These (Mod Vegan Wine))
+                                        Italian} \\ 
+estas pizzas veganas son italianas          & estos vinos veganos son italianos \\ \hline
+\end{tabular}
+\caption{Complete test cases to test \t{Mod}}
+\label{tab:testCases}
+\end{table}
 
-So, what we want to compute is, given the result category T of the syntactic function, and the start category S of the grammar, a minimal set of contexts in the start category S with hole of type T, such that any string appearing in the linearization of T also appears somewhere in the linearization of S. We compute this by setting up a system of equations for each category C in the grammar: for each C, we define all the relevant contexts with hole type C in terms of all the relevant contexts with hole type C' for other categories C' that use C. So, the answer for each category is expressed in terms of the answer for other categories. In general, this system of equations is \emph{recursive}, and we use a fixpoint iteration to compute the smallest solution.
+\paragraph{Fixpoint iteration} In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
+$$
+\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)
+$$
+In words, to generate contexts with holes of type $H$, we enumerate all functions $F$ that have a $H$ as an argument, and enumerate all contexts $C$ that have the result type $H'$ of $F$ as a hole type, and put $C$ and $F$ together to get a new context. Then, we apply a function $\textsf{filter}$ to the result in order to filter out redudant contexts, i.e. contexts whose uses of the strings of $H$ are already covered by other contexts in the same set.
 
-\paragraph{Pruning} For the previous example, we did not need any pruning: the cross
-product of all relevant distinctions produced a minimal and
-representative set of trees. Now assume we have a larger grammar,
-which also covers adjectives in a predicative position:
-e.g. \emph{esta casa es peque\~{n}a} `this house is small' and
-\emph{esta casa es buena} `this house is good'. The distinction which
-made us choose \t{small} and \t{good} in the first place is now gone:
-in predicative position, both adjectives behave the same. Thus, in
-this larger grammar, when we want to test adjectives, it is necessary
-to include two examples when in attributive position, but only one
-when in predicative position. 
+To compute relevant contexts with the start category \t{S} as a hole, we use the following definition $\textsf{contexts}(\t{S}) = \{ \; \_ \; \}$.
 
-\todo{write this better}
+Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\empty$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.
 
-First I'll explain what *coercions* are, then why it may be
-interesting to show them. Let's take a Spanish Foods grammar, and
-consider the category `Quality`—those `Good Pizza` and `Vegan Pizza`
-that you saw in the previous section. `Good`
-"bueno/buena/buenos/buenas" goes before the noun it modifies, whereas
-`Vegan` "vegano/vegana/…" goes after, so these will become different
-*concrete categories* in the PGF:  {\tt Quality\_before} and
-{\tt Quality\_after}.
+\subsection{Pruning the trees within one set of test cases} 
+On the scope of our tiny example grammar, this pruning method is
+easiest to illustrate when we test a category instead of a function;
+however, in bigger grammars, the need arises when testing functions as
+well. 
+In order to test the category \t{AP}, we need in total 12 example sentences:
+\begin{itemize}
+\setlength\itemsep{0em}
+\item[--] 4 test cases for a premodifier \t{AP} as modifier;
+\item[--] 4 test cases for a postmodifier \t{AP} as modifier;
+\item[--] 4 test cases for \emph{any} \t{AP} as predicative.
+\end{itemize}
+These categories correspond to the concrete categories \quality{pre},
+\quality{post} and the coercion \quality{*} (as explained in
+Section~\ref{sec:Coercions}). Instead of generating redundant test
+cases for the predicative, we use the coercions in the grammar to
+detect when something is redundant.
 
-Now, this difference is meaningful only when the adjective is modifying
-the noun: "la buena pizza" vs. "la pizza vegana". But when the
-adjective is in a predicative position, they both behave the same:
-"la pizza es buena" and "la pizza es vegana". For this, the grammar
-creates a {\it coercion}: both {\tt Quality\_before} and {\tt Quality\_after} may be
-treated as {\tt Quality\_whatever}. To save some redundant work, this coercion {\tt Quality\_whatever}
-appears in the type of predicative function, whereas the
-modification function has to be split into two different functions,
-one taking {\tt Quality\_before} and other {\tt Quality\_after}.
-
-Now you know what coercions are, this is how it looks like in the program:
-
-\begin{verbatim}
-> gftest -g Foods -l Spa --show-coercions
-* Coercions in the grammar:
-Quality_7--->_11
-Quality_8--->_11
-\end{verbatim}
-
-(Just mentally replace 7 with before, 8 with after and 11 with whatever.)
 
 So how do coercions help us pruning? Luckily I use overly long
 variable names, so you can just read the source code:
@@ -372,6 +515,45 @@ variable names, so you can just read the source code:
     [] -> ([],[])        -- no coercion covers all goal cats -> all contexts are relevant
     cs -> (cCtxs,rTrees) -- all goal cats coerce into same -> find redundant contexts
 \end{verbatim}
+
+\subsection{Pruning the trees to test the whole grammar}
+\label{sec:pruning_all}
+So far we have completely ignored that one tree can showcase more
+than one function. In fact, the 8 test sentences created for \t{Mod}
+happen to also test \t{Pred} exhaustively.
+Let us recap the steps we took to create them for \t{Mod}:
+enumerating arguments brought us \t{Good}, \t{Vegan}, \t{Pizza} and
+\t{Wine}, and enumerating contexts brought us \t{This} and
+\t{These}. Had we been creating test cases for \t{Pred}, we would've
+gotten \t{This} and \t{These} at the stage of enumerating arguments,
+and then there would've been no need for contexts, because \t{Pred}
+already creates the start category \t{S}.
+
+There is a simple way to detect the redundancy: make the generation of
+arguments completely deterministic, e.g. always choose the function
+that is alphabetically first. The downside is that we get a lot of
+redundancy, in the style of ``the good pizza is good''. The problem
+gets more severe when testing functions with more arguments: ``the
+pizza gives the pizza the pizza'' is not only boring but confusing.
+However, if we want to generate sentences for the whole grammar at one 
+go, we can split the generation in two stages: first stage is
+deterministic, where every feminine noun is \t{Pizza}, and we can 
+eliminate redundancies by just eliminating copies of the same
+tree. Then, when we have a set of unique trees, we can substitute
+individual words in them with other words in the same concrete
+category.
+%  ``the house gives the pizza the fountain'' has the same
+% testing property as the version with pizza in every role, but at least
+% it is easier to keep track who does what, and compare the translations
+% of the same tree. 
+
+It would be ideal to generate sentences that make sense,
+such as ``the waitress gives the girl the pizza''. If the grammar is
+purely syntactic, we would need external tools to ensure semantic
+coherence, but if the grammatical categories already include semantic
+distinctions, e.g. limiting the subject and indirect object of
+\emph{give} into humans, that naturally restricts the generated test
+suite.
 
 \section{General features of \pmcfg: unused, equal,
   erased or empty fields}
@@ -570,30 +752,43 @@ billions of trees up to depth 5.
 
 \subsection{Results}
 
-\paragraph{Execution time} We ran all the experiments on a MacBook Air with 1,7 GHz processor and 8 GB RAM.
-For the smaller grammars, all languages took just
-seconds to run. For the resource grammar, Dutch and Estonian finished in
-3--4 minutes.
-However, the Basque resource grammar is noticeably more complex, and
-creating test trees for all functions took several hours. We ran the
-experiment in smaller batches over two days, and noticed a lot of
-variance: functions that handle e.g. noun phrases, adjectives and
-adverbs ran in a few minutes, but a function involving verb phrases
-could take an hour just by itself. 
+\paragraph{Execution time} We ran all the experiments on a MacBook Air
+with 1,7 GHz processor and 8 GB RAM. For Phrasebook, it took just
+seconds to generate the test suite for all languages. For the resource
+grammar, Dutch and Estonian finished in 3--4 minutes. However, the
+Basque resource grammar is noticeably more complex, and creating test
+trees for all functions took several hours. We ran the experiment in
+smaller batches over two days, and noticed a lot of variance:
+functions that handle e.g. noun phrases, adjectives and adverbs ran in
+a few minutes, but a function involving verb phrases could take an
+hour just by itself.
 
+\paragraph{Generated trees}
 
-% \paragraph{Generated trees} 
+We report both total and unique trees: total trees are simply the sum
+of all trees for all functions, and unique trees is the count after
+removing duplicates, as explained in Section~\ref{sec:pruning_all}.
 
-% \todo{write about this in some later version}
-% We believe this has both language typological and grammar engineering
-% implications---there is no way to implement Basque in a way that
-% results in as few example sentences as English, but other resource
-% grammarians have reported significant differences in complexity
-% between implementations---\cite{enache2010} reports a
-% 200-time reduction in the number of concrete rules after changing the
-% implementation of clitics in verb phrases.
+As we can see, the number of trees differs a lot. We believe this has
+both language typological and grammar engineering reasons---there
+is no way to implement Basque in a way that results in as few example
+sentences as English, but other resource grammarians have reported
+significant differences in complexity between implementations: Enache
+et al. \cite{enache2010} report a 200-time reduction in the number of
+concrete rules after changing the implementation of clitics in verb
+phrases.
 
-
+% We experimented with a tiny grammar of 5 syntactic functions for
+% Basque. In one of them, we implemented nominal morphology using
+% inflection tables, and syntactic functions choose the correct one.
+% In another grammar, we implemented nouns as stems, and syntactic
+% functions concatenate suffixes to the stems. The second approach
+% required inherent parameters for nouns, in order to add correct
+% suffixes to each noun. For test case generation, this had the added
+% benefit or curse of implicitly testing morphology as well---in the first
+% approach, there may be a concrete category for animacy or gender, but
+% in the second one, also for phonological features. \todo{Numbers here,
+%   table if enough space}.
 
 
 \paragraph{Finding bugs} 
@@ -601,15 +796,18 @@ We read through the test sentences of the small grammar in all the
 three languages. 
 For Dutch we had a native speaker; for Estonian an intermediate non-native,
 and for Basque, a beginner. None of the three grammars had been tested
-systematically before---\cite{listenmaa_kaljurand2014} report testing
-the morphological paradigms extensively against existing resources,
-and syntactic functions with a treebank of 425 trees.
+systematically before---for the Estonian grammar
+\cite{listenmaa_kaljurand2014}, the morphological paradigms had been
+tested extensively against existing resources, but syntactic functions
+were only tested with a treebank of 425 trees.
 
 We have been developing the tool by testing it on the Dutch resource
-grammar, and during 4 months, we have committed 16 bugfixes in the
-\gf{} main repository. (In the name of honesty, a few of the bugs were
+grammar, and during 6 months, we have committed 22 bugfixes on Dutch
+in the \gf{} main repository. (In the name of honesty, a few of the bugs were
 caused by our earlier ``fixes''---that was before we had implemented
-the comparison against an older version of the grammar!) 
+the comparison against an older version of the grammar!) In addition,
+one of the bugs found in Dutch was also present in other languages, so
+we fixed it in German and English.
 
 The Basque resource grammar is still a work in progress, and the
 test sentences showed serious problems in morphology.
@@ -621,19 +819,21 @@ resources, fix the implementation, and then concentrate on syntax.
 The Phrasebook was implemented using the resource grammar, so the
 same problems apply.
 
-We read through the first 500 sentences from Estonian Phrasebook,
-which took around 20 minutes. We found 3 errors in the inflection of
-individual words (they did not come from the resource lexicon, which
-was tested, but were implemented separately in the grammar); one error
-of type ``Spaniard restaurant'', and one suggestion for a more idiomatic
-construction. As expected, Phrasebook sentences were easier to read,
-and made more sense semantically than sentences from the resource
-grammar. %, which is only supposed to contain syntactic functions. 
-
-
-%\todo{up to line 1977, 11 minutes, finish tomorrow}
-%For the 1314 sentences in Estonian, it took \todo{n} minutes for a
-%fluent non-native speaker to read through and mark suspicious-looking constructs
+We read through all the 1314 sentences from Estonian Phrasebook,
+which took around 45 minutes (not including the time to fix the bugs).
+We found 4 errors in the inflection of individual words---they did not
+come from the resource lexicon, which was tested in
+\cite{listenmaa_kaljurand2014}, but were implemented separately in the
+grammar. In addition, we found one error in forming compound words,
+also coming from the Phrasebook grammar and not from the resource
+library. There was one bug in a syntactic function: using a wrong form
+of nationality when applied to a human and when to an institution,
+along the lines of ``Spaniard restaurant''. As expected, Phrasebook
+sentences were easier to read, and made more sense semantically than
+sentences from the resource grammar. For a similarly sized grammar,
+reading through the whole test set at one go seems like a feasible
+strategy, even when the tool creates examples for a single function at
+a time.
 
 \subsection{Previous work}
 
