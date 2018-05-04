@@ -30,8 +30,28 @@ formalisms that already have millions of lines of code written in
 them. Thus, we want to develop methods that help finding bugs in
 existing software. 
 
-%\paragraph{Test oracles}
+\subsection{Purpose of testing}
 
+\url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}
+
+\begin{quote}
+Level 0:  There is no difference between testing and debugging. \\
+Level 1: The purpose of testing is to show correctness. \\
+Level 2: The purpose of testing is to show that the software does not work. \\
+Level 3: The purpose of testing is not to prove anything specific, but to reduce the risk of using the software. \\
+Level 4: Testing is a mental discipline that helps all IT professionals develop higher-quality software. \\
+\end{quote}
+
+\todo{Maybe include the above classification and say what we want to do?}
+
+\subsection{Testing}
+
+You have a \emph{system}, you give it \emph{input} and 
+\emph{expected output}.
+Then you run the system with your input, and compare \emph{actual
+  output} to expected output.
+
+Some examples different types of tests:
 
 \paragraph{Unit testing}
 
@@ -66,8 +86,19 @@ addition, or mix in some unit tests with specific values.
 
 \todo{Example related to grammar writing?}
 
+\subsection{Coverage criteria}
 
-\paragraph{Symbolic evaluation}
+(Also from the same book)
+
+\begin{itemize}
+\item graph-based (e.g. node coverage)
+\item logic-based (e.g. condition coverage)
+\item input-space-based (e.g. input block coverage)
+\item syntax-based (e.g. mutations)
+\end{itemize}
+
+
+\paragraph{Symbolic evaluation \todo{what is this related to?}}
 
 There are lots of things that can happen during the run of a
 program. What happens if we get a 3 from the user as an input? Does it

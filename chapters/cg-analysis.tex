@@ -26,6 +26,13 @@
 \def\ob#1{\overbrace{ #1 \rule{0pt}{2ex}}}
 \def\cgrule#1{{\ttfamily #1}}
 
+
+\def\newVar{$\text{\em word}'_\textsc{ RD}$}
+\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
+\def\eqdef{\Coloneqq}
+\def\invConds{\text{invalid condition}}
+\def\onlyTrgLeft{\text{only target left}}
+
 \def\defRule{``do not remove the last reading''}
 
 
@@ -34,447 +41,13 @@
 
 \epigraph{\it You should do it because it solves a problem, not because your supervisor has a fetish for SAT.}{Koen Claessen, 2016}
 
-
-\noindent In this chapter, we present CG as a Boolean satisfiability (SAT) problem,
-and describe an implementation using a SAT-solver. 
+\noindent In this chapter, we present CG as a Boolean satisfiability
+(SAT) problem, and use a SAT-solver for detecting conflicting pairs or
+groups of rules.
 This is attractive for several reasons: formal logic is
 well-studied, and serves as an abstract language to reason about the
 properties of CG. Constraint rules encoded in logic capture richer
 dependencies between the tags than standard CG. 
-
-
-Applying logic to reductionist grammars has been explored earlier by Torbjörn Lager and Joakim Nivre \cite{lager98,lager_nivre01}, but there has not been, to our knowledge, a full logic-based CG implementation; at the time, logic programming was too slow to be used for tagging or parsing. 
-Since those works, SAT-solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
-biology---these problems easily match or exceed CG in complexity. 
-In addition, SAT-solving brings us more practical tools, such as maximisation, which enables us to implement a novel conflict resolution method for parallel CG.
-
-
-The content in this chapter is based on ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}.
-As in the original papers, we present a translation of CG rules into logical formulas, and show how to encode it into a SAT-problem.
-This work is implemented as an open-source software SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the high-level library SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is based on MiniSAT \cite{een04sat}.
-We evaluate SAT-CG against the state of the art, VISL CG-3.
-The experimental setup is the same, but we ran the tests again for this thesis: since the writing of  \cite{listenmaa_claessen2015}, we have optimised our program and fixed some bugs; this 
-makes both execution time and F-scores better than we report in the earlier paper. 
-%Likewise, VISL CG-3 has been updated, and executes faster.
-
-
-\section{Related work}
-\label{sec:cg-related-work}
-\input{chapters/cg-sat-relatedwork}
-
-
-\section{CG as a SAT-problem}
-\label{sec:CGSAT}
-
-In this section, we translate the disambiguation of a sentence into a SAT-problem.
-We demonstrate our encoding with an example in Spanish, shown in Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house'). 
-The first word, {\em la}, is ambiguous between a definite article (`the') or an object pronoun (`her'), and the second word, {\em casa}, can be a noun (`house') or a verb (`(he/she) marries').
-The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
-`the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
-However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whole segment into a noun phrase: `the big house'.
-%
-Firstly, we translate input sentences into variables and rules into clauses.
-Secondly, we disambiguate the sentence by asking for a solution. 
-Finally, we consider different ordering schemes and conflict handling.
-
-
-\subsection{Encoding the input}
-
-
-\begin{figure}[h]
-\centering
-\begin{tabular}{p{0.6cm} l | c | c }
-%\multicolumn{2}{c}{}
-   & \textbf{Original~analysis} 
-                & \textbf{Variables}
-                              & \textbf{Default rule} \\ \hline
-\t{"<la>"}   &   &            &  {\small \defRule} \\
-  & \t{"el" 
-  det def f sg}  & $\laDet$   &  \\
-  & \t{"lo" 
-  prn p3 f sg}   & $\laPrn$   &   $\laDet \vee \laPrn$ \\
-\t{"<casa>"} &   &            &   \\
-  & \t{"casa" 
-  n f sg}        & $\casaN$   &  \\
-  & \t{"casar"
-   v pri p3 sg}  & $\casaV$   & $\casaN \vee \casaV$  \\
-\t{"<grande>"} & &            & \\
-  & \t{"grande" 
-  adj mf sg}   & $\grandeAdj$ & $\grandeAdj$
-\end{tabular}
-\caption{Ambiguous segment in Spanish: translation into SAT-variables.}
-\label{fig:laCasaGrande}
-\end{figure}
-
-
-% \begin{figure}[h]
-% \centering
-% \begin{verbatim}
-% "<la>"
-%         "el" det def f sg
-%         "lo" prn p3 f sg
-% "<casa>"
-%         "casa" n f sg
-%         "casar" v pri p3 sg
-% "<grande>"
-%         "grande" adj mf sg
-% \end{verbatim}
-% \caption{Ambiguous segment in Spanish.}
-% \label{fig:laCasaGrande}
-% \end{figure}
-
-\paragraph{Reading}
-The readings of the word forms make a natural basis for variables.
-We translate a combination of a word form and a reading, such as \texttt{"<la>" ["el" det def f sg]}, into a variable $\laDet$, which represents the possibility that \la{} is a determiner. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
-
-\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: 
-\t{SELECT~"casa"~n} means, in effect, ``remove~$\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
-%
-Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}. 
-These disjunctions ensure that at least one variable in each cohort must be true.
-
-
-
-\paragraph{Sentence}
-In order to match conditions against analyses, the input needs to be structured as a sentence: the cohorts must follow each other like in the original input, indexed by their absolute position in the sentence. Thus when we apply \texttt{REMOVE v IF (-1 det)} to the cohort $2 \rightarrow [\casaN , \casaV]$, the condition will match on $\laDet$ in cohort 1.
-
-
-\paragraph{Rule}
-
-Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1 det)}, is a template for forming an implication; when given a concrete sentence, it will pick concrete variables by the following algorithm.
-
-\begin{enumerate}
-\item Match rule against all cohorts
- \begin{itemize}
-    \item[\la:] No target found
-    \item[\casa:] Target found in $\casaV$, match conditions to \la
-      \begin{itemize}
-       \item Condition found in $\laDet$
-       \item Create a clause: $\laDet \Rightarrow \neg \casaV \ $ `if \la{} is a determiner, \casa{} is not a verb'
-      \end{itemize}
-    \item[\grande:] No target found
-  \end{itemize}
-\item Solve with all clauses: 
-  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by the default rule}}, \ 
-      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
-\end{enumerate}
-
-In Appendix~\ref{appendix1}
-, we have included a translation of all the rule types that SAT-CG supports: 
-{\sc remove} and {\sc select} rules, with most of the operations from CG-2 \cite{tapanainen1996}, and a couple of features from VISL CG-3 \cite{vislcg3}.
-% In addition, we include a few features from VISL CG-3 \cite{vislcg3}, in order to parse most modern grammars.
-The following examples in this section do not require reading the appendix.
-
-\subsection{Applying a rule}
-
-%Finally, we have all we need to solve the disambiguation problem. Given the clauses presented in step 2, SAT-solver returns a model---this is our disambiguated sentence. 
-
-Finally, we have all we need to disambiguate the segment: the sentence and the constraints encoded as SAT-variables and clauses. The SAT-solver returns a model that satisfies all the clauses presented in step 2.
-We started off with all the variables unassigned, and required at least one variable 
-in each cohort to be true. In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$.
-We can see with a bare eye that this problem will have a solution; in fact, multiple ones, 
-shown in Figure~\ref{fig:modelsOneRule}.
-The verb analysis is removed in the first two models, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in Models 3--4. 
-We see a third interpretation in Model 5: $\casaV$ may be removed even without 
-the presence of $\laDet$. This is possible, because $\laDet \Rightarrow \neg \casaV$ is only an implication, not an equivalence.
-
-\begin{figure}[h]
-\centering
-$$\begin{array}{ c | c | c | c | c}
-\textbf{Model 1}  & \textbf{Model 2}  & \textbf{Model 3} & \textbf{Model 4} & \textbf{Model 5} \\ \hline
- \laDet   &  \laDet  &         &        &        \\
-          &  \laPrn  & \laPrn  & \laPrn & \laPrn \\
- \casaN   &  \casaN  & \casaN  &        & \casaN \\
-          &          & \casaV  & \casaV &         \\
-\grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj \\
-
-\end{array}$$
-\caption{Possible models for \t{REMOVE v IF (-1 det)}.}
-\label{fig:modelsOneRule}
-\end{figure}
-
-
-It seems like SAT-CG does worse than any standard CG implementation:
-the latter would just remove the verb, not give 5 different interpretations for a single rule.
-In fact, the rule \t{REMOVE v IF (-1 det)} alone behaves exactly like \t{REMOVE det IF (1 v)}.
-%This behaviour is explained by simple properties of logical formulas: 
-%the implication $\laDet \Rightarrow \neg \casaV$ can be expressed as a disjunction 
-%$\neg \laDet \vee \neg \casaV$
-But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN$. The new clause
-%, together with $\laDet \Rightarrow \neg \casaV$, 
-prohibits the combination $\laPrn \ \casaN$, which rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
-
-\begin{figure}[h!]
-\centering
-$$\begin{array}{ c | c }
- \textbf{Model 1}  & \textbf{Model 2}  \\ \hline
- \laDet   &          \\
-          &  \laPrn  \\
- \casaN   &          \\
-          &  \casaV   \\
-\grandeAdj & \grandeAdj \\
-
-\end{array}$$
-\caption{Possible models for \t{REMOVE v IF (-1 det)} and \t{REMOVE n IF (-1 prn)}.}
-\label{fig:modelsTwoRules}
-\end{figure}
-
-
-After two rules, we only have two models: one with $\laDet \ \casaN$ and other with $\laPrn \ \casaV$. 
-%This behaviour corresponds to FSIG: 
-In fact, we have just implemented parallel CG (PCG), introduced in Section~\ref{sec:ordering}: the rules act in parallel, and if the sentence cannot be fully disambiguated, the remaining uncertainty is modelled as a disjunction of all possible combinations of readings.
-In contrast, a sequential CG (SCG) engine applies each rule individually, and it cannot handle disjunction; its only operation is to manipulate lists of readings in a cohort.
-%remove \footnote{In CG-3, we can also add readings to a cohort, and cohorts to a sentence.} readings from a cohort. 
-The SCG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
-
-To finish our PCG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution. 
-We can see another benefit in allowing connections between rules: none of the three rules has targeted \la{}, still it has become unambiguous. 
-
-% Now, this is all very nice, but the present thesis is not called ``Implementing FSIG with a SAT-solver''. 
-% However, understanding the translation of rules to implications is vital to the rest of this thesis, and FSIG provides, arguably, a simpler starting point.
-% In the following sections, we will discuss the concepts of conflict resolution and ordering of the rules. 
-% Firstly, we show two ways to handle conflicts in the parallel setting, 
-% and secondly, we consider an alternative method for a sequential SAT-encoding.
-
-
-% We have given a minimal description of SAT-based implementation. 
-% Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering? 
-
-
-\subsection{Solving conflicts in the parallel scheme}
-\label{sec:parallelScheme}
-
-As described in Section~\ref{sec:ordering}, PCG behaves differently from 
-SCG: the rules are dependent on each other, and the order does not matter.
-This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
-However, ignoring the order means that we miss significant information in the rule set. 
-The truth is that pure PCG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from a Dutch grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in an SCG with strict rule order.
-The grammar will behave as intended also in a heuristic variant of SCG,
-because the rules with a longer context are matched first.
-But in PCG, the rule set will definitely cause a conflict, rendering the whole grammar useless.
-
-
-
-The order clearly demonstrates the course of action: ``If a potential imperative starts a sentence and is followed by an object pronoun, select the imperative reading; then, move on to other rules; finally, if any imperative is still ambiguous, remove the imperative reading.'' 
-Comparing the success of SCG to PCG in practical applications, one may speculate that the sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
-If two rules target the same cohort, the first mentioned gets to apply, and removes the target. When the first rule has acted, the second rule is not even considered, because it would remove the last reading.
-
-
-
-
-\begin{figure}[ht]
-\centering
-   \begin{verbatim}
-SECTION
-
-   # Zeg me
-   SELECT Imp IF (-1 BOS) (1 (prn obj)) ;
-
-   # . Heb je
-   SELECT (vbhaver pres p2 sg) IF (-1 BOS) (1 (prn obj uns p2 mf sg)) ;
-
-   [--]
-
-SECTION
-
-   # remove all imperative readings that have not been explicitly selected
-   REMOVE Imp ;
-
-   # remove informal 2nd person singular reading of "heb"
-   REMOVE (vbhaver pres p2 sg) ;
-
-   \end{verbatim}
-\caption{Example from a Dutch grammar}
-\label{fig:ruleOrder}
-\end{figure}
-
-
-% In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'. 
-Ideally, both ways of grammar writing should yield similar results:
-sequential CG rules are more imperative, and parallel CG rules are more declarative.
-But the problem of conflicts in PCG still remains. 
-In the following, we present two solutions: 
-in the first one, we emulate ordering in choosing which clauses to keep, and in the second one, we maximise the number of rule applications. 
-
-
-
-\paragraph{Emulating order} 
-
-We keep the parallel base, but use ordering as information for solving conflicts.
-This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa}, may still disambiguate \emph{la}, without \emph{la} ever being the target.
-If all the rules play well together, or if the earlier rules do not match any cohorts, 
-then no rule applications need to be removed. 
-However, if we have the grammar from Figure~\ref{fig:ruleOrder}, 
-and imperative is the right analysis for a given context, then the clauses created by 
-\t{REMOVE Imp} would be ignored, in favour of the clauses that are created 
-by \t{SELECT Imp IF (-1 BOS) (1 (prn obj))}.
-
-
-
-% we keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
-%the cohorts are encoded as vectors of variables, and the rules form implications at each application.
-
-In this modified scheme, we introduce the clauses to the SAT-solver one by one, 
-and attempt to solve after each clause. If the SAT-problem after the 50$^{th}$ rule 
-has a solution, we accept all the clauses created by rule 50. %, and commit to them.
-If rule 51 causes a conflict, we prioritise the previous, well-behaving subset of
-50 rules, and discard the conflicting clauses created by rule 51.
-
-If a rule matches multiple cohorts, it creates a separate clause for each instance.
-Thus, it is no problem if the rule causes a conflict in only one cohort---say, we 
-have another potential imperative in the sentence, 
-but there is no other rule which targets its other readings. 
-We can discard only the conflicting instances: we prevent 
-\t{REMOVE Imp} from applying to \emph{Zeg} in the sequence \emph{\# Zeg me}, 
-but it still may apply to other ambiguous tokens with imperative reading.
-
-
-Let us demonstrate the procedure with the Spanish segment {\em la casa grande}.
-Assuming our rule set is $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}$\}$, the revised algorithm goes as follows:
-
-
-\begin{enumerate}
-\item Apply \t{REMOVE v IF (-1 det)}
- \begin{itemize}
-    \item Create a clause: $\laDet \Rightarrow \neg \casaV$
-    \item Solve with previous clauses:
-  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{default rule}}, \ 
-      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
-    \item Solution found: add new clause to the formula
- \end{itemize}
-\item Apply \t{REMOVE v IF (1 adj)} 
- \begin{itemize}
-    \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
-    \item Solve with previous clauses:
-  $\{..., \laDet \Rightarrow \neg \casaV, \ 
-      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}  \}$
-    \item Solution found: add new clause to the formula
- \end{itemize}
-\item Apply \t{REMOVE n}
- \begin{itemize}
-    \item Create a clause: $\neg \casaN$
-    \item Solve with previous clauses:
-      $\{ ..., \laDet \Rightarrow \neg \casaV, \ 
-      \grandeAdj \Rightarrow \neg \casaV, \ 
-      \ob{\neg \casaN}^{\t{REMOVE n}} \}$
-  % $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
-  %     \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
-  %     \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
-    \item No solution: discard clause
- \end{itemize}
-
-\end{enumerate}
-
-With this procedure, we use ordering to decide which clauses to include, and
-then apply all of them in parallel.
-After going through all the rules, the final formula to the SAT-solver will contain the clauses  
-$\laDet$~$\vee$~$\laPrn$, $\casaN$~$\vee$~$\casaV$,  $\grandeAdj$, $\laDet$~$\Rightarrow$~$\neg$~$\casaV$ and $\grandeAdj$~$\Rightarrow$~$\neg$~$\casaV$.
-
-
-
-
-
-\paragraph{Maximisation} 
-
-Solving conflicts means that we have multiple rules that target the same reading, and we must choose which rule to apply.
-Strict ordering substitutes the question with a simpler one: ``which rule comes first in the grammar?''
-Heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
-If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
-
-However, we can ask yet another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?'' 
-%We are not looking at just the initial context, but all the other rules that are going to apply to the same sentence---all of them are going to perform some changes,
-As opposed to heuristic or weighted approaches \cite{voutilainen1994designing,oflazer97votingconstraints}, here all the individual rule applications are 
-equally important; we just want to find the largest possible subset of rule applications that can act together without conflict.
-We will explain the procedure in the following.
-%This way is more similar to resolving conflicts in two-level morphology \todo{cite}
-%This approach is similar to \todo{add the sources that Anssi mentioned!}.
-%With a SAT-solver, we can address the question in the following way.
-%Addressing this is beyond the means of previous FSIG implementations \todo{confirm}, but with a SAT-solver, we can answer this question. 
-
-
-Each rule application to a concrete cohort produces a clause,
-and the whole rule set applied to the whole sentence produces 
-a large formula. In an ideal case, all the rules are well-behaved, 
-and the whole formula is satisfiable. However, if the whole formula 
-is unsatisfiable, we may still ask for an assignment that satisfies 
-the maximum number of the clauses; that is, rule applications. 
-If the grammar is good, we hope that the interaction between 
-the appropriate rules would make a large set of clauses that 
-fit together, and the inapplicable rule would not ``fit in''.
-
-%In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
-% The order-based heuristic in the traditional CG is replaced by a more
-% holistic behaviour: if the rules conflict, discard the one that seems
-% like an outlier.
-
-We keep the Spanish segment and the rule set $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n} $\}$.
-Now the procedure goes as follows:
-
-\begin{enumerate}
-\item Apply \t{REMOVE v IF (-1 det)}
- \begin{itemize}
-    \item Create a clause: $\laDet \Rightarrow \neg \casaV$
- \end{itemize}
-\item Apply \t{REMOVE v IF (1 adj)} 
- \begin{itemize}
-    \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
- \end{itemize}
-\item Apply \t{REMOVE n}
- \begin{itemize}
-    \item Create a clause: $\neg \casaN$
- \end{itemize}
-
-\item Solve with all clauses:
-  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
-      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
-      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
-      \ob{\neg \casaN}^{\t{REMOVE n}} \}$
-\item No solution for all clauses: try to find a solution that satisfies maximally many rule applications; however, default rule cannot be overridden.
-\end{enumerate}
-
-Similarly to the previous, order-based scheme, we create a clause for each 
-instance of the rule application. In the case of a conflict, we can 
-only discard the clauses targeting the offending cohort, but the rule may apply 
-elsewhere in the sentence.
-
-
-The problem of satisfying maximum amount of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
-Whereas SAT is a decision problem, MaxSAT is an optimisation problem.
-However, optimisation can be expressed as a sequence of decision problems:
-first, we compute a solution, then we add a constraint ``the solution must be better than the one just found'', and ask for another one. 
-This process repeats until a better solution cannot be found; then we accept the 
-latest solution.
-
-Now let us define how is one solution ``better'' than other,
-by using a simple trick. 
-%To start, remember that implications can be translated into disjunctions: 
-%$\laDet \Rightarrow \neg\casaV$ is equivalent to $\neg\laDet \vee \neg\casaV$. 
-%We will create a set of helper variables, and associate them to the clauses 
-%with a simple trick.
-For each clause $c$, we create a new variable $v$. 
-Instead of the original clause, we give the SAT-solver 
-an implication $v \Rightarrow c$. 
-This means that if $v$ is false, the SAT-solver can ignore the 
-actual clause $c$---the part that comes from the rule application.
-Conversely, if $v$ is true, then the SAT-solver must handle
-the original clause.
-Then, we ask for a solution where maximally many of these $v$s are true,
-and the question for improvement becomes ``can we make any more of the $v$s true''?
-The method of maximising the variables is described in \cite{een06minisatplus}.
-
-As a alternative to creating a helper variable, we could also separate the variables into 
-contexts and targets, and maximise the set of contexts: for $\laDet \Rightarrow \neg \casaV$
-and $\grandeAdj \Rightarrow \neg \casaV$, maximise the set of $\{\laDet, \grandeAdj\}$.
-This variant would bring back the distinction between targets and contexts; given the design of most actually used CGs, it may be better suited for a practical implementation.
-
-
-%%%%%%%%%
-% TODO: move this section somewhere else, it's redundant here in the middle of a chapter!
-\section{Grammar Analysis}
-
-In the previous sections, we presented a tool.
-In the current section, we will solve a problem.
-
 
 Recall the design principles of CG from Section~\ref{sec:properties}: 
 by design, the grammars are shallow and low-level.
@@ -487,7 +60,6 @@ cases without touching the more general rule: we would simply write
 the narrow rule first (``if noun AND \emph{sailor}''), and introduce
 the general rule (``if noun'') later.
 
-
 However, this design is not without problems. As CGs grow larger, it
 gets harder to keep track of all the rules and their interaction.
 Despite this well-known issue, there has not been a tool that would help 
@@ -497,8 +69,6 @@ restricted to conflicts, but also other features that are helpful
 in the process of writing grammar.
 Given the rules in Figure~\ref{fig:infrules}, a grammar writer may 
 ask the following questions.
-
-
 
 \begin{itemize}
 \item Are all the Portuguese rules distinct? (e.g. \texttt{Para} and \texttt{De} may be included in \texttt{Prep})
@@ -531,22 +101,36 @@ SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} 
 \label{fig:infrules}
 \end{figure}
 
-The chapter follows with introduction of related work: namely, corpus-based methods to aid grammar writing, and automatic optimisation of a complete, human-written grammar. We continue by presenting our solution, along with a working implementation, and finally, evaluate its performance.
-%%%%%%%%%
 
 
-\section{Analysing CGs}
+The content in this chapter is based on ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}.
+As in the original papers, we present a translation of CG rules into logical formulas, and show how to encode it into a SAT-problem.
+This work is implemented as an open-source software SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the high-level library SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is based on MiniSAT \cite{een04sat}.
+We evaluate SAT-CG against the state of the art, VISL CG-3.
+The chapter follows with introduction of related work: namely,
+corpus-based methods to aid grammar writing, and automatic
+optimisation of a complete, human-written grammar. We continue by
+presenting our solution, along with a working implementation, and
+finally, evaluate its performance and effectiveness in finding
+conflicting rules.
+
+\section{Related work}
+\label{sec:cg-related-work}
+\input{chapters/cg-sat-relatedwork}
+
+
+\section{Conflict}
 \label{sec:sectionCGana}
 
-We start by defining a conflict, and present requirements for a solution.
-Then, we introduce a logical translation of sequential CG, corresponding to \cite{lager_nivre01}, and modify it into a SAT-problem about the \emph{original} sentence before applying the rules.
-%this will tell us if it is possible for a senten
-We refine our solution by restricting what kind of sentences we can create.
-The whole method requires only a morphological lexicon, no corpus. 
+% We start by defining a conflict, and present requirements for a solution.
+% Then, we introduce a logical translation of sequential CG, corresponding to \cite{lager_nivre01}, and modify it into a SAT-problem about the \emph{original} sentence before applying the rules.
+% %this will tell us if it is possible for a senten
+% We refine our solution by restricting what kind of sentences we can create.
+% The whole method requires only a morphological lexicon, no corpus.
 
-\paragraph{Conflict}
-
-We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input. 
+We define \emph{conflict} as follows: a list of rules $R$ is in
+conflict with the rule $r$, if applying $R$ makes it impossible to
+apply $r$, regardless of input.
 Some examples of conflicts follow:
 
 \begin{itemize}
@@ -558,12 +142,14 @@ Some examples of conflicts follow:
 tag combination, or contradictory requirements for a context word
 \end{itemize}
 
-This definition is very similar to the concept \emph{bleeding order} in generative phonology \cite{kiparsky1968}; however, since we are talking about an explicit list of 
-human-written rules, we include also rule-internal conflicts in our classification.
-The conflicting (or ``bleeding'') $R$ can be a single rule or a list of rules: for instance, if one rule removes a verb in
-context $C$, and another in context $\neg C$, together these rules
-remove a verb in all possible cases, disabling any future rule that
-targets verbs.
+This definition is very similar to the concept \emph{bleeding order}
+in generative phonology \cite{kiparsky1968}; however, since we are
+talking about an explicit list of human-written rules, we include also
+rule-internal conflicts in our classification. The conflicting (or
+``bleeding'') $R$ can be a single rule or a list of rules: for
+instance, if one rule removes a verb in context $C$, and another in
+context $\neg C$, together these rules remove a verb in all possible
+cases, disabling any future rule that targets verbs.
 
 % While rule-internal conflicts can be detected by simpler means, taking
 % care of rule interaction requires a {\em semantic} rather than a {\em
@@ -574,7 +160,7 @@ targets verbs.
 % not fire, we have again two options: either its conditions are not met,
 % or its target is the only remaining analysis. 
 
-\paragraph{Solution}
+%\paragraph{Solution}
 
 How do we find out if a rule $r$ can act? 
 We could apply the grammar to a large corpus and count the number of times 
@@ -593,42 +179,112 @@ In a nutshell, we are going to show the absence of a conflict by trying to creat
 a sequence where $r$ can apply after $R$; conversely, we detect a conflict by 
 showing that such sequence cannot be created.
 
+\section{CG as a SAT-problem}
+\label{sec:CGSAT}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\def\newVar{$\text{\em word}'_\textsc{ RD}$}
-\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
-\def\eqdef{\Coloneqq}
-\def\invConds{\text{invalid condition}}
-\def\onlyTrgLeft{\text{only target left}}
-
-\subsection{From disambiguation to generation}
-
-\paragraph{SAT-encoding of sequential CG}
-\label{sec:orderedScheme}
-
-In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
-rule application takes effect immediately, is irreversible\footnote{As pointed out by Eckhard Bick, VISL CG-3 allows reference to deleted readings. In principle, this would not be an obstacle for our implementation, because no variables are removed.}, and only allows changes in the target.
-We restrict ourselves to the operations on morphological disambiguation, and only {\sc select} and {\sc remove} rules. 
-The following encoding does not support dependency relations, nor rule types which add readings or cohorts. 
-%In order to support the full feature set of  most likely, we will have to modify our encoding to fully support the features of VISL CG-3.
-
-%There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule. 
+In this section, we translate the disambiguation of a sentence into a SAT-problem.
+We demonstrate our encoding with an example in Spanish, shown in
+Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house').
+The first word, {\em la}, is ambiguous between a definite article
+(`the') or an object pronoun (`her'), and the second word, {\em casa},
+can be a noun (`house') or a verb (`(he/she) marries'). 
+The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
+`the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
+However, the unambiguous adjective, {\em grande} (`big'),
+disambiguates the whole segment into a noun phrase: `the big house'.
 %
+%In this section, we disambiguate the sentence by solving all the
+%constraints in parallel, and in Section~X, we show a sequential encoding.
+\todo{Decide whether to show the parallel scheme or only sequential. \\
+
+Firstly, we translate input sentences into variables and rules into clauses.
+Secondly, we disambiguate the sentence by asking for a solution. 
+Finally, we consider different ordering schemes and conflict handling.}
+
+\subsection{Encoding the input}
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{p{0.6cm} l | c | c }
+%\multicolumn{2}{c}{}
+   & \textbf{Original~analysis} 
+                & \textbf{Variables}
+                              & \textbf{Default rule} \\ \hline
+\t{"<la>"}   &   &            &  {\small \defRule} \\
+  & \t{"el" 
+  det def f sg}  & $\laDet$   &  \\
+  & \t{"lo" 
+  prn p3 f sg}   & $\laPrn$   &   $\laDet \vee \laPrn$ \\
+\t{"<casa>"} &   &            &   \\
+  & \t{"casa" 
+  n f sg}        & $\casaN$   &  \\
+  & \t{"casar"
+   v pri p3 sg}  & $\casaV$   & $\casaN \vee \casaV$  \\
+\t{"<grande>"} & &            & \\
+  & \t{"grande" 
+  adj mf sg}   & $\grandeAdj$ & $\grandeAdj$
+\end{tabular}
+\caption{Ambiguous segment in Spanish: translation into SAT-variables.}
+\label{fig:laCasaGrande}
+\end{figure}
+
+
+\paragraph{Reading}
+The readings of the word forms make a natural basis for variables.
+We translate a combination of a word form and a reading, such as \texttt{"<la>" ["el" det def f sg]}, into a variable $\laDet$, which represents the possibility that \la{} is a determiner. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
+
+\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: 
+\t{SELECT~"casa"~n} means, in effect, ``remove~$\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
 %
-%
-%We need to model the state of the sentence after each rule application. 
-%Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
-% This is done in \cite{lager_nivre01}: they present CG as a composition of predicates, 
-% numbered by the rules in the grammar. Each predicate is applied to the result of the previous 
-% applications, and the ``do not remove last reading'' property is checked each time.
-%
-%
-Last time, we only used ordering as a way to choose the which rules to apply.
-But there was no state: all clauses operated in parallel, on the same variables. 
-Now, we need a new variable for a reading every time when it is targeted; 
-that is, when its state potentially changes.
+Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}. 
+These disjunctions ensure that at least one variable in each cohort must be true.
+
+\paragraph{Sentence}
+In order to match conditions against analyses, the input needs to be
+structured as a sentence: the cohorts must follow each other like in
+the original input, indexed by their absolute position in the
+sentence. Thus when we apply \texttt{REMOVE v IF (-1 det)} to the
+cohort 2 $\casa{} \rightarrow \{\casaN , \casaV\}$, the condition will match on
+$\laDet$ in cohort 1 \la.
+
+\paragraph{Rule}
+
+Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1 det)}, is a template for forming an implication; when given a concrete sentence, it will pick concrete variables by the following algorithm.
+
+\begin{enumerate}
+\item Match rule against all cohorts
+ \begin{itemize}
+    \item[\la:] No target found
+    \item[\casa:] Target found in $\casaV$, match conditions to \la
+      \begin{itemize}
+       \item Condition found in $\laDet$
+       \item Create a clause: $\laDet \Rightarrow \neg \casaV \ $ `if \la{} is a determiner, \casa{} is not a verb'
+      \end{itemize}
+    \item[\grande:] No target found
+  \end{itemize}
+\item Solve with all clauses: 
+  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by the default rule}}, \ 
+      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
+\end{enumerate}
+
+\noindent In Appendix~\ref{appendix1}, we have included a translation
+of all the rule types that SAT-CG supports: {\sc remove} and {\sc
+  select} rules, with most of the operations from CG-2
+\cite{tapanainen1996}, and a couple of features from VISL CG-3
+\cite{vislcg3}. The following examples in this section do not require
+reading the appendix.
+
+\paragraph{Parallel execution scheme}
+In our previous work~\cite{listenmaa_claessen2015,listenmaa2016lic}, we
+presented a parallel scheme, along with different heuristics of
+solving rule conflicts. However, given that almost all major CG
+compiles apply rules sequentially, we develop a sequential scheme for the
+grammar analysis tool.
+
+\paragraph{Sequential execution scheme}
+
+As a first step, we need a new variable for a reading every time when
+it is targeted; that is, when its state potentially changes.
 %But now, we assume that each variable starts off as true: 
 %all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
 As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
@@ -644,7 +300,7 @@ The new variable \newVar{} is true iff
 \end{tabular}
 \end{figure}
 
-\noindent We keep the same example sequence from Chapter~\ref{chapterCGSAT}, {\em la casa grande}. In the following, we apply the rule \t{REMOVE v IF (-1 det)} to it.
+\noindent In the following, we apply the rule \t{REMOVE v IF (-1 det)} to {\em la casa grande}.
 
 $$\begin{array}{r l}
 \text{New variable } \casa{}'_\v 
@@ -653,10 +309,11 @@ $$\begin{array}{r l}
         \vee  \ob{(\casaV \wedge \neg \casaN) }^{\onlyTrgLeft} ) \\
 \end{array}$$
 
-
-\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. 
-For example, if we apply two rules which target verbs and one which targets pronouns, 
-the sentence vector will look like the following. 
+\noindent After the application, we replace each \oldVar with \newVar
+in the sentence vector; those variables that are not touched by the
+rule, will be carried over to the next round unchanged. For example,
+if we apply two rules which target verbs and one which targets
+pronouns, the sentence vector will look like the following.
 
 
 %\begin{figure}
@@ -669,7 +326,26 @@ $$\begin{array}{r @{~\rightarrow~} l}
 %\end{figure}
 
 
-\paragraph{Symbolic sentence}
+% \paragraph{Where is the SAT?}
+
+% The careful reader who has read their background literature may
+% protest that we have just reinvented the wheel: Lager and Nivre
+% \cite{lager_nivre01} present CG as a composition of predicates, where
+% each predicate is applied to the result of the previous
+% applications. Indeed, if our variables $\laDet, \dots,  \grandeAdj$
+% start off as true, then we get exactly the encoding used in
+% \cite{lager_nivre01}. However, that would be a trivial
+% SAT-problem---there is no search involved, just manipulation of
+% Boolean expressions in a completely deterministic way. Furthermore, we
+% do not want yet another CG engine, but a tool that detects
+% conflicts. For these reasons, all our variables start off unassigned.
+
+% We return to finish our description in Section~\todo{okay this is
+%   probably a bad order to present things, do something about it}.
+
+
+\subsection{From disambiguation to generation}
+
 
 We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
 %If there is a pronoun in its conditions, and the rule which targest
@@ -681,15 +357,17 @@ This option would not make an interesting SAT-problem:
 there is no search involved, just manipulation of Boolean expressions in a completely deterministic way.
 All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em True} \wedge \neg \text{\em True})$. 
 
-%There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
-
 
 %However, when all the readings start off as unassigned, the SAT-problem becomes 
 %``Which readings were true before any rule applications?''
 In order to turn this problem into a SAT-problem, we will have the readings start off
 unassigned. All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
 For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser. 
-But our task now is to {\em generate} the original sentence, which will pass through the rules. 
+But our task now is to {\em generate} the original sentence, which
+will pass through the rules. 
+
+\paragraph{Symbolic sentence}
+
 Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}. 
 Every cohort, called {\em symbolic word}, contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
 
@@ -879,9 +557,6 @@ Since the clauses formed by {\em r1} and {\em r3} get access to different variab
 % A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
 
 
-
-
-
 \subsection{Towards realistic language}
 
 \paragraph{Creating realistic readings}
@@ -990,7 +665,7 @@ However, it could be that past participles (pp) only ever get confused with adje
  By removing the adjective reading, the first rule selects the past participle reading, making it an instance of ``$r$ selects something in a context, $r'$ removes~it''. 
 The additional constraints will prevent the SAT-solver from creating an ambiguity outside the allowed classes, and such a case would be caught as a conflict.
 
-\subsection{Use cases}
+\section{Use cases}
 
 In the beginning of this chapter, we gave a list of questions, regarding the rules in Figure~\ref{fig:infrules}. After describing our implementation, we return to these questions, and explain how a SAT-solver can answer them. 
 Section~\ref{sec:eval} shows the evaluation of the conflict detection, which we tried out for three grammars of different sizes. 
