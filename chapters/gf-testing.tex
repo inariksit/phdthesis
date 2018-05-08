@@ -9,14 +9,14 @@
 \def\hpsg{\textsc{hpsg}}
 \def\feat{\textsc{feat}}
 \newcommand{\tts}[1]{{\tt #1}}
-\newcommand{\quality}[1]{${\tt AP_{#1}}$}
-\newcommand{\kind}[1]{${\tt CN_{#1}}$}
-\newcommand{\very}[1]{${\tt Very_{#1}}$}
-\newcommand{\comment}{${\tt S}$}
-\newcommand{\modFun}[2]{${\tt Mod_{#1\times#2}}$}
-\newcommand{\predFun}[3]{${\tt Pred_{#1\times#2\times#3}}$}
-\newcommand{\itemSpa}[2]{${\tt NP_{#1\times#2}}$}
-\newcommand{\itemEng}[1]{${\tt NP_{#1}}$}
+% \newcommand{\quality}[1]{${\tt AP_{#1}}$}
+% \newcommand{\kind}[1]{${\tt CN_{#1}}$}
+% \newcommand{\very}[1]{${\tt Very_{#1}}$}
+% \newcommand{\comment}{${\tt S}$}
+% \newcommand{\modFun}[2]{${\tt Mod_{#1\times#2}}$}
+% \newcommand{\predFun}[3]{${\tt Pred_{#1\times#2\times#3}}$}
+% \newcommand{\itemSpa}[2]{${\tt NP_{#1\times#2}}$}
+% \newcommand{\itemEng}[1]{${\tt NP_{#1}}$}
 
 \chapter{Test Case Generation for Grammatical Framework}
 \label{chapterGFtest}
@@ -69,7 +69,13 @@ method works for any formalism that is at most as expressive as
 \cite{joshi1975tag}, and several variants of Categorial Grammar
 \cite{deGroote2004,steedman1988ccg}.
 
+The following sections assume knowledge of \gf{} and \pmcfg{}
+formalisms; we direct the reader to Section~\ref{sec:gf-intro} for a
+general \gf{} introduction, and \ref{sec:PMCFG} especially for
+translation of a \gf{} grammar into \pmcfg{}.
+
 \section{Grammar}
+
 
 \begin{figure}[h]
   \centering
@@ -272,82 +278,13 @@ paradigms. But there are easier methods to test for such bugs---our
 goal is to test the more abstract, syntactic phenomena with as few
 trees as possible.  
 
-\section{PMCFG}
-\label{sec:PMCFG}
-
-\gf{} grammars are compiled into parallel multiple context-free
-grammars (\pmcfg), which are processed by our tool. Here we explain
-three key features for the test suite generation.
-
-\subsection{Concrete categories}
-
-For each category in the original grammar, the \gf{} compiler
-introduces a new \emph{concrete category} in the \pmcfg{} for each combination of
-inherent parameters.  
-These concrete categories can be linearized to strings or vectors of
-strings. The start category (\t{S} in the Foods grammar) is in
-general a single string, but intermediate categories may have to keep
-several options open. 
-
-Consider the categories \t{NP}, \t{CN} and \t{AP} in the
-Spanish concrete syntax. Firstly, \t{NP} has inherent number
-and gender, so it compiles into four concrete categories:
-\itemSpa{sg}{masc}, \itemSpa{sg}{fem}, \itemSpa{pl}{masc} and
-\itemSpa{pl}{fem}, each of them containing one string. Secondly,
-\t{CN} has an inherent gender and variable number, so it compiles into
-two concrete categories: \kind{masc} and \kind{fem}, each of them a
-vector of two strings (singular and plural). Finally, \t{AP} needs to
-agree in number and gender with its head, but it has its position as
-an inherent feature.  Thus \t{AP} compiles into two concrete
-categories: \quality{pre} and \quality{post}, each of them a vector of
-four strings.
-% ({\stackanchor{\tt \small pl}{\tt \small sg}}
-%  $\times$ {\stackanchor{\tt \small masc}{\tt \small fem}}).
-
-\subsection{Concrete functions}
-Just like categories, each syntactic function from the original
-grammar turns into multiple syntactic functions into the
-\pmcfg{}---one for each combination of parameters of its arguments.
-
-\begin{itemize}
-\setlength\itemsep{0em}
-\item[--] \modFun{pre}{fem~~} \t{:} \quality{pre~} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
-\item[--]  \modFun{post}{fem~} \t{:} \quality{post} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
-\item[--]  \modFun{pre}{masc~~}\t{:} \quality{pre~} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
-\item[--] \modFun{post}{masc} \t{:} \quality{post} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
-\end{itemize}
-
-
-\subsection{Coercions}
-\label{sec:Coercions}
-As we have seen, \t{AP} in Spanish compiles into \quality{pre} and
-\quality{post}. However, the difference of position is meaningful only when the
-adjective is modifying the noun: ``la \emph{buena} pizza'' vs. ``la pizza
-\emph{vegana}''. But when we use an adjective in a predicative position, both
-classes of adjectives behave the same: ``la pizza es \emph{buena}''
-and ``la pizza es \emph{vegana}''. As an optimization strategy, the
-grammar creates a {\it coercion}: both \quality{pre} and \quality{post}
-may be treated as \quality{*} when the distinction doesn't matter. 
-Furthermore, the function \t{Pred : NP $\rightarrow$ AP $\rightarrow$ S} uses
-the coerced category \quality{*} as its second argument, and thus
-expands only into 4 variants, despite there being 8 combinations of
-\t{NP}$\times$\t{AP}.
-
-\begin{itemize}
-\setlength\itemsep{0em}
-\item[--] \predFun{sg}{fem}{*~} \t{:} \itemSpa{sg}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\item[--]  \predFun{pl}{fem}{*~} \t{:} \itemSpa{pl}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\item[--]  \predFun{sg}{masc}{*} \t{:} \itemSpa{sg}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\item[--] \predFun{pl}{masc}{*} \t{:} \itemSpa{pl}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\end{itemize}
-
 
 \section{Generating the test suite}
 \label{sec:testing}
 
 We now have all building blocks for creating a representative and
 minimal set of test cases.
-In the previous section, we saw how a single abstract category
+In Section~\ref{sec:PMCFG}, we saw how a single abstract category
 compiles into multiple concrete categories, depending on the
 combinations of parameters. This compilation step can dramatically
 increase the number of categories of the grammar, but it also removes

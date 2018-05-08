@@ -1,50 +1,72 @@
 \section{Software testing and verification}
 \label{sec:testing-intro} 
 
-
 \begin{itemize}
 \item All software has bugs.
 \item Grammars are software.
 \end{itemize}
 
-An intelligent reader may complete the syllogism.
+The intelligent reader may complete the syllogism.
 
-We can approach the elimination of bugs in two ways: find them by
-catching concrete examples, or build safeguards into the program that
-make it more difficult for bugs to occur in the first place.
+We can approach the elimination of bugs in two ways: find them
+by devising clever tests, or build safeguards into the program that
+make it more difficult for bugs to occur in the first place. The
+latter approach is more of a concern for developers of new programming
+languages---the language can impose more checks and constraints on the
+programmer, and thus make it harder to write buggy code. However, we
+approach the problem from particular, existing grammar formalisms that
+already have millions of lines of code written in them. Thus, we want
+to develop methods that help finding bugs in existing software.
 
-Simplified model of programming languages: if it's easy to write
-programs in a language, it's easy to write buggy programs. There are
-languages that impose more checks and constraints, and thus make it
-harder to write buggy code, but the overall effect is that it's harder
-to write \emph{any} code. Some argue that the combination ``easy to
-write correct code, hard to write buggy code'' exists, but the actual
-language to achieve this varies from person to person.\footnote{There
-  is more of a consensus of the existence of programming languages
-  that are hard to write correct but easy to write buggy.} 
+% Simplified model of programming languages: if it's easy to write
+% programs in a language, it's easy to write buggy programs. There are
+% languages that impose more checks and constraints, and thus make it
+% harder to write buggy code, but the overall effect is that it's harder
+% to write \emph{any} code. Some argue that the combination ``easy to
+% write correct code, hard to write buggy code'' exists, but the actual
+% language to achieve this varies from person to person.\footnote{There
+%   is more of a consensus of the existence of programming languages
+%   that are hard to write correct but easy to write buggy.} 
 
-However interesting these points are from programming language
-research point of view, they are way beside the point for this
-thesis. We approach the problem from particular, existing grammar
-formalisms that already have millions of lines of code written in
-them. Thus, we want to develop methods that help finding bugs in
-existing software. 
+% However interesting these points are from programming language
+% research point of view, they are way beside the point for this
+% thesis. We approach the problem from particular, existing grammar
+% formalisms that already have millions of lines of code written in
+% them. Thus, we want to develop methods that help finding bugs in
+% existing software. 
 
 \subsection{Purpose of testing}
 
-\url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}
+Ammann and Offutt \todo{cite \url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}}
+define different levels of enlightment for software engineers.
 
 \begin{quote}
 Level 0:  There is no difference between testing and debugging. \\
 Level 1: The purpose of testing is to show correctness. \\
 Level 2: The purpose of testing is to show that the software does not work. \\
 Level 3: The purpose of testing is not to prove anything specific, but to reduce the risk of using the software. \\
-Level 4: Testing is a mental discipline that helps all IT professionals develop higher-quality software. \\
+Level 4: Testing is a mental discipline that helps all IT professionals develop higher-quality software.
 \end{quote}
 
-\todo{Maybe include the above classification and say what we want to do?}
+
 
 \subsection{Testing}
+
+More quotes from the Intro to Software testing book:
+
+\begin{quote}
+Testing: Evaluating software by observing its execution \\
+Test Failure: Execution of a test that results in a software failure \\
+Debugging: The process of finding a fault given a failure \\
+\\
+Not all inputs will “trigger” a fault into causing a failure
+\\
+\\
+Reachability :The location or locations in the program that contain the fault must be reached \\
+Infection :The state of the program must be incorrect \\
+Propagation :The infected state must cause some output or  final state of the program to be incorrect \\
+Reveal :The tester must observe part of the incorrect portion of the program state \\
+\end{quote}
 
 You have a \emph{system}, you give it \emph{input} and 
 \emph{expected output}.
@@ -87,6 +109,12 @@ addition, or mix in some unit tests with specific values.
 \todo{Example related to grammar writing?}
 
 \subsection{Coverage criteria}
+
+When have we tested enough? Consider a function that takes two numbers
+and returns their average. There are \todo{big number} of possible
+combinations of arguments---not a feasible task to be
+exhaustive, search space is way too big. Thus we have smarter coverage
+criteria: structured ways of covering the search space.
 
 (Also from the same book)
 
