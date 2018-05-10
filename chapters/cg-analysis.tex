@@ -558,13 +558,14 @@ Since the clauses formed by {\em r1} and {\em r3} get access to different variab
 
 
 \subsection{Towards realistic language}
+\label{sec:realistic_language}
 
 \paragraph{Creating realistic readings}
 \label{sec:realistic_readings}
 
 Earlier we have shown an example with 5 readings (``det def'', ``noun sg'', ...). In a realistic case, we operate between hundreds and thousands of possible readings. 
 %This is very much dependent on language: the simplest language we tested was Dutch, with 336 readings. The most complex was 
-In order to find the set of readings, we expand a morphological lexicon\footnote{We used the lexica from Apertium, found in \url{https://svn.code.sf.net/p/apertium/svn/languages/}.}, ignore the word forms and lemmas, and take all distinct analyses. 
+In order to find the set of readings, we expand a morphological lexicon\footnote{We used the lexica from Apertium, found in \url{https://github.com/apertium/apertium-languages}.}, ignore the word forms and lemmas, and take all distinct analyses. 
 However, many grammar rules target a specific lemma or word form.
 A simple solution is to retain the lemmas and word forms only for those entries where it is specified in the grammar, and otherwise leave them out. For example, the Dutch grammar contains the following rule:
 
@@ -587,9 +588,23 @@ Thus we add special entries for these: in addition to the anonymous
 ``det pos mfn pl'' reading, we add ``\emph{zijn} det pos mfn pl''. 
 The lemma is treated as just another tag.
 
- However, for languages with more readings, this may not be feasible. For instance, Spanish has a high number of readings, not only because of many inflectional forms, but because it is possible to add 1--2 clitics to the verb forms.
-The number of verb readings without clitics is 213, and with clitics 1572.
-With the previously mentioned approach, we would have to duplicate 1572 entries for each verb lemma. Even ignoring the clitics, each verb lemma still adds 213 new readings.
+However, for languages with more readings, this turned out not be
+feasible. When applying the tool for Basque \cite{listenmaa2017basque}, 
+we implemented an alternative scheme, with variables split in three
+layers: word forms, lexemes and morphological tags. A reading in a
+symbolic sentence had to have at least morphological tags, and
+optional lexical tags. The method made it possible to run the tool for
+Basque, but the resulting readings were mostly nonsensical---imagine a
+situation in English where a reading combines the word form
+\t{"<going>"} with the lexeme \t{"dog"} and claims that it is a plural
+possessive pronoun. Nevertheless, the method worked for detecting
+conflicts between rules. (Of course, it may have missed some that
+would have been found by saner readings!) We return to the experiment
+on Basque in Section~\todo{write about it}.
+
+% For instance, Spanish has a high number of readings, not only because of many inflectional forms, but because it is possible to add 1--2 clitics to the verb forms.
+% The number of verb readings without clitics is 213, and with clitics 1572.
+% With the previously mentioned approach, we would have to duplicate 1572 entries for each verb lemma. Even ignoring the clitics, each verb lemma still adds 213 new readings.
 
 The readings in a grammar can be underspecified: for example, the rule
 \texttt{REMOVE (verb sg) IF (-1 det)} gives us ``verb sg'' and ``det''.
@@ -711,13 +726,21 @@ We can initialise two symbolic sentences, then run the original rule and the rew
 \section{Evaluation}
 \label{sec:eval}
 
-We tested three grammars to find conflicting rules: 
-Dutch\footnote{\scriptsize{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}, revision number r65111}},
-with 59 rules; 
-Spanish\footnote{\scriptsize{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}}, revision number r66938},
-with 279 rules; and 
-Finnish\footnote{\scriptsize{\url{https://github.com/flammie/apertium-fin/raw/master/apertium-fin.fin.rlx}}},
-with 1185 rules. We left out \textsc{map}, \textsc{substitute} and other rule
+We tested two grammars with the setup described in
+Section~\ref{sec:realistic_language}: readings as combinations of
+lexical and morphological tags, and ambiguity class constraints in place.
+These grammars were very small:
+Dutch\footnote{\scriptsize{\url{https://github.com/apertium/apertium-nld/blob/master/apertium-nld.nld.rlx}, commit d13fdaa}},
+with 59 rules and 
+Spanish\footnote{\scriptsize{\url{https://github.com/apertium/apertium-spa/blob/master/apertium-spa.spa.rlx}, commit 1d4f290d}},
+with 279 rules.
+
+In addition, we applied the method to two larger grammars and complex languages:
+Finnish\footnote{\scriptsize{\url{https://github.com/flammie/apertium-fin/blob/master/apertium-fin.fin.rlx}, commit 49866f3b}},
+with 1185 rules, and
+Basque\footnote{\scriptsize{\url{https://github.com/inariksit/cgclean/blob/master/data/gramatika4.4.1_lem.rlx}, commit 793e00d1}}.
+
+We left out \textsc{map}, \textsc{substitute} and other rule
 types introduced in CG-3, and only tested \textsc{remove} and \textsc{select} rules.
 The results for Dutch and Spanish are shown in Table~\ref{table:res},
 and the results for Finnish in Table~\ref{table:resFin}.
