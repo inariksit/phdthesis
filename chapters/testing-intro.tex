@@ -88,6 +88,12 @@ Whenever a program is changed or updated, the collection of unit tests
 are run again, to make sure that the change has not broken something
 that previously worked.
 
+\paragraph{Model-based testing}
+
+Look at model and use it to generate tests
+
+We look at a grammar and generate tests
+
 \paragraph{Property-based testing}
 
 The weakness of unit testing is that it only tests cases that the
@@ -106,24 +112,7 @@ e.g. multiplication, or some function $f(x, y) = 0$ for any $x$
 and $y$. To remedy this, we would need to test other properties of
 addition, or mix in some unit tests with specific values.
 
-\todo{Example related to grammar writing?}
-
-\subsection{Coverage criteria}
-
-When have we tested enough? Consider a function that takes two numbers
-and returns their average. There are \todo{big number} of possible
-combinations of arguments---not a feasible task to be
-exhaustive, search space is way too big. Thus we have smarter coverage
-criteria: structured ways of covering the search space.
-
-(Also from the same book)
-
-\begin{itemize}
-\item graph-based (e.g. node coverage)
-\item logic-based (e.g. condition coverage)
-\item input-space-based (e.g. input block coverage)
-\item syntax-based (e.g. mutations)
-\end{itemize}
+\todo{Example related to grammar writing: does it contain empty string?}
 
 
 \paragraph{Symbolic evaluation \todo{what is this related to?}}
@@ -133,6 +122,18 @@ program. What happens if we get a 3 from the user as an input? Does it
 crash if it's 29th of February and we get a 3 from the user?  Symbolic 
 evaluation simulates the run of a program with different inputs, using 
 a constraint solver to find out where certain combinations lead into.
+
+
+\subsection{Coverage criteria}
+
+When have we tested enough? Consider a function that takes two numbers
+and returns their average. There are \todo{big number} of possible
+combinations of arguments---not a feasible task to be
+exhaustive, search space is way too big. Thus we have smarter coverage
+criteria: structured ways of covering the search space.
+
+
+
 
 
 \input{chapters/sat-intro}

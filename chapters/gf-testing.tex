@@ -443,15 +443,80 @@ Section~\ref{sec:Coercions}). Instead of generating redundant test
 cases for the predicative, we use the coercions in the grammar to
 detect when something is redundant.
 
+So how do coercions help us pruning? Here's the algorithm:
 
-So how do coercions help us pruning? Luckily I use overly long
-variable names, so you can just read the source code:
+We generate test cases and contexts for them, as usual.
+For instance, we have tested \t{AdjCN}, and we get the following:
 
 \begin{verbatim}
-  (commonCtxs,reducedTrees) = case coercionsThatCoverAllGoalcats of
-    [] -> ([],[])        -- no coercion covers all goal cats -> all contexts are relevant
-    cs -> (cCtxs,rTrees) -- all goal cats coerce into same -> find redundant contexts
+(AdjCN : AdjPre  -> CNFem -> CNFem, [Attributive, Predicative])
+(AdjCN : AdjPost -> CNFem -> CNFem, [Attributive, Predicative])
+(AdjCN : AdjPre  -> CNMasc -> CNMasc, [Attributive, Predicative])
+(AdjCN : AdjPost -> CNMasc -> CNMasc, [Attributive, Predicative])
+
+Table XXX
 \end{verbatim}
+
+In addition, we look into the coercions in the grammar, and keep those
+that coerce at least 2 of the concrete categories in our list. (That
+is, CNFem and CNMasc).
+
+\begin{verbatim}
+Coercion_999 -> [CNFem,CNMasc]
+\end{verbatim}
+
+Now we find the list of contexts for the \emph{coercion}: e.g.
+
+\begin{verbatim}
+(Coercion_999, [Predicative,SomethingIrrelevant,EvenMoreIrrelevant])
+\end{verbatim}
+
+Out of these contexts, we keep those that are somewhere in the list of
+the contexts for \t{AdjCN}. There is one context that matches, namely
+\t{Predicative}. Now we have got our pruning candidates:
+
+\begin{verbatim}
+(Coercion\_999, [CNFem,CNMasc], [Predicative])
+\end{verbatim}
+
+i.e. ``Coercion 999 covers the categories CNFem and CNMasc, in the
+context Predicative''. This means that it is redundant to include
+Predicative for \emph{all} the test cases in Table XXX. But on the
+other hand, the context Attributive never appears in the contexts for
+Coercion 999, thus we know that it is important to repeat it for all
+the items in Table XXX.
+
+We linearise the following sentences:
+
+\begin{verbatim}
+Attributive (AdjCN : AdjPre  -> CNFem -> CNFem)
+Attributive (AdjCN : AdjPost -> CNFem -> CNFem)
+Attributive (AdjCN : AdjPre  -> CNMasc -> CNMasc)
+Attributive (AdjCN : AdjPost -> CNMasc -> CNMasc)
+Predicative (<Pick any of the following trees!>)
+
+Table YYY
+\end{verbatim}
+
+Sometimes it happens that one test case only has contexts that other
+trees could as well fill. Then it may happen that the test case is
+never even shown to the user. Consider the following initial table:
+
+\begin{verbatim}
+(Foo : X1 -> Y2 -> Z3, [1,2,3])
+(Foo : X4 -> Y5 -> Z6, [1,2])
+
+Table ZZZ
+\end{verbatim}
+
+with coercions \t{(Coercion\_999, [Z3,Z6], [1,2])}. In this case, two
+things happen:
+\begin{itemize}
+\item Z6's contexts are fully contained in Z3's,\emph{and} 
+\item Z3 and Z6 coerce to the same category Coercion\_999.
+\end{itemize}
+This is why we can safely ignore all of the test case \t{Foo : X4 ->
+  Y5 -> Z6} and only use \t{Foo : X1 -> Y2 -> Z3}.
 
 \subsection{Pruning the trees to test the whole grammar}
 \label{sec:pruning_all}
