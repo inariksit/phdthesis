@@ -71,8 +71,10 @@ Given the rules in Figure~\ref{fig:infrules}, a grammar writer may
 ask the following questions.
 
 \begin{itemize}
-\item Are all the Portuguese rules distinct? (e.g. \texttt{Para} and \texttt{De} may be included in \texttt{Prep})
-\item Could two or more rules be merged? (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
+\item Are all the Portuguese rules distinct? (e.g. \texttt{Para}
+      and \texttt{De} may be included in \texttt{Prep})
+\item Could two or more rules be merged?
+      (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
 \item What is the best order for the rules?
 \item Can the Finnish rule on the left be rewritten in the form shown on the right?
 \item Generate an example sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
@@ -103,16 +105,27 @@ SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} 
 
 
 
-The content in this chapter is based on ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}.
-As in the original papers, we present a translation of CG rules into logical formulas, and show how to encode it into a SAT-problem.
-This work is implemented as an open-source software SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the high-level library SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is based on MiniSAT \cite{een04sat}.
-We evaluate SAT-CG against the state of the art, VISL CG-3.
-The chapter follows with introduction of related work: namely,
-corpus-based methods to aid grammar writing, and automatic
-optimisation of a complete, human-written grammar. We continue by
-presenting our solution, along with a working implementation, and
-finally, evaluate its performance and effectiveness in finding
-conflicting rules.
+The content in this chapter is based on ``Constraint Grammar as a SAT
+problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint
+Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. Appendix
+II is based on ``Exploring the Expressivity of Constraint
+Grammar'' \cite{kokke2017expressivity}---a side effect following the
+creation of \emph{symbolic sentences}, it allowed us to pose the question
+``what if CG was a generative formalism?''
+
+As in the original papers, we present a translation of CG rules into
+logical formulas, and show how to encode it into a SAT-problem.  This
+work is implemented as an open-source software
+SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the
+high-level library
+SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is
+based on MiniSAT \cite{een04sat}.  We evaluate SAT-CG against the
+state of the art, VISL CG-3.  The chapter follows with introduction of
+related work: namely, corpus-based methods to aid grammar writing, and
+automatic optimisation of a complete, human-written grammar. We
+continue by presenting our solution, along with a working
+implementation, and finally, evaluate its performance and
+effectiveness in finding conflicting rules.
 
 \section{Related work}
 \label{sec:cg-related-work}
@@ -281,15 +294,18 @@ solving rule conflicts. However, given that almost all major CG
 compiles apply rules sequentially, we develop a sequential scheme for the
 grammar analysis tool.
 
+
 \paragraph{Sequential execution scheme}
 
 As a first step, we need a new variable for a reading every time when
 it is targeted; that is, when its state potentially changes.
-%But now, we assume that each variable starts off as true: 
-%all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
-As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
-At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
-The new variable \newVar{} is true iff 
+%But now, we assume that each variable starts off as true: all those
+%readings are true at the ``first round'', and the goal is to make
+%more and more readings false, as more rules are applied.
+As before, a sentence is a vector of cohorts, which is, in turn, a
+vector of variables representing the readings of the current cohort.
+At each rule application, we create a new variable \newVar{} for each
+targeted reading \oldVar{}.  The new variable \newVar{} is true iff
 
 \begin{figure}[h]
 \begin{tabular}{l l}
@@ -347,15 +363,23 @@ $$\begin{array}{r @{~\rightarrow~} l}
 \subsection{From disambiguation to generation}
 
 
-We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
+We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$
+and the conditions at the time. Similarly, $\casa{}''_\v$ will be
+created based on $\casa{}'_\v$.
 %If there is a pronoun in its conditions, and the rule which targest
 But what is the status of the variables in the beginning?
 %We have not specified yet what is the status of the variables in the beginning. 
-In fact, that decision makes a crucial difference. 
-If all variables start off as true, then we have, in effect, reimplemented the logical encoding by Lager and Nivre \cite{lager_nivre01}. 
-This option would not make an interesting SAT-problem: 
-there is no search involved, just manipulation of Boolean expressions in a completely deterministic way.
-All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em True} \wedge \neg \text{\em True})$. 
+In fact, that decision makes a crucial difference.  If all variables
+start off as true, then we have, in effect, reimplemented the logical
+encoding by Lager and Nivre \cite{lager_nivre01}.  This option would
+not make an interesting SAT-problem: there is no search involved, just
+manipulation of Boolean expressions in a completely deterministic way.
+All the new variables, created from the rule applications, would get
+their value immediately:
+$\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg
+(\casaV \wedge \neg \casaN)$ just translates into
+$\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em
+True} \wedge \neg \text{\em True})$.
 
 
 %However, when all the readings start off as unassigned, the SAT-problem becomes 
@@ -368,24 +392,47 @@ will pass through the rules.
 
 \paragraph{Symbolic sentence}
 
-Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}. 
-Every cohort, called {\em symbolic word}, contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
+Here comes the most important modification: we will apply the rules to
+something we call {\em symbolic sentence}.  Every cohort, called {\em
+symbolic word}, contains every possible reading, and rule applications
+are responsible for shaping the sentence into a concrete one.
 
-% Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
-% Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}
+% Our analysis operates on a rule $r$, which is preceded by a list of
+% rules $R$, and is concerned with answering the following question:
+% ``Does there exist an input sentence $S$ that can trigger rule $r$,
+% even after passing all rules $R$ that came before $r$?''  Instead of
+% concrete sentences from a corpus, we apply rules on {\em symbolic
+% sentences}
 
-Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too; we will explain this in more detail in the coming sections. In our experiments, the number of readings has ranged from about 300 to about 9000. 
+Before we can do any analysis any of the rules, we need to find out
+what the set of all possible readings of a word is. We can do this by
+extracting this information from a lexicon, but there are other ways
+too; we will explain this in more detail in the coming sections. In
+our experiments, the number of readings has ranged from about 300 to
+about 9000.
+
 
 \paragraph{Width of a rule}
-Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule \t{REMOVE v IF (-1 det)}, the width is 2.
+Furthermore, when we analyse a rule $r$, we need to decide the {\em
+width} $w(r)$ of the rule $r$: How many different words should there
+be in a sentence that can trigger $r$? Most often, $w(r)$ can be
+easily determined by looking at how far away the rule context indexes
+in the sentence relative to the target. For example, in the
+rule \t{REMOVE v IF (-1 det)}, the width is 2.
 
-If the context contains a \t{*} (context word can be anywhere),
-we need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis; this indeed happened in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the implementation, we tried for each \t{*} multiple variants of the sentence. 
-For example, given the rule \t{REMOVE~v~IF~(-1*~det)}, 
-we tried first a sentence of width 2; if there was a conflict, we tried width 3, and then 4. For a rule with multiple \t{*}s, we create combinations in the range of $\pm$ 2 symbolic words for each \t{*}-condition; 
-in addition, we need to specify where the target is in the symbolic sentence. 
-For instance, the rule \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested 
-with the following combinations, where C means condition and T means target:
+If the context contains a \t{*} (context word can be anywhere), we
+need to make an approximation of $w(r)$, which may result in false
+positives or negatives later on in the analysis; this indeed happened
+in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the
+implementation, we tried for each \t{*} multiple variants of the
+sentence.  For example, given the rule \t{REMOVE~v~IF~(-1*~det)}, we
+tried first a sentence of width 2; if there was a conflict, we tried
+width 3, and then 4. For a rule with multiple \t{*}s, we create
+combinations in the range of $\pm$ 2 symbolic words for
+each \t{*}-condition; in addition, we need to specify where the target
+is in the symbolic sentence.  For instance, the
+rule \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested with the
+following combinations, where C means condition and T means target:
 % in a range of 3--7 symbolic words: both \t{1*} and \t{-1*} can be interpreted as \t{}. 
 % For the rule with two \t{*}s, we tried all the following combinations: 
 (C,T,C); 
@@ -677,6 +724,7 @@ However, it could be that past participles (pp) only ever get confused with adje
  By removing the adjective reading, the first rule selects the past participle reading, making it an instance of ``$r$ selects something in a context, $r'$ removes~it''. 
 The additional constraints will prevent the SAT-solver from creating an ambiguity outside the allowed classes, and such a case would be caught as a conflict.
 
+
 \section{Use cases}
 
 In the beginning of this chapter, we gave a list of questions, regarding the rules in Figure~\ref{fig:infrules}. After describing our implementation, we return to these questions, and explain how a SAT-solver can answer them. 
@@ -717,6 +765,7 @@ As a variant, we may be interested in the placement of just one rule in the sequ
 
 \paragraph{Does a rewritten rule correspond to the original?}
 We can initialise two symbolic sentences, then run the original rule and the rewritten rule, and check if they allow the same models. 
+
 
 
 
@@ -1092,6 +1141,9 @@ there is no way to trigger the second rule without placing a comma in position -
 \subsection{Basque} 
 \label{sec:basqueEval}
 
+After the original experiment was done on the previously introduced three languages, we got a chance to test a Basque grammar \cite{aduriz1997euscg}. The size of the tag set was even larger than for Finnish, and made it impossible to test the whole grammar.
+In the following, we describe adaptations we tested, as well as some preliminary results.
+
 
 \begin{figure*}[t]
 \centering
@@ -1106,6 +1158,8 @@ there is no way to trigger the second rule without placing a comma in position -
 \label{fig:basqueSorted}
 \end{figure*}
 
+
+
 \paragraph{Group by target, sort by conditions}
 After the simple checks and transformations, we group the rules by their targets, and sort them by the complexity of their contextual texts. For instance, the 5 rules that target ADOIN will be in the order shown in Figure~\ref{fig:sorted}: from fewest to most contextual tests, and in the case of same number of tests, preferring those with fewer tagsets.
 
@@ -1115,14 +1169,7 @@ After the simple checks and transformations, we group the rules by their targets
 When the rules are grouped and sorted as described, we run SAT-based 
 symbolic evaluation \cite{listenmaa_claessen2016} on each group. 
 If it says that some rule with a more complex condition is superfluous 
-because of another rule earlier in the list\footnote{For example, the latter rule of the following is superfluous: \texttt{REMOVE Verb IF (-1 Det)} and \texttt{REMOVE Verb IF (-1 Det) (1 Verb)}}, 
-then that is a hint for the grammar writer: why are there two similar 
-rules in the grammar, if the simpler one would do?
-At the moment of writing, we are still looking for better ways to adapt the conflict check
-to the Basque grammar; due to the large number of tags, we cannot use
-the system straight out of the box.
-We describe the adaptations we have done so far in Section~\ref{analysis},
-as well as some preliminary results.
+because of another rule earlier in the list then that is a hint for the grammar writer: why are there two similar  rules in the grammar, if the simpler one would do?
 
 \paragraph{Manual cleanup}
 \label{manual} 
@@ -1161,21 +1208,12 @@ better fixed by updating the obsolete tag, instead of the whole rule being
 demoted or killed. To test our assumptions, we tune both the original
 grammar and the human-cleaned versions, continuously comparing the new
 versions to the original.
-% it is also possible that this error type is not very 
-%common, and the majority of the bad rules were bad already when they were born.
-
-% We are also interested to find out whether there are some rules or rule types 
-% that are consistently missed by one of the tuning methods. 
-
-%We compare the performance of the grammar in its original state, and
-%the cleaned up version. 
 
 \paragraph{Final order}
 
 After checking the conflicts and redundancies of the grammar, 
 we will proceed to reorder the grammar by defining the sections
 of the grammar corresponding to each level of granularity of the Basque tag set.
-
 
 
 \paragraph{Evaluation}
@@ -1292,7 +1330,7 @@ Among the first rules we tested, it has found a few redundancies, such as the fo
 Our second strategy is to reduce the rules themselves: from a rule such as \texttt{SELECT Verb + Sg IF (1 Noun + Sg)},
 we just remove all tags higher than level 2, resulting in
 \texttt{SELECT Verb IF (1 Noun)}. We also keep all lexical tags
-intact, but unlike in \newcite{listenmaa_claessen2016}, we allow them to attach to any morphological tags; this may
+intact, but unlike in \cite{listenmaa_claessen2016}, we allow them to attach to any morphological tags; this may
 lead to further false negatives, but reduces the size of the SAT-problem.
 This setup analyses the whole grammar, in the given order, in approximately 1 hour. 
 With the reduced rules, the program would not find the redundancy described earlier, because
@@ -1357,7 +1395,8 @@ maintenance, and other for running.
 
 \subsection{Performance} 
 The running time of the grammars ranges from seconds to hours. 
-Note that the times in the Finnish table are not entirely comparable with each other: we were forced to run the tests in smaller batches, and it is possible that there are different overheads, unrelated to the size of the SAT-problem, from testing 50 or 500 rules at a time. 
+Note that the times in the Finnish table are not entirely comparable with each other: we were forced to run the tests in smaller batches, and it is possible that there are different overheads, unrelated to the size of the SAT-problem, from testing 50 or 500 rules at a time.
+Furthermore, the experiments on Basque were done a year after the original three, with yet different setups.
 Despite the inaccuracies, we can see that increasing the number of readings 
 and adding the ambiguity class constraints
 slow the program down significantly.
@@ -1371,7 +1410,6 @@ and while the overhead may be acceptable when checking the full grammar,
 it is hardly so when analysing just a handful of rules. 
 We are working on an option to store and reuse the ambiguity class constraints.
 
-\todo{Include results from the Basque experiment}
 
 \section{Conclusions and future work}
 
