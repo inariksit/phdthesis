@@ -6,14 +6,50 @@
 \def\pl{\textsc{Pl}}
 \def\detdef{\textsc{DetDef}}
 
+\def\la{\text{\em la}}
+\def\casa{\text{\em casa}}
+\def\grande{\text{\em grande}}
+\def\wOne{\text{\em w1}}
+\def\wTwo{\text{\em w2}}
 
-\chapter{Analysing Constraint Grammar}
-\label{chapterCGana}
+\def\det{{\text{\sc Det}}}
+\def\prn{{\text{\sc  Prn}}}
+\def\n{{\text{\sc N}}}
+\def\v{{\text{\sc V}}}
+\def\adj{{\text{\sc Adj}}}
+
+\def\laDet{\la_\det}
+\def\laPrn{\la_\prn}
+\def\casaN{\casa_\n}
+\def\casaV{\casa_\v}
+\def\grandeAdj{\grande_\adj}
+
+\def\t#1{\texttt{#1}}
+\def\ob#1{\overbrace{ #1 \rule{0pt}{2ex}}}
+\def\cgrule#1{{\ttfamily #1}}
 
 
-In the previous chapter, we presented a tool.
-In the current chapter, we will solve a problem.
+\def\newVar{$\text{\em word}'_\textsc{ RD}$}
+\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
+\def\eqdef{\Coloneqq}
+\def\invConds{\text{invalid condition}}
+\def\onlyTrgLeft{\text{only target left}}
 
+\def\defRule{``do not remove the last reading''}
+
+
+\chapter{Symbolic Evaluation of Constraint Grammar}
+\label{chapterCGSAT}
+
+\epigraph{\it You should do it because it solves a problem, not because your supervisor has a fetish for SAT.}{Koen Claessen, 2016}
+
+\noindent In this chapter, we present CG as a Boolean satisfiability
+(SAT) problem, and use a SAT-solver for detecting conflicting pairs or
+groups of rules.
+This is attractive for several reasons: formal logic is
+well-studied, and serves as an abstract language to reason about the
+properties of CG. Constraint rules encoded in logic capture richer
+dependencies between the tags than standard CG. 
 
 Recall the design principles of CG from Section~\ref{sec:properties}: 
 by design, the grammars are shallow and low-level.
@@ -26,7 +62,6 @@ cases without touching the more general rule: we would simply write
 the narrow rule first (``if noun AND \emph{sailor}''), and introduce
 the general rule (``if noun'') later.
 
-
 However, this design is not without problems. As CGs grow larger, it
 gets harder to keep track of all the rules and their interaction.
 Despite this well-known issue, there has not been a tool that would help 
@@ -37,11 +72,11 @@ in the process of writing grammar.
 Given the rules in Figure~\ref{fig:infrules}, a grammar writer may 
 ask the following questions.
 
-
-
 \begin{itemize}
-\item Are all the Portuguese rules distinct? (e.g. \texttt{Para} and \texttt{De} may be included in \texttt{Prep})
-\item Could two or more rules be merged? (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
+\item Are all the Portuguese rules distinct? (e.g. \texttt{Para}
+      and \texttt{De} may be included in \texttt{Prep})
+\item Could two or more rules be merged?
+      (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
 \item What is the best order for the rules?
 \item Can the Finnish rule on the left be rewritten in the form shown on the right?
 \item Generate an example sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
@@ -70,88 +105,47 @@ SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} 
 \label{fig:infrules}
 \end{figure}
 
-The chapter follows with introduction of related work: namely,
-corpus-based methods to aid grammar writing, and automatic
-optimisation of a complete, human-written grammar. We continue by
-presenting our solution, along with a working implementation, and
-finally, evaluate its performance.
 
-We include also two later developments. Section~\ref{sec:basqueEval},
-based on the article ``Cleaning up the Basque grammar: a work in
-progress'' \cite{listenmaa2017basque}, describes a practical
-application of our tool and collaboration with CG writers.
-Section~\ref{sec:expressivity} presents the main ideas from
-``Exploring the Expressivity of Constraint Grammar''
-\cite{kokke2017expressivity}---a side effect following the creation of
-\emph{symbolic sentences}, it allowed us to pose the question ``what
-if CG was a generative formalism?''
+
+The content in this chapter is based on ``Constraint Grammar as a SAT
+problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint
+Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. Appendix
+II is based on ``Exploring the Expressivity of Constraint
+Grammar'' \cite{kokke2017expressivity}---a side effect following the
+creation of \emph{symbolic sentences}, it allowed us to pose the question
+``what if CG was a generative formalism?''
+
+As in the original papers, we present a translation of CG rules into
+logical formulas, and show how to encode it into a SAT-problem.  This
+work is implemented as an open-source software
+SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the
+high-level library
+SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is
+based on MiniSAT \cite{een04sat}.  We evaluate SAT-CG against the
+state of the art, VISL CG-3.  The chapter follows with introduction of
+related work: namely, corpus-based methods to aid grammar writing, and
+automatic optimisation of a complete, human-written grammar. We
+continue by presenting our solution, along with a working
+implementation, and finally, evaluate its performance and
+effectiveness in finding conflicting rules.
 
 \section{Related work}
-\label{sec:CGanaRelated}
-
-There has been previous research on corpus-based methods in manual
-grammar development \cite{voutilainen2004}, as well as optimisation of
-hand-written CGs~\cite{bick2013tuning}.  In addition, there is a large
-body of research on automatically inducing rules,
-e.g. \cite{inducing_cg1996,lindberg_eineborg98ilp,lager01transformation,asfrent14}.
-However, since our work is aimed to aid the process of hand-crafting
-rules, we omit those works from our discussion. Due to adding
-Section~\ref{sec:expressivity}, we also include work addressing the
-  expressivity and complexity of CG.
+\label{sec:cg-related-work}
+\input{chapters/cg-sat-relatedwork}
 
 
-\paragraph{Corpus-based methods in manual grammar development}
+\section{Conflict}
+\label{sec:conflict}
 
-Hand-annotated corpora are commonly used in the development of CGs, because they give immediate feedback whether a new rule increases or decreases accuracy.
-% This helps the grammar writer to arrange the rules in appropriate sections, with safest and most effective rules coming first.
-% However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve.
-Atro Voutilainen \cite{voutilainen2004} gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
-For a language with no free or tagset-compatible corpus available, Reynolds and Tyers \cite{tyers_reynolds2015} describe a method where they apply their rules to unannotated Wikipedia texts and pick 100 examples at random for manual check.
+% We start by defining a conflict, and present requirements for a solution.
+% Then, we introduce a logical translation of sequential CG, corresponding to \cite{lager_nivre01}, and modify it into a SAT-problem about the \emph{original} sentence before applying the rules.
+% %this will tell us if it is possible for a senten
+% We refine our solution by restricting what kind of sentences we can create.
+% The whole method requires only a morphological lexicon, no corpus.
 
-CG rules are usually arranged in sections, and run in the following manner. 
-First apply rules from section 1, and repeat until nothing changes in the text. Then apply rules from sections 1--2, then 1--3 and so on, until the set includes all rules.
-The best strategy is to place the safest and most effective rules in the first sections,
-so that they make way for the following, more heuristic and less safe rules to act on.
-A representative corpus is arguably the best way to get concrete numbers---how many times a rule applied and how often it was correct---and to arrange the rules in sections based on that feedback.
-
-Voutilainen \cite{voutilainen2004} states that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
-This figure is very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms.
-However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve; neither does it guarantee a coherent whole of rules. 
-While the coverage information is easy to obtain from a corpus, there is no tool that would aid grammar writers in including wide coverage of different linguistic phenomena.
-
-
-\paragraph{Automatic optimisation of hand-written grammars }
-
-The corpus-based method can tell the effect of each single rule at their place in the rule sequence, and leaves the grammar writer to make changes in the grammar.
-As a step further, Eckhard Bick \cite{bick2013tuning} modifies the grammar automatically, by trying
-out different rule orders and altering the contexts of the rules. 
-Bick reports error reduction of 7--15\% compared to the original grammars.
-This is a valuable tool, especially for grammars that are so big that it's hard to keep track manually. A program can try all combinations whereas trying to make sense out of a huge set of rules would be hard for humans.
-As a downside, the grammar writer will likely not know why exactly does the tuned grammar perform better.
-
-
-\paragraph{Expressivity and complexity of CG}
-Tapanainen \cite{tapanainen1999phd} gives an account of the expressivity of
-the contextual tests for 4 different constraint formalisms, including CG. 
-In addition, parsing complexity can be easily defined for a given variant and 
-implementation of CG; see for instance Nemeskey \cite{nemeskey14}.
-Yli-Jyrä \cite{ylijyra2017} relates CG to early formal language theory, and
-provides an independent proof of non-monotonic\footnote{A monotonic
-  variant of CG may only remove readings from cohorts, whereas a non-monotonic
-  variant may add readings or cohorts.} CG being Turing-complete.
-
-\section{Analysing CGs}
-\label{sec:sectionCGana}
-
-We start by defining a conflict, and present requirements for a solution.
-Then, we introduce a logical translation of sequential CG, corresponding to \cite{lager_nivre01}, and modify it into a SAT-problem about the \emph{original} sentence before applying the rules.
-%this will tell us if it is possible for a senten
-We refine our solution by restricting what kind of sentences we can create.
-The whole method requires only a morphological lexicon, no corpus. 
-
-\paragraph{Conflict}
-
-We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input. 
+We define \emph{conflict} as follows: a list of rules $R$ is in
+conflict with the rule $r$, if applying $R$ makes it impossible to
+apply $r$, regardless of input.
 Some examples of conflicts follow:
 
 \begin{itemize}
@@ -163,12 +157,18 @@ Some examples of conflicts follow:
 tag combination, or contradictory requirements for a context word
 \end{itemize}
 
-This definition is very similar to the concept \emph{bleeding order} in generative phonology \cite{kiparsky1968}; however, since we are talking about an explicit list of 
-human-written rules, we include also rule-internal conflicts in our classification.
-The conflicting (or ``bleeding'') $R$ can be a single rule or a list of rules: for instance, if one rule removes a verb in
-context $C$, and another in context $\neg C$, together these rules
-remove a verb in all possible cases, disabling any future rule that
-targets verbs.
+This definition is very similar to the concept \emph{bleeding order}
+in generative phonology \cite{kiparsky1968}; however, since we are
+talking about an explicit list of human-written rules, we include also
+rule-internal conflicts in our classification. The conflicting (or
+``bleeding'') $R$ can be a single rule or a list of rules: for
+instance, if one rule removes a verb in context $C$, and another in
+context $\neg C$, together these rules remove a verb in all possible
+cases, disabling any future rule that targets verbs.
+We are going to show the absence of a conflict by trying to create 
+a sequence where $r$ can apply after $R$; conversely, we detect a conflict by 
+showing that such sequence cannot be created.
+
 
 % While rule-internal conflicts can be detected by simpler means, taking
 % care of rule interaction requires a {\em semantic} rather than a {\em
@@ -179,66 +179,143 @@ targets verbs.
 % not fire, we have again two options: either its conditions are not met,
 % or its target is the only remaining analysis. 
 
-\paragraph{Solution}
+%\paragraph{Solution}
 
-How do we find out if a rule $r$ can act? 
-We could apply the grammar to a large corpus and count the number of times 
-each rule fires; if some rule never fires, we can suspect there is something wrong 
-in the rule itself, or in the interaction with previous rules. 
-But it can also be that $r$ just targets a rare phenomenon, and there was no sentence in the corpus that would trigger it.
+% How do we find out if a rule $r$ can act? 
+% We could apply the grammar to a large corpus and count the number of times 
+% each rule fires; if some rule never fires, we can suspect there is something wrong 
+% in the rule itself, or in the interaction with previous rules. 
+% But it can also be that $r$ just targets a rare phenomenon, and there was no sentence in the corpus that would trigger it.
 
-Of course, tagged corpora are extremely useful for many questions in CG analysis.
-A corpus can show which rules are the most used, or which rules give false analyses. 
-Luckily, we have already methods for finding such statistics---the question 
-about conflicts is orthogonal to those, and the solution needs to address only 
-the part about conflicts, not about rules being frequent or accurate.
-Therefore, we can take a more artificial approach. % generate our own sentences.
-Remember the definition of conflict: ``applying $R$ makes it impossible to apply $r$ \emph{regardless of input}''.
-In a nutshell, we are going to show the absence of a conflict by trying to create 
-a sequence where $r$ can apply after $R$; conversely, we detect a conflict by 
-showing that such sequence cannot be created.
+% Of course, tagged corpora are extremely useful for many questions in CG analysis.
+% A corpus can show which rules are the most used, or which rules give false analyses. 
+% Luckily, we have already methods for finding such statistics---the question 
+% about conflicts is orthogonal to those, and the solution needs to address only 
+% the part about conflicts, not about rules being frequent or accurate.
+% Therefore, we can take a more artificial approach. % generate our own sentences.
+% Remember the definition of conflict: ``applying $R$ makes it
+% impossible to apply $r$ \emph{regardless of input}''.
 
+% In a nutshell, we are going to show the absence of a conflict by trying to create 
+% a sequence where $r$ can apply after $R$; conversely, we detect a conflict by 
+% showing that such sequence cannot be created.
 
+\section{CG as a SAT-problem}
+\label{sec:CGSAT}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\def\newVar{$\text{\em word}'_\textsc{ RD}$}
-\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
-\def\eqdef{\Coloneqq}
-\def\invConds{\text{invalid condition}}
-\def\onlyTrgLeft{\text{only target left}}
-
-\subsection{From disambiguation to generation}
-
-\paragraph{SAT-encoding of sequential CG}
-\label{sec:orderedScheme}
-
-In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
-rule application takes effect immediately, is irreversible\footnote{As pointed out by Eckhard Bick, VISL CG-3 allows reference to deleted readings. In principle, this would not be an obstacle for our implementation, because no variables are removed.}, and only allows changes in the target.
-We restrict ourselves to the operations on morphological disambiguation, and only {\sc select} and {\sc remove} rules. 
-The following encoding does not support dependency relations, nor rule types which add readings or cohorts. 
-%In order to support the full feature set of  most likely, we will have to modify our encoding to fully support the features of VISL CG-3.
-
-%There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule. 
+In this section, we translate the disambiguation of a sentence into a SAT-problem.
+We demonstrate our encoding with an example in Spanish, shown in
+Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house').
+The first word, {\em la}, is ambiguous between a definite article
+(`the') or an object pronoun (`her'), and the second word, {\em casa},
+can be a noun (`house') or a verb (`(he/she) marries'). 
+The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
+`the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
+However, the unambiguous adjective, {\em grande} (`big'),
+disambiguates the whole segment into a noun phrase: `the big house'.
 %
+%In this section, we disambiguate the sentence by solving all the
+%constraints in parallel, and in Section~X, we show a sequential
+%encoding.
+
+% \todo{Decide whether to show the parallel scheme or only sequential. \\
+
+% Firstly, we translate input sentences into variables and rules into clauses.
+% Secondly, we disambiguate the sentence by asking for a solution. 
+% Finally, we consider different ordering schemes and conflict handling.}
+
+\subsection{Encoding the input}
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{p{0.6cm} l | c | c }
+%\multicolumn{2}{c}{}
+   & \textbf{Original~analysis} 
+                & \textbf{Variables}
+                              & \textbf{Default rule} \\ \hline
+\t{"<la>"}   &   &            &  {\small \defRule} \\
+  & \t{"el" 
+  det def f sg}  & $\laDet$   &  \\
+  & \t{"lo" 
+  prn p3 f sg}   & $\laPrn$   &   $\laDet \vee \laPrn$ \\
+\t{"<casa>"} &   &            &   \\
+  & \t{"casa" 
+  n f sg}        & $\casaN$   &  \\
+  & \t{"casar"
+   v pri p3 sg}  & $\casaV$   & $\casaN \vee \casaV$  \\
+\t{"<grande>"} & &            & \\
+  & \t{"grande" 
+  adj mf sg}   & $\grandeAdj$ & $\grandeAdj$
+\end{tabular}
+\caption{Ambiguous segment in Spanish: translation into SAT-variables.}
+\label{fig:laCasaGrande}
+\end{figure}
+
+
+\paragraph{Reading}
+The readings of the word forms make a natural basis for variables.
+We translate a combination of a word form and a reading, such as \texttt{"<la>" ["el" det def f sg]}, into a variable $\laDet$, which represents the possibility that \la{} is a determiner. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
+
+\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: 
+\t{SELECT~"casa"~n} means, in effect, ``remove~$\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
 %
-%
-%We need to model the state of the sentence after each rule application. 
-%Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
-% This is done in \cite{lager_nivre01}: they present CG as a composition of predicates, 
-% numbered by the rules in the grammar. Each predicate is applied to the result of the previous 
-% applications, and the ``do not remove last reading'' property is checked each time.
-%
-%
-Last time, we only used ordering as a way to choose the which rules to apply.
-But there was no state: all clauses operated in parallel, on the same variables. 
-Now, we need a new variable for a reading every time when it is targeted; 
-that is, when its state potentially changes.
-%But now, we assume that each variable starts off as true: 
-%all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
-As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
-At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
-The new variable \newVar{} is true iff 
+Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}. 
+These disjunctions ensure that at least one variable in each cohort must be true.
+
+\paragraph{Sentence}
+In order to match conditions against analyses, the input needs to be
+structured as a sentence: the cohorts must follow each other like in
+the original input, indexed by their absolute position in the
+sentence. Thus when we apply \texttt{REMOVE v IF (-1 det)} to the
+cohort 2 $\casa{} \rightarrow \{\casaN , \casaV\}$, the condition will match on
+$\laDet$ in cohort 1 \la.
+
+\paragraph{Rule}
+
+Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1 det)}, is a template for forming an implication; when given a concrete sentence, it will pick concrete variables by the following algorithm.
+
+\begin{enumerate}
+\item Match rule against all cohorts
+ \begin{itemize}
+    \item[\la:] No target found
+    \item[\casa:] Target found in $\casaV$, match conditions to \la
+      \begin{itemize}
+       \item Condition found in $\laDet$
+       \item Create a clause: $\laDet \Rightarrow \neg \casaV \ $ `if \la{} is a determiner, \casa{} is not a verb'
+      \end{itemize}
+    \item[\grande:] No target found
+  \end{itemize}
+\item Solve with all clauses: 
+  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by the default rule}}, \ 
+      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
+\end{enumerate}
+
+\noindent In Appendix~\ref{appendix1}, we have included a translation
+of all the rule types that SAT-CG supports: {\sc remove} and {\sc
+  select} rules, with most of the operations from CG-2
+\cite{tapanainen1996}, and a couple of features from VISL CG-3
+\cite{vislcg3}. The following examples in this section do not require
+reading the appendix.
+
+\paragraph{Parallel execution scheme}
+In our previous work~\cite{listenmaa_claessen2015,listenmaa2016lic}, we
+presented a parallel scheme, along with different heuristics of
+solving rule conflicts. However, given that almost all major CG
+compiles apply rules sequentially, we develop a sequential scheme for the
+grammar analysis tool.
+
+
+\paragraph{Sequential execution scheme}
+
+As a first step, we need a new variable for a reading every time when
+it is targeted; that is, when its state potentially changes.
+%But now, we assume that each variable starts off as true: all those
+%readings are true at the ``first round'', and the goal is to make
+%more and more readings false, as more rules are applied.
+As before, a sentence is a vector of cohorts, which is, in turn, a
+vector of variables representing the readings of the current cohort.
+At each rule application, we create a new variable \newVar{} for each
+targeted reading \oldVar{}.  The new variable \newVar{} is true iff
 
 \begin{figure}[h]
 \begin{tabular}{l l}
@@ -249,7 +326,7 @@ The new variable \newVar{} is true iff
 \end{tabular}
 \end{figure}
 
-\noindent We keep the same example sequence from Chapter~\ref{chapterCGSAT}, {\em la casa grande}. In the following, we apply the rule \t{REMOVE v IF (-1 det)} to it.
+\noindent In the following, we apply the rule \t{REMOVE v IF (-1 det)} to {\em la casa grande}.
 
 $$\begin{array}{r l}
 \text{New variable } \casa{}'_\v 
@@ -258,10 +335,11 @@ $$\begin{array}{r l}
         \vee  \ob{(\casaV \wedge \neg \casaN) }^{\onlyTrgLeft} ) \\
 \end{array}$$
 
-
-\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. 
-For example, if we apply two rules which target verbs and one which targets pronouns, 
-the sentence vector will look like the following. 
+\noindent After the application, we replace each \oldVar with \newVar
+in the sentence vector; those variables that are not touched by the
+rule, will be carried over to the next round unchanged. For example,
+if we apply two rules which target verbs and one which targets
+pronouns, the sentence vector will look like the following.
 
 
 %\begin{figure}
@@ -274,19 +352,44 @@ $$\begin{array}{r @{~\rightarrow~} l}
 %\end{figure}
 
 
-\paragraph{Symbolic sentence}
+% \paragraph{Where is the SAT?}
 
-We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
+% The careful reader who has read their background literature may
+% protest that we have just reinvented the wheel: Lager and Nivre
+% \cite{lager_nivre01} present CG as a composition of predicates, where
+% each predicate is applied to the result of the previous
+% applications. Indeed, if our variables $\laDet, \dots,  \grandeAdj$
+% start off as true, then we get exactly the encoding used in
+% \cite{lager_nivre01}. However, that would be a trivial
+% SAT-problem---there is no search involved, just manipulation of
+% Boolean expressions in a completely deterministic way. Furthermore, we
+% do not want yet another CG engine, but a tool that detects
+% conflicts. For these reasons, all our variables start off unassigned.
+
+% We return to finish our description in Section~\todo{okay this is
+%   probably a bad order to present things, do something about it}.
+
+
+\subsection{From disambiguation to generation}
+
+
+We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$
+and the conditions at the time. Similarly, $\casa{}''_\v$ will be
+created based on $\casa{}'_\v$.
 %If there is a pronoun in its conditions, and the rule which targest
 But what is the status of the variables in the beginning?
 %We have not specified yet what is the status of the variables in the beginning. 
-In fact, that decision makes a crucial difference. 
-If all variables start off as true, then we have, in effect, reimplemented the logical encoding by Lager and Nivre \cite{lager_nivre01}. 
-This option would not make an interesting SAT-problem: 
-there is no search involved, just manipulation of Boolean expressions in a completely deterministic way.
-All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em True} \wedge \neg \text{\em True})$. 
-
-%There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
+In fact, that decision makes a crucial difference.  If all variables
+start off as true, then we have, in effect, reimplemented the logical
+encoding by Lager and Nivre \cite{lager_nivre01}.  This option would
+not make an interesting SAT-problem: there is no search involved, just
+manipulation of Boolean expressions in a completely deterministic way.
+All the new variables, created from the rule applications, would get
+their value immediately:
+$\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg
+(\casaV \wedge \neg \casaN)$ just translates into
+$\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em
+True} \wedge \neg \text{\em True})$.
 
 
 %However, when all the readings start off as unassigned, the SAT-problem becomes 
@@ -294,30 +397,52 @@ All the new variables, created from the rule applications, would get their value
 In order to turn this problem into a SAT-problem, we will have the readings start off
 unassigned. All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
 For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser. 
-But our task now is to {\em generate} the original sentence, which will pass through the rules. 
-Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}. 
-Every cohort, called {\em symbolic word}, contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
+But our task now is to {\em generate} the original sentence, which
+will pass through the rules. 
 
-% Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
-% Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}
+\paragraph{Symbolic sentence}
+
+Here comes the most important modification: we will apply the rules to
+something we call {\em symbolic sentence}.  Every cohort, called {\em
+symbolic word}, contains every possible reading, and rule applications
+are responsible for shaping the sentence into a concrete one.
+
+% Our analysis operates on a rule $r$, which is preceded by a list of
+% rules $R$, and is concerned with answering the following question:
+% ``Does there exist an input sentence $S$ that can trigger rule $r$,
+% even after passing all rules $R$ that came before $r$?''  Instead of
+% concrete sentences from a corpus, we apply rules on {\em symbolic
+% sentences}
 
 Before we can do any analysis any of the rules, we need to find out
 what the set of all possible readings of a word is. We can do this by
 extracting this information from a lexicon, but there are other ways
-too; we will explain this in more detail in
-Section~\ref{sec:realistic_language}. In our experiments, the number
-of readings has ranged from about 300 to about 9000.
+too; we will explain this in more detail in the coming sections. In
+our experiments, the number of readings has ranged from about 300 to
+about 9000.
+
 
 \paragraph{Width of a rule}
-Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule \t{REMOVE v IF (-1 det)}, the width is 2.
+Furthermore, when we analyse a rule $r$, we need to decide the {\em
+width} $w(r)$ of the rule $r$: How many different words should there
+be in a sentence that can trigger $r$? Most often, $w(r)$ can be
+easily determined by looking at how far away the rule context indexes
+in the sentence relative to the target. For example, in the
+rule \t{REMOVE v IF (-1 det)}, the width is 2.
 
-If the context contains a \t{*} (context word can be anywhere),
-we need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis; this indeed happened in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the implementation, we tried for each \t{*} multiple variants of the sentence. 
-For example, given the rule \t{REMOVE~v~IF~(-1*~det)}, 
-we tried first a sentence of width 2; if there was a conflict, we tried width 3, and then 4. For a rule with multiple \t{*}s, we create combinations in the range of $\pm$ 2 symbolic words for each \t{*}-condition; 
-in addition, we need to specify where the target is in the symbolic sentence. 
-For instance, the rule \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested 
-with the following combinations, where C means condition and T means target:
+If the context contains a \t{*} (context word can be anywhere), we
+need to make an approximation of $w(r)$, which may result in false
+positives or negatives later on in the analysis; this indeed happened
+in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the
+implementation, we tried for each \t{*} multiple variants of the
+sentence.  For example, given the rule \t{REMOVE~v~IF~(-1*~det)}, we
+tried first a sentence of width 2; if there was a conflict, we tried
+width 3, and then 4. For a rule with multiple \t{*}s, we create
+combinations in the range of $\pm$ 2 symbolic words for
+each \t{*}-condition; in addition, we need to specify where the target
+is in the symbolic sentence.  For instance, the
+rule \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested with the
+following combinations, where C means condition and T means target:
 % in a range of 3--7 symbolic words: both \t{1*} and \t{-1*} can be interpreted as \t{}. 
 % For the rule with two \t{*}s, we tried all the following combinations: 
 (C,T,C); 
@@ -356,7 +481,10 @@ Now we have the definitions in place. In the following, we are going to show two
 
 \paragraph{Example 1: conflict}
 
-Let us look at a conflicting case. For simplicity, we assume that the full set of readings in the language is $\{ \emph{det def, noun sg, noun pl, verb sg, verb pl} \}$. We ignore all lexical readings for now, and assume dummy words of the form \emph{w$_{i}$}, where $i$ refers to the index of the word.
+%Let us look at a conflicting case. For simplicity, we assume that the full set of readings in the language is $\{ \emph{det def, noun sg, noun pl, verb sg, verb pl} \}$. We ignore all lexical readings for now, and assume dummy words of the form \emph{w$_{i}$}, where $i$ refers to the index of the word.
+Let us look at a conflicting case. For simplicity, we assume that the
+full set of readings in the language is $\{ \emph{det , noun, verb} \}$. We ignore all lexical readings for now, and assume dummy words of the form \emph{w$_{i}$}, where $i$ refers to the index of the word.
+
 The rules are as follows:
 
 
@@ -371,6 +499,21 @@ The width of the last rule is three: one condition to the left of the target, on
 
 \begin{figure}[h]
 \centering
+$$\begin{array}{ c | c | c | c | c}
+\textbf{Model 1}  & \textbf{Model 2}  & \textbf{Model 3} & \textbf{Model 4} & \textbf{Model 5} \\ \hline
+ \wOne_{\det}   &  \wOne_{\det}  &         &        &        \\
+          &  \wOne_{\noun}  & \wOne_{\noun}  & \wOne_{\noun} & \wOne_{\noun} \\
+ \casaN   &  \casaN  & \casaN  &        & \casaN \\
+          &          & \casaV  & \casaV &         \\
+\grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj \\
+
+\end{array}$$
+\caption{Possible models for \t{REMOVE verb IF (-1 det)}.}
+\label{fig:modelsOneRule}
+\end{figure}
+
+\begin{figure}[h]
+\centering
 \begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l }
 \t{"<w1>"}    &                     &  \t{"<w2>"}  &           &  \t{"<w3>"}    \\
               & \t{"w1" det def}    & &      \t{"w2" det def}  & &  \t{"w3" det def} \\
@@ -381,7 +524,8 @@ The width of the last rule is three: one condition to the left of the target, on
 \end{tabular}
 \end{figure}
 
-After applying the first rule, we have a situation which looks much like the one in the previous chapter, Figure~\ref{fig:modelsOneRule}. 
+After applying the first rule, we have a situation which 
+looks much like the one in Figure~\ref{fig:modelsOneRule}. 
 If the symbolic word {\em w1} is a determiner, then {\em w2} cannot be a verb; 
 the only exception is the case where verb is the only analysis of {\em w2}. 
 As before, the verb analysis {\em w2} can also be false, even if {\em w1} 
@@ -425,25 +569,23 @@ Since we had only one preceding rule, we could not demonstrate why is it importa
 %Furthermore, the order was not really crucial. 
 Now we will show another example, where we illustrate why is it important to create new variables, and how conditions can affect the state of the variables, but in a more limited way. The set of readings is the same, and the rules are as follows.
 
-\begin{itemize}
-\item[] 
 \begin{verbatim}
 r1 = REMOVE verb IF (-1C det) ;
 r2 = SELECT det  IF ( 1 verb) ;
 r3 = REMOVE verb IF (-1 det) ;
 \end{verbatim}
-\end{itemize}
 
 \noindent The width of the last rule is 2, thus we create a symbolic sentence with only {\em w1} and {\em w2}. The sentence is shown below:
 
 \begin{figure}[h]
-\begin{tabular}{p{0.2cm} p{0.6cm} l  p{0.6cm} l }
-& \t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
-&              & \t{"w1" det def}    & &      \t{"w2" det def}  \\
-&              & \t{"w1" noun sg}    & &      \t{"w2" noun sg}  \\
-&              & \t{"w1" noun pl}    & &      \t{"w2" noun pl}  \\
-&              & \t{"w1" verb sg}    & &      \t{"w2" verb sg}  \\
-&              & \t{"w1" verb pl}    & &      \t{"w2" verb pl}  \\
+\centering 
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l }
+\t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
+              & \t{"w1" det def}    & &      \t{"w2" det def}  \\
+              & \t{"w1" noun sg}    & &      \t{"w2" noun sg}  \\
+              & \t{"w1" noun pl}    & &      \t{"w2" noun pl}  \\
+              & \t{"w1" verb sg}    & &      \t{"w2" verb sg}  \\
+              & \t{"w1" verb pl}    & &      \t{"w2" verb pl}  \\
 \end{tabular}
 % \label{fig:ambiguousDet}
 % \caption{After $r1$, the symbolic word {\em w1} has to be determiner, but ambiguously so.}
@@ -454,10 +596,11 @@ To begin, let us only look at {\em r1} and {\em r3}. Like in the previous exampl
 The following is an example of such sequence (false readings not shown). %---if we stopped after $r1$ and asked for a solution that triggers $r3$, we might get just that.
 
 \begin{figure}[h]
-\begin{tabular}{p{0.2cm} p{0.6cm} l  p{0.6cm} l }
-& \t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
-&              & \t{"w1" det def}    & &      \t{"w2" noun pl}  \\
-&              & \t{"w1" noun sg}    & &      \t{"w2" verb sg}  \\
+\centering
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l }
+\t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
+              & \t{"w1" det def}    & &      \t{"w2" noun pl}  \\
+              & \t{"w1" noun sg}    & &      \t{"w2" verb sg}  \\
 \end{tabular}
 % \label{fig:ambiguousDet}
 % \caption{After $r1$, the symbolic word {\em w1} has to be determiner, but ambiguously so.}
@@ -490,57 +633,53 @@ Since the clauses formed by {\em r1} and {\em r3} get access to different variab
 % A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
 
 
-
-
-
 \subsection{Towards realistic language}
 \label{sec:realistic_language}
 
 \paragraph{Creating realistic readings}
 \label{sec:realistic_readings}
 
-Earlier we have shown an example with 5 readings (``det def'', ``noun
-sg'', ...). In a realistic case, we operate between hundreds and
-thousands of possible readings.  In order to find the set of readings,
-we expand a morphological lexicon\footnote{We used the lexica from
- Apertium, found in \url{https://github.com/apertium/apertium-languages}.}, 
-ignore the word forms and lemmas, and take all distinct analyses.
-However, many grammar rules target a specific lemma or word form.  A
-simple solution is to retain the lemmas and word forms only for those
-entries where it is specified in the grammar, and otherwise leave them
-out. For example, the Dutch grammar contains the following rule:
+Earlier we have shown an example with 5 readings (``det def'', ``noun sg'', ...). In a realistic case, we operate between hundreds and thousands of possible readings. 
+%This is very much dependent on language: the simplest language we tested was Dutch, with 336 readings. The most complex was 
+In order to find the set of readings, we expand a morphological lexicon\footnote{We used the lexica from Apertium, found in \url{https://github.com/apertium/apertium-languages}.}, ignore the word forms and lemmas, and take all distinct analyses. 
+However, many grammar rules target a specific lemma or word form.
+A simple solution is to retain the lemmas and word forms only for those entries where it is specified in the grammar, and otherwise leave them out. For example, the Dutch grammar contains the following rule:
 
 \begin{itemize}
  \item[] \texttt{REMOVE ("zijn" vbser) IF (-1 Prep) (1 Noun) ;}
 \end{itemize}
 
-\noindent This hints that there is something special about the verb
-\emph{zijn}, compared to the other verbs. Looking at the lexicon, we
-find \emph{zijn} in the following entries:
+This hints that there is something special about the verb \emph{zijn}, compared to the other verbs. Looking at the lexicon, we find \emph{zijn} in the following entries:
 
 \begin{itemize}
  \item[] 
-\begin{verbatim}
-zijn:zijn<det><pos><mfn><pl>     zijn:zijn<vbser><inf>
-zijn:zijn<det><pos><mfn><sg>     zijn:zijn<vbser><pres><pl>
-\end{verbatim}
+\begin{verbatim}zijn:zijn<det><pos><mfn><pl>
+zijn:zijn<det><pos><mfn><sg>
+zijn:zijn<vbser><inf>
+zijn:zijn<vbser><pres><pl>\end{verbatim}
 \end{itemize}
 
-\noindent Thus we add special entries for these: in addition to the anonymous
+Thus we add special entries for these: in addition to the anonymous
 ``det pos mfn pl'' reading, we add ``\emph{zijn} det pos mfn pl''. 
 The lemma is treated as just another tag.
 
-However, for languages with more readings, this approach is not
-feasible. For instance, Spanish has a high number of readings, not
-only because of many inflectional forms, but because it is possible to
-add 1--2 clitics to the verb forms.  The number of verb readings
-without clitics is 213, and with clitics 1572.  With the previously
-mentioned approach, we would have to duplicate 1572 entries for each
-verb. We experimented with small variations with Spanish, and
-report slightly different results (and significantly different running
-time) in Section~\ref{sec:eval}. Later on, when we applied the tool for Basque
-\cite{listenmaa2017basque}, we were forced to modify the approach even
-further. We explain the changes in Section~\ref{sec:basqueChanges}.
+However, for languages with more readings, this turned out not be
+feasible. When applying the tool for Basque \cite{listenmaa2017basque}, 
+we implemented an alternative scheme, with variables split in three
+layers: word forms, lexemes and morphological tags. A reading in a
+symbolic sentence had to have at least morphological tags, and
+optional lexical tags. The method made it possible to run the tool for
+Basque, but the resulting readings were mostly nonsensical---imagine a
+situation in English where a reading combines the word form
+\t{"<going>"} with the lexeme \t{"dog"} and claims that it is a plural
+possessive pronoun. Nevertheless, the method worked for detecting
+conflicts between rules. (Of course, it may have missed some that
+would have been found by saner readings!) We return to the experiment
+on Basque in Section~\todo{write about it}.
+
+% For instance, Spanish has a high number of readings, not only because of many inflectional forms, but because it is possible to add 1--2 clitics to the verb forms.
+% The number of verb readings without clitics is 213, and with clitics 1572.
+% With the previously mentioned approach, we would have to duplicate 1572 entries for each verb lemma. Even ignoring the clitics, each verb lemma still adds 213 new readings.
 
 The readings in a grammar can be underspecified: for example, the rule
 \texttt{REMOVE (verb sg) IF (-1 det)} gives us ``verb sg'' and ``det''.
@@ -567,42 +706,34 @@ the underspecified readings from the grammar may be an adequate solution.
 %In fact, it may even catch interaction conflicts between rules which have an internal conflict
 
 
-\begin{table}[h]
-\centering
-\begin{tabular}{ c|c|c|c|c}
-             & \t{n nt sg}  & \t{n f pl}  & \t{vblex sep inf} & \t{det pos mfn}  \\ \hline
- uitgaven    & 0        & 1       & 1             & 0    \\ 
- toespraken  & 0        & 1       & 1             & 0    \\ 
- haar        & 1        & 0       & 0             & 1    \\ 
-\end{tabular}
-\caption{Ambiguity classes}
-\label{table:ambclass}
-\end{table}
-
 \paragraph{Creating realistic ambiguities}
 
 
 In the previous section, we have created realistic \emph{readings}, by simply hardcoding legal tag combinations into variables. The next step in creating realistic \emph{ambiguities} is to constrain which readings can go together. For instance, the case of \emph{zijn} shows us that ``determiner or verb'' is a possible ambiguity. In contrast, there is no word form in the lexicon that would be ambiguous between an adjective and a comma, hence we do not want to generate such ambiguity in our symbolic sentences.
 
+\begin{center}
+\begin{tabular}{c|c|c|c|c}
 
-We solve the problem by creating \emph{ambiguity classes}: groups of
-readings that can be ambiguous with each other.  We represent the
-expanded morphological lexicon as a matrix, as seen in
-Table~\ref{table:ambclass}: word forms on the rows and analyses on the
-columns. Each distinct row forms an ambiguity class. For example, one
-class may contain words that are ambiguous between plural feminine
-nouns and separable verb infinitives; another contains masculine
-plural adjectives and masculine plural past participles.  Then we form
-SAT-clauses that allow or prohibit certain combinations. These clauses
-will interact with the constraints created from the rules, and the end
-result will be closer to real-life sentences.
 
-Our approach is similar to \newcite{cutting_etal92}, who use ambiguity
-classes instead of distinct word forms, in order to reduce the number
-of parameters in a Hidden Markov Model. They take advantage of the
-fact that they don't have to model ``bear'' and ``wish'' as separate
-entries, but they can just reduce it to ``word that can be ambiguous
-between noun and verb'', and use that as a parameter in their HMM.
+            & n nt sg  & n f pl  & vblex sep inf & det pos mfn  \\ \hline
+uitgaven    & 0        & 1       & 1             & 0    \\ 
+toespraken  & 0        & 1       & 1             & 0    \\ 
+haar        & 1        & 0       & 0             & 1    \\ 
+
+
+\end{tabular}
+\end{center}
+
+We solve the problem by creating \emph{ambiguity classes}: groups of readings that can be ambiguous with each other. 
+We represent the expanded morphological lexicon as a matrix, as seen
+above: word forms on the rows and analyses on the columns. Each
+distinct row forms an ambiguity class. For example, one class may
+contain words that are ambiguous between plural feminine nouns and
+separable verb infinitives; another contains masculine plural adjectives 
+and masculine plural past participles.
+Then we form SAT-clauses that allow or prohibit certain combinations. These clauses will interact with the constraints created from the rules, and the end result will be closer to real-life sentences.
+
+Our approach is similar to \newcite{cutting_etal92}, who use ambiguity classes instead of distinct word forms, in order to reduce the number of parameters in a Hidden Markov Model. They take advantage of the fact that they don't have to model ``bear'' and ``wish'' as separate entries, but they can just reduce it to ``word that can be ambiguous between noun and verb'', and use that as a parameter in their HMM. 
 %We can do a similar thing by saving a list of words with each ambiguity class. For example, we map the ambiguity class ``feminine plural noun or a separable verb infinitive'' to the list of word forms \{``uitgaven'', ``toespraken''\}, and then, if we generate such reading for our symbolic word, we can give one of these words as an example word.
 
 There are two advantages of restricting the ambiguity within words.
@@ -622,10 +753,11 @@ However, it could be that past participles (pp) only ever get confused with adje
  By removing the adjective reading, the first rule selects the past participle reading, making it an instance of ``$r$ selects something in a context, $r'$ removes~it''. 
 The additional constraints will prevent the SAT-solver from creating an ambiguity outside the allowed classes, and such a case would be caught as a conflict.
 
-\subsection{Use cases}
+
+\section{Use cases}
 
 In the beginning of this chapter, we gave a list of questions, regarding the rules in Figure~\ref{fig:infrules}. After describing our implementation, we return to these questions, and explain how a SAT-solver can answer them. 
-Section~\ref{sec:eval} shows the evaluation of the conflict detection, which we tried out for four grammars of different sizes. 
+Section~\ref{sec:eval} shows the evaluation of the conflict detection, which we tried out for three grammars of different sizes. 
 The use cases presented in this section have not been tried in practice; however, our setup makes them fairly straight-forward to implement.
 
 \paragraph{Are all the rules distinct?} We gave the example of two rules in the Portuguese grammar, where one had the condition \t{(-1 Prep)} and the other \t{(-1 Para OR De)}. A grammarian who has some knowledge of Portuguese could tell that {\em para} and {\em de} are both prepositions, so these two rules seem to do almost the same thing.
@@ -663,6 +795,9 @@ As a variant, we may be interested in the placement of just one rule in the sequ
 \paragraph{Does a rewritten rule correspond to the original?}
 We can initialise two symbolic sentences, then run the original rule and the rewritten rule, and check if they allow the same models. 
 
+
+
+
 \section{Evaluation}
 \label{sec:eval}
 
@@ -675,8 +810,7 @@ with 59 rules and
 Spanish\footnote{\scriptsize{\url{https://github.com/apertium/apertium-spa/blob/master/apertium-spa.spa.rlx}, commit 1d4f290d}},
 with 279 rules.
 
-In addition, we applied variations of the method to two grammars,
-which were both larger and targeted more complex languages:
+In addition, we applied the method to two larger grammars and complex languages:
 Finnish\footnote{\scriptsize{\url{https://github.com/flammie/apertium-fin/blob/master/apertium-fin.fin.rlx}, commit 49866f3b}},
 with 1185 rules, and
 Basque\footnote{\scriptsize{\url{https://github.com/inariksit/cgclean/blob/master/data/gramatika4.4.1_lem.rlx}, commit 793e00d1}}
@@ -687,14 +821,19 @@ We left out \textsc{map}, \textsc{substitute} and other rule
 types introduced in CG-3, and only tested \textsc{remove} and \textsc{select} rules.
 The results for Dutch and Spanish are shown in Table~\ref{table:res},
 and the results for Finnish in Table~\ref{table:resFin}. For Basque,
-we were unable to analyse the whole grammar; instead we worked in
+we were unable to analyze the whole grammar, instead working in
 smaller batches. 
+
+
+% Unfortunately, we did not have time to perform such
+% evaluation, and in addition, we only have gold standard corpus (20~000~words) for Spanish.
+
 
 
 The experiments revealed problems in all grammars. For the smaller
 grammars, we were able to verify manually that nearly all detected conflicts were
 true positives---we found one false positive and one false negative,
-when trying out different setups for the Spanish grammar. 
+when using a shortcut for the Spanish grammar. 
 %The results for the Finnish grammar are inconclusive, 
 % For the Finnish grammar, we did not have time to
 % investigate all of them, but among those we could, we found both true and false negatives.
@@ -705,8 +844,7 @@ As the tool matures and we add new features, a more in-depth analysis
 will be needed.
 Another natural follow-up evaluation will be to compare the accuracy of the
 grammar in the original state, and after removing the conflicts found
-by our tool. 
-%We aim to perform such evaluation, when the toolset is more mature.
+by our tool. %We aim to perform such evaluation, when the toolset is more mature.
 
 
 \begin{table}[h]
@@ -750,10 +888,8 @@ There was one genuine conflict with rule interaction, shown below:
 
 \begin{itemize}
 \item[\textsc{d$_1$.}] 
-\begin{verbatim}
-REMOVE Adv IF (1 N) ;
-REMOVE Adv IF (-1 Det) (0 Adj) (1 N) ;
-\end{verbatim}
+\begin{verbatim}REMOVE Adv IF (1 N) ;
+REMOVE Adv IF (-1 Det) (0 Adj) (1 N) ;\end{verbatim}
 \end{itemize}
 
 % These two rules both remove an adverb, but the first one has a broader condition:
@@ -788,13 +924,11 @@ Can we catch this imprecise formulation with our tool? The SAT-solver will not m
 \item[a)] \begin{verbatim}
 "<w2>"
     "w2" det pos f sg
-    "zijn" vbser inf
-\end{verbatim}
+    "zijn" vbser inf\end{verbatim}
 
 \item[b)] \begin{verbatim}
 "<w2>"
-    "zijn" det pos mfn pl
-\end{verbatim}
+    "zijn" det pos mfn pl\end{verbatim}
 \end{itemize}
 
 
@@ -877,72 +1011,55 @@ writer intended.
 
 The comments make it clear that the first rule is meant to
 disambiguate between \emph{sentar} and \emph{sentir}, but the rule
-does not mention anything about \emph{sentir}.  Even with the
-ambiguity class constraints, the SAT-solver only created an ambiguity
-where \emph{sentar} in 1st person plural is ambiguous with an
-anonymous 1st person plural reading.  This does not reflect the
-reality, where the target is only ambiguous with certain verbs, and in
-certain conjugated forms.
+does not mention anything about \emph{sentir}. 
+Even with the ambiguity class constraints, the SAT-solver only created
+an ambiguity where \emph{sentar} in 1st person plural is ambiguous
+with an anonymous 1st person plural reading. 
+This does not reflect the reality, where the target is only ambiguous
+with certain verbs, and in certain conjugated forms. 
 
-The second case is potentially more dangerous.  The word form
-$estado_{W}$ can be either a noun ($estado_{L}$, `state'), or the past
-participle of the verb $estar_{L}$.  The condition, however, addresses
-the lemma of the noun, $estado_L$, whereas the lemma of the PP is
-$estar_{L}$.  This means that, in theory, there can be a case where
-the condition to select the PP is already removed. As for now, the
-lexicon does not contain other ambiguities with the word form
-$estado_{W}$, but we could conceive of a scenario where someone adds
-e.g. a proper noun $Estado_{L}$ to the lexicon. Then, if some rule
-removes the lemma $estado_{L}$, the rule to select PP will not be able
-to trigger.
+The second case is potentially more dangerous. 
+The word form $estado_{W}$ 
+can be either a noun ($estado_{L}$, `state'), or the past participle
+of the verb $estar_{L}$.  The condition, however, addresses the lemma
+of the noun, $estado_L$, whereas the lemma of the PP is $estar_{L}$. 
+This means that, in theory, there can be a case where the condition to
+select the PP is already removed. As for now, the lexicon does not
+contain other ambiguities with the word form $estado_{W}$, but we
+could conceive of a scenario where someone adds e.g. a proper noun
+$Estado_{L}$ to the lexicon. Then, if some rule removes the lemma
+$estado_{L}$, the rule to select PP will not be able to trigger. 
 
 
-% Another question is whether this level of detail is necessary.  After
-% all, the grammar will be used to disambiguate real life texts, where
-% neither \emph{sentar} nor \emph{estado} are likely to have any other
-% ambiguities.  In fact, we are planning to change how we handle the
-% lexical forms; with those changes, it will become clear whether the
-% imprecision will result in potential errors, given the current
-% lexicon.
+\todo{Another question is whether this level of detail is necessary. 
+After all, the grammar will be used to disambiguate real life texts,
+where neither \emph{sentar} nor \emph{estado} are likely to have any
+other ambiguities. 
+In fact, we are planning to change how we handle the lexical forms;
+with those changes, it will become clear whether the imprecision will
+result in potential errors, given the current lexicon.}
 
 
 
 \subsection{Finnish} 
 \label{sec:finnishEval}
 
-The results for the Finnish grammar are shown separately, in
-Table~\ref{table:resFin}. We encountered a number of difficulties and
-used a few shortcuts, which we did not need for the other
-grammars---most importantly, not using the ambiguity class
-constraints. Due to these complications, the results are not directly
-comparable, but we include Finnish in any case, to give an idea how
-our method scales up: both to more rules, and more complex rules.
+The results for the Finnish grammar are shown separately, in Table~\ref{table:resFin}. We encountered a number of difficulties and used a few shortcuts, which we did not need for the other grammars---most importantly, not using the ambiguity class constraints. Due to these complications, the results are not directly comparable, but we include Finnish in any case, 
+to give an idea how our method scales up: both to more rules, and more complex rules.
 
-\paragraph{Challenges with Finnish} The first challenge is the
-morphological complexity of Finnish.  There are more than 20,000
-readings, when all possible clitic combinations are included.  After
-weeding out the most uncommon combinations, we ended up with sets of
-4000--8000 readings.
+\paragraph{Challenges with Finnish} The first challenge is the morphological complexity of Finnish.
+There are more than 20,000 readings, when all possible clitic combinations are included.
+After weeding out the most uncommon combinations, we ended up with sets of 4000--8000 readings.
 
-The second challenge comes from the larger size of the
-grammar. Whereas the Spanish and Dutch had only tens of word forms or
-lemmas, the Finnish grammar specifies around 900 of them.  Due to both
-of these factors, the procedure described in
-Section~\ref{sec:realistic_readings} would have exploded the number of
-readings, so we simply took the lemmas and word forms, and added them
-as single readings.  In cases where they were combined with another
-tag in the grammar, we took that combination directly and made it into
-an underspecified reading: for instance, we included both \emph{aika}
-and ``\emph{aika} n'' from the rule \texttt{SELECT "aika" + N}, but
-nothing from the rule \texttt{SELECT Pron + Sg}. This method gave us
-1588 additional readings.
+The second challenge comes from the larger size of the grammar. Whereas the Spanish and Dutch had only tens of word forms or lemmas, the Finnish grammar specifies around 900 of them.
+Due to both of these factors, the procedure described in Section~\ref{sec:realistic_readings} would have exploded the number of readings, so we simply took the lemmas and word forms, and added them as single readings. 
+In cases where they were combined with another tag in the grammar, we took that combination directly and made it into an underspecified reading: for instance, we included both \emph{aika} and ``\emph{aika} n'' from the rule \texttt{SELECT "aika" + N},
+but nothing from the rule \texttt{SELECT Pron + Sg}. This method gave us 1588 additional readings.
 
-Finally, we were not able to create ambiguity class
-constraints---expanding the Finnish morphological lexicon results in
-100s of gigabytes of word forms, which is simply too big for our
-method to work.  For future development, we will see if it is possible
-to manipulate the finite automata directly to get hold of the
-ambiguities, instead of relying on the output in text.
+Finally, we were not able to create ambiguity class constraints---expanding the Finnish morphological lexicon results in 100s of gigabytes of word forms, which is simply too big for our method to work. 
+For future development, we will see if it is possible to manipulate the finite automata directly to get hold of the ambiguities, instead of relying on the output in text.
+
+
 
 
 \def\oneClLG{{\sc 1~cl~+~lem}}
@@ -1050,49 +1167,14 @@ The conflict lies in the fact that \texttt{Comma} is a subset of \texttt{Comma/N
 there is no way to trigger the second rule without placing a comma in position -1, and thereby triggering the first rule.
 
 
-\subsection{Performance} 
-The running time of the grammars ranges from seconds to hours. 
-Note that the times in the Finnish table are not entirely comparable with each other: we were forced to run the tests in smaller batches, and it is possible that there are different overheads, unrelated to the size of the SAT-problem, from testing 50 or 500 rules at a time. 
-Despite the inaccuracies, we can see that increasing the number of readings 
-and adding the ambiguity class constraints
-slow the program down significantly.
-%In order to understand the effect of each feature more precisely, we should run our tests on grammars that differ on only one of the variables. 
-
-However, many of the use cases do not require running the whole
-grammar. Testing the interaction between 5--10 rules takes just
-seconds in all languages, if the ambiguity class constraints are not included. 
-A downside in the ambiguity classes is that generating them takes a long time, 
-and while the overhead may be acceptable when checking the full grammar,
-it is hardly so when analysing just a handful of rules. 
-We are working on an option to store and reuse the ambiguity class constraints.
-
-\section{Experiments on Basque grammar}
+\subsection{Basque} 
 \label{sec:basqueEval}
 
-After the original experiment was done on the previously introduced
-three languages, we got a chance to test a Basque grammar
-\cite{aduriz1997euscg}. The size of the tag set was even larger than
-for Finnish, and made it impossible to test the whole grammar with our
-setup. We explain our modifications and report preliminary results. 
-
-\subsection{Changes in the setup}
-\label{sec:basqueChanges}
-
-\paragraph{Work on groups of rules} In order to get some use out of our tool, we grouped all the rules in the
-grammar by their targets, and sorted by the complexity of their
-contextual tests. For instance, the 5 rules that target the tag
-\t{ADOIN} will be in the order shown in Figure~\ref{fig:basqueSorted}:
-from fewest to most contextual tests, and in the case of same number
-of tests, preferring those with fewer tagsets.  Each of those groups
-is then tested with the SAT-based method. The original order is lost,
-but the method is likely to catch superfluous rules, because
-shorter contexts come first. For instance, the two rules originally on
-lines 6423 and 6422 will cause a conflict in this new order. The
-original order wasn't a conflict, according to our definition in
-Section~\ref{sec:sectionCGana}, but it certainly looks redundant.
+After the original experiment was done on the previously introduced three languages, we got a chance to test a Basque grammar \cite{aduriz1997euscg}. The size of the tag set was even larger than for Finnish, and made it impossible to test the whole grammar.
+In the following, we describe adaptations we tested, as well as some preliminary results.
 
 
-\begin{figure}[h]
+\begin{figure*}[t]
 \centering
 \begin{tabular}{lr}
 \t{SELECT ADOIN IF (1 ARAZI) ;}                         & \t{\# line 7412} \\
@@ -1103,30 +1185,51 @@ Section~\ref{sec:sectionCGana}, but it certainly looks redundant.
 \end{tabular}
 \caption{Rules grouped by target, and ordered by their contextual tests.}
 \label{fig:basqueSorted}
-\end{figure}
+\end{figure*}
 
-\paragraph{Modified handling of lexical forms}
 
-We implemented an alternative scheme for readings, with variables
-split in three layers: word forms, lexemes and morphological tags. The
-layer with morphological tags comes from the lexicon as usual, but
-now, instead of creating new variables with appropriate lexical tags
-included (e.g. the word form \t{"<going>"} added to the morphological
-tag list \t{verb present gerund}), we allowed lexical tags to attach
-to anything. A reading in a symbolic sentence has to have at least
-morphological tags, and optional lexical tags. The method made it
-possible to run the tool for Basque, but the resulting readings were
-mostly nonsensical---imagine a situation in English where a reading
-combines the word form \t{"<going>"} with the lexeme \t{"dog"} and
-claims that it is a plural possessive pronoun. The method worked for
-detecting conflicts between rules, but of course, it may have missed
-some that would have been found by saner readings.
 
-\paragraph{Improve order of the rules with an external tool}
+\paragraph{Group by target, sort by conditions}
+After the simple checks and transformations, we group the rules by their targets, and sort them by the complexity of their contextual texts. For instance, the 5 rules that target ADOIN will be in the order shown in Figure~\ref{fig:sorted}: from fewest to most contextual tests, and in the case of same number of tests, preferring those with fewer tagsets.
 
-In addition, we applied a tool for automatically tuning grammars
-\cite{bick2013tuning}: the tool modifies and reorders rules, testing
-against a gold standard to keep only those changes which improve the results.
+
+\paragraph{Check for conflicts and redundancies}
+
+When the rules are grouped and sorted as described, we run SAT-based 
+symbolic evaluation \cite{listenmaa_claessen2016} on each group. 
+If it says that some rule with a more complex condition is superfluous 
+because of another rule earlier in the list then that is a hint for the grammar writer: why are there two similar  rules in the grammar, if the simpler one would do?
+
+\paragraph{Manual cleanup}
+\label{manual} 
+
+Even if the program wouldn't find any conflicts, we give the rules to 
+a grammarian in any case. The grammarian works with this list, having 
+the original grammar on the side to see the comments, or other original 
+context of any given rule. 
+On the one hand, seeing all the rules grouped helps with the 
+situation where different grammarians have written rules independent of 
+each other. On the other hand, working with the ordered grammar makes
+it difficult to compare the precision, recall and F-score to the
+original grammar in the intermediate stages of the cleanup. 
+
+In any case, the sorting and grouping is not meant to be the final order, it is only 
+to help a human grammarian to make decisions regarding all the rules that 
+target the same tagsets.
+An easy alternative would be to work on the original grammar instead, only
+keeping the sorted list as a help and generating new ones as the
+cleanup proceeds. However, we found it easier to work directly on the
+sorted list. To solve the problem of intermediate evaluation, we
+decided to compare the results by ML-tuning both the original and the
+ordered grammar.
+
+\paragraph{ML-tuning}
+Once the grammar has gone through the previous steps, we give it to the 
+ML-tuning tool \cite{bick2013tuning}, with the purpose of finding an 
+optimal order. Then we can run the newly ordered grammar through the
+conflict check, to detect if the ML-tuning has introduced new
+conflicts or superfluous rules.
+
 Our initial hypothesis is that the human-cleaned version will benefit more 
 from tuning than the original grammar. Some bad rules may have only a minor 
 problem, such as a single tag name having changed meaning, and they would be 
@@ -1135,36 +1238,39 @@ demoted or killed. To test our assumptions, we tune both the original
 grammar and the human-cleaned versions, continuously comparing the new
 versions to the original.
 
+\paragraph{Final order}
 
-\subsection{Results}
-
-We evaluate the grammars with a manually disambiguated corpus of
-65,153 tokens/53,429 words, compiled from different sources
-\cite{aduriz2006epec}.  We report the original score, and the result
-from tuning the original grammar, as well as the result of
-preliminary cleanup.  The scores are given using two metrics,
-differing on the granularity of the tagset.
-
-The Basque tag set is structured in four levels of granularity.  As
-explained in \cite{ezeiza1998basque}, the first level contains only
-the main POS, 20 distinct tags, and the fourth level contains several
-hundreds of tags with fine-grained distinctions, including semantic
-tags such as animacy.  Table~\ref{table:levels} shows a simplified
-example of the levels for nouns.  On the 4th level, the initial
-ambiguity is very high: the test corpus has, on average, 3.96 readings
-per cohort. On the 2nd level, when readings that differ only in
-higher-level tags are collapsed into one, the initial ambiguity is
-2.41 readings per cohort.  We follow the scheme for evaluation: assume
-that we are left with two readings, ``Common noun, singular'' and
-``Common noun, plural'', and one of them is correct. Evaluation on
-levels 3 and 4 reports 100 \% recall and 50 \% precision.  Evaluation
-on levels 1 and 2 ignores the tags from the higher levels, and regards
-any common noun or noun as correct, hence 100 \% for both measures.
+After checking the conflicts and redundancies of the grammar, 
+we will proceed to reorder the grammar by defining the sections
+of the grammar corresponding to each level of granularity of the Basque tag set.
 
 
-\begin{table}[t]
+\paragraph{Evaluation}
+
+We evaluate the grammars with a manually disambiguated corpus of 65,153 tokens/53,429 words,
+compiled from different sources \cite{aduriz2006epec}.
+We report the original score, and the result from ML-tuning the original grammar, 
+as well as the result of preliminary cleanup. 
+The scores are given using two metrics, differing on the granularity of the tagset.
+
+The Basque tag set is structured in four levels of granularity. 
+As explained in \newcite{ezeiza1998basque}, the first level contains only the main POS, 20 distinct tags,
+and the fourth level contains several hundreds of tags with fine-grained distinctions, including semantic tags such as animacy.
+Table~\ref{table:levels} shows a simplified example of the levels for nouns.
+On the 4th level, the initial ambiguity is very high: the test corpus has, on average,
+3.96 readings per cohort. On the 2nd level, when readings that differ only in 
+higher-level tags are collapsed into one, the initial ambiguity is 2.41 readings per cohort.
+We follow the scheme for evaluation: assume that we are left with two readings, ``Common noun, singular''
+and ``Common noun, plural'', and one of them is correct. Evaluation on levels 3 and 4 reports 100 \% recall and 50 \% precision.
+Evaluation on levels 1 and 2 ignores the tags from the higher levels, and regards any common noun or noun as correct, hence 100 \% for both measures. 
+
+It should be noted that the linguistic revision has been targeted
+towards improving the 2nd level. 
+%Nevertheless, the score on both levels improves
+
+
+\begin{table*}[t]
 \centering
-\resizebox{\textwidth}{!}{
 \begin{tabular}{llll}
 
 \hline
@@ -1172,10 +1278,9 @@ any common noun or noun as correct, hence 100 \% for both measures.
 \multicolumn{1}{|l|}{Noun}             & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Common noun\\ Proper noun\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Common noun, plural absolutive\\ Common noun, singular ergative\\ Proper noun, plural absolutive\\ Proper noun, singular ergative\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Common noun, plural absolutive, animate\\ Common noun, plural absolutive, inanimate\\ ...\\ Proper noun, singular ergative, animate\\ Proper noun, singular ergative, inanimate\end{tabular}} \\ \hline
 
 \end{tabular}
-}
 \caption{Levels of granularity}
 \label{table:levels}
-\end{table}
+\end{table*}
 
 
 
@@ -1185,18 +1290,18 @@ any common noun or noun as correct, hence 100 \% for both measures.
 The results of the preliminary evaluation are in Table~\ref{table:res}. 
 The drop in performance after the preliminary cleanup is most certainly due to ordering---we found it 
 easier to work on the grammar directly after grouping and sorting the rules, as shown in
-Figure~\ref{fig:basqueSorted}. 
+Figure~\ref{fig:sorted}. 
 %Both precision and recall get worse, 
 % The worst drop is in precision; from 62 \% to 56 \% on the full tagset,
 %which suggests that the alphabetical ordering blocks many rules from firing.
-Tuning the cleaned grammar brings the precision up, indicating that
+ML-tuning the cleaned grammar brings the precision up, indicating that
 more rules get to fire in the tuned order. The difference is most
 dramatic in the sorted and grouped grammar on the 4th level: the
 original precision drops from 62 \% to 56 \%, and goes up to 68 \%
-with the tuning. 
+with the ML-tuning. 
 
 As explained in Section~\ref{manual}, the fairest test at this stage is to compare the
-tuned results of the original and the cleaned grammar.
+ML-tuned results of the original and the cleaned grammar.
 We see the cleaned and tuned grammar slightly outperforming the tuned original;
 the difference is not large, but we see it as a promising start.
 
@@ -1216,11 +1321,11 @@ the difference is not large, but we see it as a promising start.
                                                  & \textit{Rec.} & \textit{Prec.} & \textit{F-score} & \textit{Rec.} & \textit{Prec.} & \textit{F-score} \\ \hline
 \multicolumn{1}{|l|}{\textbf{Original grammar}}     
 					    & \textbf{95.61}  & 62.99         &  75.94         & \textbf{97.48}  &  84.37           &  90.45           \\ \hline
-\multicolumn{1}{|l|}{\textbf{Tuned original}}    
+\multicolumn{1}{|l|}{\textbf{ML-tuned original}}    
 					    & 93.87          & 68.06             &  78.91              & 96.66          &  86.82           &  91.48            \\ \hline
 \multicolumn{1}{|l|}{\textbf{Preliminary cleanup}}  
 					   & 94.81           & 56.56             & 70.85               &  96.82         &  84.13           &  90.03           \\ \hline
-\multicolumn{1}{|l|}{\textbf{Tuned prel.cleanup}}      
+\multicolumn{1}{|l|}{\textbf{ML-tuned prel.cl.}}      
 					   & 93.41           & \textbf{68.61}  & \textbf{79.11}   &  96.41        &  \textbf{87.19}   &  \textbf{91.57}           \\ \hline
 \end{tabular}
 \caption{Preliminary evaluation on words, excluding punctuation, for levels 4 and 2 of granularity.}
@@ -1273,14 +1378,10 @@ SELECT IZE IF 	 # line 829
 
 
 
-Finally, all setups have found some internal conflicts. In order to
-get a more reliable account, we would need more accurate tagset,
-beyond the 21000. To be fair, many internal conflicts can be detected
-by simpler means: using the STRICT-TAGS flag of VISL CG-3 would reveal
-illegal tags, which are the reason for a large number of internal
-conflicts.  But some cases are due to a mistake in logic, rather than
-a typo; examples such as the following were easily found by the
-tool. %elow are some examples of the internal conflicts found by the tool:
+Finally, all setups have found some internal conflicts. In order to get a more reliable account, we would need 
+more accurate tagset, beyond the 21000. To be fair, many internal conflicts can be detected by simpler means:
+using STRICT-TAGS would reveal illegal tags, which are the reason for a large number of internal conflicts. 
+But some cases are due to a mistake in logic, rather than a typo; examples such as the following were easily found by the tool. %elow are some examples of the internal conflicts found by the tool:
 
 \begin{verbatim}
   REMOVE ADI IF (NOT 0 ADI) (1 BAT) ;
@@ -1294,9 +1395,9 @@ The second rule is not obvious to the eye; the interplay of \texttt{0C} and \tex
 
 %We have found the conflict check helpful for the grammarians: it is useful information to know about redundancies. But so far
 
-\paragraph{Tuning}
+\paragraph{ML-tuning}
 
-So far, the most important use of the tuning has been to overcome
+So far, the most important use of the ML-tuning has been to overcome
 the differences in ordering. 
 Given the preliminary nature of the work, we have not tried multiple
 variations. We used a development corpus of 61,524
@@ -1308,26 +1409,39 @@ rule as ``good'' or ``bad''.
 In the future, as the grammar cleanup advances, we are interested in
 trying out different settings.
 % as we approach the task of finding an optimal order. 
-Already in our current stage, tuning has clearly improved the
-precision, for both original and preliminarily cleaned grammars, and
-for both levels of granularity; it is likely that experimenting with
-different parameters, we would find a combination that would also
-improve the recall, like Bick and Hagen
-\cite{bick2013tuning,bick_hagen2015obt} report.  However, while tuning
-improves the grammar's performance, it makes it less readable for
-human eyes, and continuing the development is harder. It might make
-sense to keep two versions of the grammar: one for maintenance, and
-other for running, created automatically from the former.
+Already in our current stage, ML-tuning has clearly
+improved the precision, for both original and preliminarily cleaned
+grammars, and for both levels of granularity; it is likely that
+experimenting with different parameters, we would find a combination
+that would also improve the recall, like \newcite{bick2013tuning} 
+and \newcite{bick_hagen2015obt} report.
+However, while ML-tuning improves the grammar's performance, it makes
+it less readable for human eyes, and continuing the development is
+harder. Thus we might settle to two versions of the grammar: one for
+maintenance, and other for running.
 
 
-\section{Generative Constraint Grammar}
 
+\subsection{Performance} 
+The running time of the grammars ranges from seconds to hours. 
+Note that the times in the Finnish table are not entirely comparable with each other: we were forced to run the tests in smaller batches, and it is possible that there are different overheads, unrelated to the size of the SAT-problem, from testing 50 or 500 rules at a time.
+Furthermore, the experiments on Basque were done a year after the original three, with yet different setups.
+Despite the inaccuracies, we can see that increasing the number of readings 
+and adding the ambiguity class constraints
+slow the program down significantly.
+%In order to understand the effect of each feature more precisely, we should run our tests on grammars that differ on only one of the variables. 
 
-\label{sec:expressivity}
+However, many of the use cases do not require running the whole
+grammar. Testing the interaction between 5--10 rules takes just
+seconds in all languages, if the ambiguity class constraints are not included. 
+A downside in the ambiguity classes is that generating them takes a long time, 
+and while the overhead may be acceptable when checking the full grammar,
+it is hardly so when analysing just a handful of rules. 
+We are working on an option to store and reuse the ambiguity class constraints.
 
-\input{chapters/cg-expressivity}
 
 \section{Conclusions and future work}
+
 
 We set out to design and implement an automatic analysis of constraint grammars that can find problematic rules and rule combinations, without the need for a corpus.
 Our evaluation indicates that the tool indeed finds non-trivial conflicts and dead rules
@@ -1350,48 +1464,48 @@ Future work can be divided in roughly three categories:
 
 Our solution to hardcode the tag combinations in the readings is
 feasible for simple morphology, but it can cause problems with more
-complex morphology. Currently, if we add one new lemma to the set of
-readings, we need to create as many new variables as there are
-inflectional forms for that lemma.  The alternative scheme we
-implemented for Basque resulted in fewer combinations, but as a
-result, it created nonsensical combinations of wordform, lemma and
-morphological tags. Investigating whether this is a problem (i.e. does
-it miss actual conflicts, or suggest false positives) is left for
-future work.
+complex morphology.
+Currently, if we add one new lemma to the set of readings, we need to
+create as many new variables as there are inflectional forms
+for that lemma. %easily hundreds for languages with rich morphology. 
 
+We are currently working on adding the concepts of lemmas and word
+forms directly to the representation of the possible readings.
+A possible solution would be to make each tag a variable, and ask the
+question ``can this reading be a noun? singular? 
+conditional?'' separately for each tag. Then we could lift the
+restriction of tag combinations into the SAT side: make SAT-clauses
+that prohibit a comparative to go with a verb, or conditional with a noun.
+Alternatively, we can still hardcode the set of morphological readings, and 
+only use SAT-clauses to restrict which lexical form can go with which morphological analysis.
 
 \paragraph{Heuristic checks for common issues} 
-As mentioned earlier, some grammar design choices are common sources
-of misinterpretation.  Many of these issues concern the case where the
-conditions include the target cohort---does \t{SELECT foo IF (0 bar)}
-mean that ``foo'' and ``bar'' should be in the same reading or in
-different readings?  Lemmas and word forms are another source of
-confusion, which is easy to check automatically against the lexicon.
-Ideally, these checks should be included in a special ``paranoid
-mode'', to not clutter the analysis\footnote{As pointed out by Eckhard
-  Bick, the program should act upon this only if the 0 relates to an
-  existing ambiguity class.}.
+As mentioned earlier, some grammar design choices  
+are common sources of misinterpretation.
+Many of these issues concern the case where the conditions include 
+the target cohort---does \t{SELECT foo IF (0 bar)} mean that ``foo'' and ``bar'' 
+should be in the same reading or in different readings? 
+Lemmas and word forms are another source of confusion, which is easy to check automatically against the lexicon. 
+Ideally, these checks should be included in a special ``paranoid mode'', to not clutter the analysis\footnote{As pointed out by Eckhard Bick, the program should act upon this only if the 0 relates to an existing ambiguity class.}.
 
 
 \paragraph{Support for more features of VISL CG-3}
-As for longer-term goals, we want to handle more of the features in
-VISL CG-3, such as \textsc{map}, \textsc{append} and
-\textsc{substitute} rules, as well as dependency structure.  This also
-means finding different kinds of conflicts, such as dependency
-circularity.  In order to implement rules that may add new readings,
-or new tags to existing readings, we need to modify our approach in
-the SAT-encoding.  Even if the lexicon gives all readings that exist
-in the lexicon, the user might give a nonexistent reading, or in the
-case of {\sc map}, a syntactic tag, which is (by definition) not in
-the lexicon. We may need to move to a more scalable solution.
+As for longer-term goals, we want to handle more of the features in VISL CG-3,
+such as \textsc{map}, \textsc{append} and
+\textsc{substitute} rules, as well as dependency structure. 
+This also means finding different kinds of conflicts, such as dependency circularity.
+In order to implement rules that may add new readings, or new tags to
+existing readings, we need to modify our approach in the SAT-encoding.
+Even if the lexicon gives all readings that exist in the lexicon, the
+user might give a nonexistent reading, or in the case of {\sc map}, a
+syntactic tag, which is (by definition) not in the lexicon. We may need to move
+to a more scalable solution.
 
 \subsection{Evaluation with user base}
 
-Our next step is to evaluate our tools together with actual grammar
-writers, in comparison with a corpus-based method or machine learning.
-Below, we envision some properties that might be interesting; however,
-we would be interested in getting feedback from actual grammarians and
-adding features based on what is needed.
+Our next step is to evaluate our tools together with actual grammar writers,
+in comparison with a corpus-based method or machine learning. 
+Below, we envision some properties that might be interesting; however, we would be interested in getting feedback from actual grammarians and adding features based on what is needed.
 
 \paragraph{Reformatting a rule}
 
@@ -1406,44 +1520,77 @@ reason(s) for the conflict.
 
 
 \paragraph{Suggesting alternative orders} 
-On a speculative note, it could be interesting to identify pairs for a
-potential ``feeding order'' that is missed in the grammar. Say we have
-the following rule sequence:
+On a speculative note, it could be interesting to identify pairs for a potential ``feeding order'' that is missed in the grammar. Say we have the following rule sequence:
 
 \begin{verbatim}
 REMOVE:r1 x IF (-1C y)
 SELECT:s2 y IF (...)
 \end{verbatim}
 
-If $s2$ appears before $r1$, if makes way for $r1$ to act later on the
-same round.  However, if the rules are ordered as shown, and $y$ is
-not unambiguous from the beginning, then $r1$ has to wait for the next
-round to be applied.
+If $s2$ appears before $r1$, if makes way for $r1$ to act later on the same round. 
+However, if the rules are ordered as shown, and $y$ is not unambiguous from the beginning, then $r1$ has to wait for the next round to be applied.
 
-Lager \cite{lager01transformation} observed that the rule sequence
-learned by the $\mu$TBL system did not remove further ambiguities
-after its first run, and concluded that the sequence was ``optimal''.
-It would be interesting to recreate the goals in
-\cite{lager01transformation} and \cite{bick2013tuning}, to see if this
-semantic analysis of rule dependencies could lead also to better
-ordering within a grammar.
 
-Of course, it remains to be seen if any of these improvements would
-make a difference in speed; VISL CG-3 is already very fast, when the
-grammars are run multiple times.
 
+Lager \cite{lager01transformation} observed that the rule sequence learned by the $\mu$TBL system did not remove further ambiguities after its first run, and concluded that the sequence was ``optimal''. 
+It would be interesting to recreate the goals in \cite{lager01transformation} and \cite{bick2013tuning}, to see if this semantic analysis of rule dependencies could lead also to better ordering within a grammar.
+
+Of course, it remains to be seen if any of these improvements would make a difference in speed; VISL CG-3 is already very fast, when the grammars are run multiple times.
+
+% \paragraph{More cohesive grammar} 
+% The SAT-based tool could potentially compliment
+% \cite{voutilainen2004} state that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
+% This figure is very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms. However, this does not guarantee a coherent whole of rules. 
+% While the coverage information is easy to obtain from a corpus, our SAT-based tool could potentially compliment the process, and guide grammar writers towards a wide coverage of different linguistic phenomena.
 
 \subsection{Integration as a part of CG development environment}
 
-In order to attract the attention of the CG community, it would be
-desirable to incorporate the tools as a part of existing CG software.
-Currently, the described software consists of just under 3000 lines of
-Haskell code, including both the CG engine and the grammar analysis
-tool.  The grammar used for parsing the original CG files is written
-in BNFC \cite{bnfc}, and it is missing many constructs in CG-3.  Given
-these factors, the preferred option would be a full reimplementation
-and integration as a part of VISL CG-3, or any other CG development
-framework. We believe this would make the tools easier to use, more
-cohesive and synchronised with the main CG engine, and likely much
-faster. Of course, it is up to the community and the developers to
-decide if these tools are of interest.
+In order to attract the attention of the CG community, it would be desirable to incorporate the tools as a part of existing CG software. 
+Currently, the described software consists of just under 3000 lines of Haskell code, including both the CG engine and the grammar analysis tool.
+The grammar used for parsing the original CG files is written in BNFC \cite{bnfc}, and it is missing many constructs in CG-3. 
+Given these factors, the preferred option would be a full reimplementation and integration as a part of VISL CG-3, or any other CG development framework. We believe this would make the tools easier to use, more cohesive and synchronised with the main CG engine, and likely much faster. Of course, it is up to the community and the developers to decide if these tools are of interest.
+
+
+
+
+
+
+
+%%%%%%%
+% Too verbose beginning
+
+% In the previous chapter, we have seen the SAT encoding of CG used to
+% create a CG engine.
+% We evaluated our engine against the state-of-the-art VISL CG-3, using
+% the same grammar and same gold standard corpus.
+% Unsurprisingly, we got worse results when using the SAT-based parallel
+% implementation on grammars that were written for an imperative and
+% sequential CG engine. 
+% Given that most real grammars out there are written in such way, 
+% using SAT in the CG engine offers little practical use.
+
+
+% In the implementation described in the previous paragraph, we analysed
+% some real input sentences, and generated clauses of the rules that
+% applied to those particular sentences. If there is a word that is
+% analysed as n or v, it can only match rules that target those analyses
+% (and is surrounded by appropriate context).
+
+% Now, we operate on \emph{symbolic sentences}. We start from a
+% situation where each word in the sentence can have any analysis: this
+% means that every rule potentially applies to every word. This
+% combination of rule application starts narrowing down the potential
+% sentence.
+% The rules are interpreted as more abstract and declarative:
+% \texttt{REMOVE verb IF -1 det} does not just check if a particular
+% word is verb, it prohibits a combination of determiner followed by
+% verb \emph{anywhere}. The restriction can show in various ways, 
+% %if another rule requires the 3rd word of the sentence to be determiner, then the 4th may not be a verb. If a rule requires
+% and must be in sync with other restrictions.
+
+% If it turns out that there is no symbolic sentence that can satisfy a
+% number of rules, this means that there is a conflict among the
+% rules. In the following chapter, we will give examples of such
+% conflicts and describe how to detect them.
+
+

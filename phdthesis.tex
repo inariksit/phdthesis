@@ -185,6 +185,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 
+\usepackage{pdfpages}
 
 % Appendix after chapter 3
 \usepackage{appendix}
@@ -231,13 +232,20 @@
 \include{chapters/thesis-intro}
 
   \include{chapters/background}
-  \include{chapters/cg-analysis}
 
+  %\include{chapters/cg-encoding-and-analysis}
+  % attempt at squeezing encoding and analysis into one chapter
+
+  \include{chapters/cg-sat-encoding}
 \begin{subappendices}
   \include{chapters/sat-appendix}
 \end{subappendices}  
 
+  \include{chapters/cg-analysis}
+ 
+
   \include{chapters/gf-testing}
+
   \include{chapters/conclusion}
 
 
