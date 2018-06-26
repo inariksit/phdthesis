@@ -314,9 +314,9 @@ arguments that are needed to test the function. If the result of the
 function is an inflection table rather than a fully specified result,
 then we need several \emph{contexts} to squeeze out all the different
 forms. For example, a \t{CN} in English is open for number---\t{house}
-is really a table \{\t{Sg =>} \emph{``house''} \t{; Pl =>}
+is really a table \{\t{Sg~=>}~\emph{``house''}~\t{;~Pl~=>}
 \emph{``houses''}\}, and applying a determiner chooses the right form:
-\t{DetCN this house} linearises to \emph{this house} and \t{DetCN
+\t{DetCN~this~house} linearises to \emph{this house} and \t{DetCN
   these house} linearises to \emph{these houses}. 
 
 \label{sec:wishlist_comments}
@@ -378,10 +378,10 @@ category.
 \subsection{Enumerate arguments} Some syntactic functions are
 simply a single lexical item (for example the word \emph{good}); in
 this case just the tree \t{Good} is our answer.
-If we choose a function with arguments, such as \t{Pred}, then we have
+If we choose a function with arguments, such as \t{PrepNP}, then we have
 to supply it with argument trees. Each argument needs to be a
-tree belonging to the right category (in the example, \t{NP} and
-\t{AP}, respectively). 
+tree belonging to the right category (in the example, \t{Prep} and
+\t{NP}, respectively). 
 
 When we test a function, we want to see whether or not it uses the
 right information from its arguments, in the right way. The
@@ -419,10 +419,10 @@ this happen in practice.
 \t{AdjCN : Adj $\rightarrow$ CN $\rightarrow$ CN} in Spanish
 concrete syntax. 
 Firstly, we need a minimal and representative set of arguments:
-one premodifier and one postmodifier \t{AP} (\t{Good} and
-\t{Vegan}), as well as one feminine and one masculine
-\t{CN} (\t{Pizza} and \t{Wine}). Now, our full set of test cases are
-\t{Mod} applied to the cross product of \{\stackanchor{\tt \small
+one premodifier and one postmodifier \t{AP} (\t{good} and
+\t{small}), as well as one feminine and one masculine
+\t{CN} (\t{house} and \t{hill}). Now, our full set of test cases are
+\t{AdjCN} applied to the cross product of \{\stackanchor{\tt \small
   good}{\tt \small small}\} $\times$ \{\stackanchor{\tt \small
   house}{\tt \small hill}\}, as seen in Table~\ref{tab:adjAttr}.
 
@@ -447,13 +447,14 @@ one premodifier and one postmodifier \t{AP} (\t{Good} and
 perform when generating test cases is to generate all possible
 \emph{uses} of a function. After we provide a function with arguments,
 we need to put the resulting tree into a context, so that we can generate a
-single string from the result (a sentence). Generating contexts thus requires the specification of a top-level \emph{start category}, which is typically the sentence category (\t{S} in our example).
+single string from the result. By \emph{context}, we mean a tree in
+the start category (\t{S} in our example) with a \emph{hole} of the
+same type as the function under test (denoted by \char`_).
 
 The important thing here is that the generated set of contexts shows
 all the possible different ways the tree can be used. For example, for
-a test tree with an inflection table of 4 forms, we would generate 4 different sentences in which each of the 4 inflections is used.
-
-More specifically, by \emph{context}, we mean a tree in the start category (in our case \t{S}), with a \emph{hole} of the same type as the function under test (denoted by \t{\char`_}).
+a test tree with an inflection table of 4 forms, we would generate 4
+different sentences in which each of the 4 inflections is used.
 
 As an example, consider generating contexts for a tree of category \t{CN}.
 Since \t{CN} is variable for number, we need two contexts: 
@@ -462,7 +463,7 @@ the plural form.
 This suggests that we should apply two different
 \t{Det $\rightarrow$ CN $\rightarrow$ NP} functions, for instance
 \t{DetCN this} and \t{DetCN these}, and
-give their results to the \t{UttNP} function, which constructs a \t{S}.
+give their results to the \t{UttNP} function, which constructs an \t{S}.
 
 We could pick any of the \t{Pred*} functions, which also has the goal
 type \t{S}, but their second arguments don't make any difference as to
@@ -478,23 +479,23 @@ holes, and get 8 trees in total as shown in Figure~\ref{tab:testCases}.
 \begin{tabular}{| l | l |}
 \hline
 \t{UttNP (DetCN this
-    (AdjCN good house))} & \t{UttNP (DetCN this
-                                            (AdjCN good hill))} \\
+    (\underline{AdjCN good house}))} & \t{UttNP (DetCN this
+                                            (\underline{AdjCN good hill}))} \\
 esta buena casa          & este buen cerro \\ \hline
 \t{UttNP (DetCN these
-    (AdjCN good house))} & \t{UttNP (DetCN these
-                                            (AdjCN good hill))} \\
+    (\underline{AdjCN good house}))} & \t{UttNP (DetCN these
+                                            (\underline{AdjCN good hill}))} \\
 estas buenas casas       & estos buenos cerros \\ \hline
 \t{UttNP (DetCN this
-    (AdjCN small house))} & \t{UttNP (DetCN this
-                                            (AdjCN small hill))} \\
-esta peque\~{n}a casa          & este peque\~{n}o cerro \\ \hline
+    (\underline{AdjCN small house}))} & \t{UttNP (DetCN this
+                                            (\underline{AdjCN small hill}))} \\
+esta casa peque\~{n}a          & este cerro peque\~{n}o \\ \hline
 \t{UttNP (DetCN these
-    (AdjCN small house))} & \t{UttNP (DetCN these
-                                            (AdjCN small hill))} \\
-estas peque\~{n}as casas       & estos peque\~{n}os cerros \\ \hline
+    (\underline{AdjCN small house}))} & \t{UttNP (DetCN these
+                                            (\underline{AdjCN small hill}))} \\
+estas casas peque\~{n}as      & estos cerros peque\~{n}os \\ \hline
 \end{tabular}
-\caption{Complete test cases to test \t{Mod}}
+\caption{Complete test cases to test \t{AdjCN}}
 \label{tab:testCases}
 \end{table}
 
@@ -508,98 +509,145 @@ To compute relevant contexts with the start category \t{S} as a hole, we use the
 
 Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\empty$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.
 
+
+\paragraph{Alternative priorities} The current implementation of
+context generation prioritises minimal trees, such as \t{UttNP} for
+\t{NP} instead of any other functions. An alternative method would be
+to choose contexts where the \t{NP} can also use its parameters, in
+addition to just showing all of its strings. Arguably, it would tell
+more to the user to see a sentence like ``the house is big'', formed
+with \t{PredAdj}, rather than just ``house'', formed by \t{UttNP}.
+With the current scheme, we have found it a useful practice to hide
+functions such as \t{UttNP}, which just lift a category into the start
+category without introducing other arguments. For future, especially
+if we plan to move away from per-function basis and target the whole
+grammar with minimal sentences, it could make sense for a context to
+serve double purpose: show all its strings and use as many of its
+parameters as possible.
+% Prefer contexts where there are no coercions
+
+
 \subsection{Pruning the trees within one set of test cases} 
-On the scope of our tiny example grammar, this pruning method is
-easiest to illustrate when we test a category instead of a function;
-however, in bigger grammars, the need arises when testing functions as
-well. 
-In order to test the category \t{AP}, we need in total 12 example sentences:
+
+% \t{your} as definite,
+% singular\footnote{In our grammar, \t{your} is singular just because we
+%   decided---we could as well have made it plural, or include two
+%   variants, \t{yourSg} and \t{yourPl}.} and non-contracting; \t{a} as
+% indefinite, singular and non-contracting; \t{this} and \t{the} as
+%  definite, singular and contracting; finally, \t{these} as definite,
+%  plural and contracting. 
+
+Sometimes we can further reduce test cases created for a single function, taking
+advantage of the coercions in the grammar (explained in Section~\ref{sec:PMCFG}).
+Let us take as an example the function \t{DetNP : Det $\rightarrow$
+  NP} for Dutch. First, the category \t{Det} compiles into 8 concrete
+categories: combinations of singular vs. plural; contracting vs.
+non-contracting; and definite vs. indefinite. But our grammar only has
+5 determiners in total, out of 8 possible combinations---does this
+mean that we cannot test \t{DetNP} exhaustively with the small
+lexicon? To answer this, we look at the different concrete versions of
+\t{DetNP}.
+
+\paragraph{Coercions of \t{Det} used by \t{DetNP}} Due to coercions, there are only 4
+different type signatures for \t{DetNP}: definiteness is not relevant
+when a \t{Det} is made directly into an \t{NP} (it only matters when
+combining a determiner with an adjective). This brings us down to 4
+arguments for \t{DetNP}, shown below.
+
 \begin{itemize}
 \setlength\itemsep{0em}
-\item[--] 4 test cases for a premodifier \t{AP} as modifier;
-\item[--] 4 test cases for a postmodifier \t{AP} as modifier;
-\item[--] 4 test cases for \emph{any} \t{AP} as predicative.
+\item[--] \t{DetNP : Det$_{*\text{,sg,noncontr}}$ $\rightarrow$ NP$_\text{sg,noncontr}$}
+\item[--] \t{DetNP : Det$_{*\text{,pl,noncontr}}$ $\rightarrow$ NP$_\text{pl,noncontr}$}
+\item[--] \t{DetNP : Det$_{*\text{,sg,contr}}$ $\rightarrow$ NP$_\text{sg,contr}$}
+\item[--] \t{DetNP : Det$_{*\text{,pl,contr}}$ $\rightarrow$ NP$_\text{pl,contr}$}
 \end{itemize}
-These categories correspond to the concrete categories \quality{pre},
-\quality{post} and the coercion \quality{*} (as explained in
-Section~\ref{sec:Coercions}). Instead of generating redundant test
-cases for the predicative, we use the coercions in the grammar to
-detect when something is redundant.
 
-So how do coercions help us pruning? Here's the algorithm:
+% \noindent Four looks better than eight, but we are missing a plural
+% non-contracting determiner in the lexicon. However, we may still be
+% able to test \t{DetNP} exhaustively---
+\noindent The next step is to look at the \emph{contexts} for all goal
+categories of \t{DetNP}, as shown in Table~\ref{tbl:nps}.  The
+contracting \t{NP}s get two contexts, one to choose the full form and
+other the contracted form.  The non-contracting ones only get one
+context each, because their field for the contracted form is empty.
 
-We generate test cases and contexts for them, as usual.
-For instance, we have tested \t{AdjCN}, and we get the following:
 
-\begin{verbatim}
-(AdjCN : AdjPre  -> CNFem -> CNFem, [Attributive, Predicative])
-(AdjCN : AdjPost -> CNFem -> CNFem, [Attributive, Predicative])
-(AdjCN : AdjPre  -> CNMasc -> CNMasc, [Attributive, Predicative])
-(AdjCN : AdjPost -> CNMasc -> CNMasc, [Attributive, Predicative])
+\begin{table}
+\centering
+%\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|l|} \hline
+\t{NP$_\text{sg,noncontr}$} & \t{NP$_\text{pl,noncontr}$} & \t{NP$_\text{sg,contr}$}  & \t{NP$_\text{pl,contr}$}\\ \hline
 
-Table XXX
-\end{verbatim}
+\t{UttNP~\char`_}   & \t{UttNP~\char`_}   & \t{UttNP~\char`_} & \t{UttNP~\char`_} \\
+ &  & \t{PredAdv \dots{} (PrepNP on \char`_)} & \t{PredAdv \dots{} (PrepNP on \char`_)}
+  \\ \hline
+\end{tabular} %}
+\caption{Contexts to showcase all strings of different concrete \t{NP}s in the Dutch grammar}
+\label{tbl:nps}
+\end{table}
 
-In addition, we look into the coercions in the grammar, and keep those
-that coerce at least 2 of the concrete categories in our list. (That
-is, CNFem and CNMasc).
 
-\begin{verbatim}
-Coercion_999 -> [CNFem,CNMasc]
-\end{verbatim}
+\paragraph{Coercions of \t{NP} used in contexts} In addition, we look for
+\emph{coercions} for all the goal categories. For instance, there is
+one that covers all \t{NP}s; let us call that \t{NP$_*$}. This tells
+us that there are functions that take \t{NP}, but don’t care anything
+about about its parameters. One such example is \t{UttNP}, which just
+takes an \t{NP}, chooses the nominative form and makes it into a
+standalone utterance.  There is another useful coercion, which covers
+both singular and plural contracting \t{NP}s; we call that
+\t{NP$_{*\text{,contr}}$}. It is used by \t{PrepNP}\footnote{Along
+  with a similar coercion \t{NP$_{*\text{,noncontr}}$} for
+  non-contracting \t{NP}s}, which doesn't care about number, just
+whether to merge its arguments or not.
+In order to reduce the number of test cases for \t{DetNP}, two properties need to hold:
+\begin{enumerate}
+\item A number of concrete categories for \t{NP} are interchangeable in a particular
+context;
+\item That context is one of those chosen to showcase \t{NP}.
+\end{enumerate}
 
-Now we find the list of contexts for the \emph{coercion}: e.g.
+\noindent With \t{NP$_*$} and \t{NP$_\text{*,contr}$}, both of these
+properties hold.
+%\t{UttNP : NP$_*$ $\rightarrow$ S}, and \t{PrepNP :
+%  Prep  $\rightarrow$ NP$_\text{*,contr}$  $\rightarrow$ Adv}.
+Thus, we only need to put one representative of \emph{any} \t{NP} into
+the context \t{UttNP~\char`_}, and one representative of the
+contracting \t{NP}s into the context \t{PredAdv~\dots~(PrepNP~on~\char`_)}. 
+The following trees would fit the description:
 
-\begin{verbatim}
-(Coercion_999, [Predicative,SomethingIrrelevant,EvenMoreIrrelevant])
-\end{verbatim}
-
-Out of these contexts, we keep those that are somewhere in the list of
-the contexts for \t{AdjCN}. There is one context that matches, namely
-\t{Predicative}. Now we have got our pruning candidates:
-
-\begin{verbatim}
-(Coercion\_999, [CNFem,CNMasc], [Predicative])
-\end{verbatim}
-
-i.e. ``Coercion 999 covers the categories CNFem and CNMasc, in the
-context Predicative''. This means that it is redundant to include
-Predicative for \emph{all} the test cases in Table XXX. But on the
-other hand, the context Attributive never appears in the contexts for
-Coercion 999, thus we know that it is important to repeat it for all
-the items in Table XXX.
-
-We linearise the following sentences:
-
-\begin{verbatim}
-Attributive (AdjCN : AdjPre  -> CNFem -> CNFem)
-Attributive (AdjCN : AdjPost -> CNFem -> CNFem)
-Attributive (AdjCN : AdjPre  -> CNMasc -> CNMasc)
-Attributive (AdjCN : AdjPost -> CNMasc -> CNMasc)
-Predicative (<Pick any of the following trees!>)
-
-Table YYY
-\end{verbatim}
-
-Sometimes it happens that one test case only has contexts that other
-trees could as well fill. Then it may happen that the test case is
-never even shown to the user. Consider the following initial table:
-
-\begin{verbatim}
-(Foo : X1 -> Y2 -> Z3, [1,2,3])
-(Foo : X4 -> Y5 -> Z6, [1,2])
-
-Table ZZZ
-\end{verbatim}
-
-with coercions \t{(Coercion\_999, [Z3,Z6], [1,2])}. In this case, two
-things happen:
 \begin{itemize}
-\item Z6's contexts are fully contained in Z3's,\emph{and} 
-\item Z3 and Z6 coerce to the same category Coercion\_999.
+\item[] \t{UttNP (DetNP this)}  \\
+ \emph{deze} \\
+ `this'
+\item[] \t{PredAdv (DetCN a house) (PrepNP on (DetNP this)}  \\
+\emph{een huis hierop} \\
+`a house on this'
 \end{itemize}
-This is why we can safely ignore all of the test case \t{Foo : X4 ->
-  Y5 -> Z6} and only use \t{Foo : X1 -> Y2 -> Z3}.
+
+
+
+
+% Now, in order to compute a context for a coercion, we simply take
+% the largest common subset of the categories that the coercion covers.
+% The coercion \t{NP$_*$} is the most general, covering all \t{NP}s, so it only has the most general
+% context: \t{UttNP~\char`_}, which is common to all non-coerced
+% \t{NP}s. The other coercion \t{NP$_\text{*,contr}$} is more specific,
+% so it has also a second context, only included for contracting
+% \t{NP}s. Some contexts for coercions are shown in Table~\ref{tbl:npcs}.
+
+% \begin{table}[h]
+% \centering
+% \begin{tabular}{|l|l|l|} \hline
+% \t{NP$_*$}  &  \t{NP$_{*\text{,noncontr}}$} &\t{NP$_{*\text{,contr}}$}\\ \hline
+
+% \t{UttNP~\char`_} & \t{UttNP~\char`_} & \t{UttNP~\char`_} \\
+%                   & & \t{PredAdv \dots{} (PrepNP on \char`_)}
+%   \\ \hline
+% \end{tabular}
+% \caption{Contexts to showcase all strings of some \t{NP}-coercions in the Dutch grammar}
+% \label{tbl:npcs}
+% \end{table}
+
 
 \subsection{Pruning the trees to test the whole grammar}
 \label{sec:pruning_all}

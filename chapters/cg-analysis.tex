@@ -1066,14 +1066,21 @@ and while the overhead may be acceptable when checking the full grammar,
 it is hardly so when analysing just a handful of rules. 
 We are working on an option to store and reuse the ambiguity class constraints.
 
-\section{Experiments on Basque grammar}
+\section{Experiments on a Basque grammar}
 \label{sec:basqueEval}
 
 After the original experiment was done on the previously introduced
 three languages, we got a chance to test a Basque grammar
-\cite{aduriz1997euscg}. The size of the tag set was even larger than
-for Finnish, and made it impossible to test the whole grammar with our
-setup. We explain our modifications and report preliminary results. 
+\cite{aduriz1997euscg}. We worked together with grammarians, who
+improved the grammar in various ways: reordering, removing or
+modifying rules, and updating deprecated tag sets. It is hard to
+say how much exactly our tool influenced the improved F-score, but
+nevertheless, the tool was helpful in detecting both internal and
+interaction conflicts.
+
+The size of the Basque tag set was much larger than for Finnish, and
+made it impossible to test the whole grammar with our setup. We
+explain our modifications and report preliminary results.
 
 \subsection{Changes in the setup}
 \label{sec:basqueChanges}
@@ -1173,7 +1180,7 @@ any common noun or noun as correct, hence 100 \% for both measures.
 
 \end{tabular}
 }
-\caption{Levels of granularity}
+\caption{Levels of granularity in the Basque grammar}
 \label{table:levels}
 \end{table}
 
@@ -1182,25 +1189,24 @@ any common noun or noun as correct, hence 100 \% for both measures.
 \paragraph{Analysis of the results}
 \label{analysis}
 
-The results of the preliminary evaluation are in Table~\ref{table:res}. 
-The drop in performance after the preliminary cleanup is most certainly due to ordering---we found it 
-easier to work on the grammar directly after grouping and sorting the rules, as shown in
-Figure~\ref{fig:basqueSorted}. 
-%Both precision and recall get worse, 
-% The worst drop is in precision; from 62 \% to 56 \% on the full tagset,
-%which suggests that the alphabetical ordering blocks many rules from firing.
+The results of the preliminary evaluation are in
+Table~\ref{table:res}.  The drop in performance after the preliminary
+cleanup is most certainly due to ordering---the alphabetical ordering
+seems to block many rules from firing. We could have done the
+preliminary fixes on the grammar in the old format, to get more
+representative scores after the initial cleanup, but we found it easier to work
+on the grammar directly after grouping and sorting the rules, as shown
+in Figure~\ref{fig:basqueSorted}. 
 Tuning the cleaned grammar brings the precision up, indicating that
 more rules get to fire in the tuned order. The difference is most
 dramatic in the sorted and grouped grammar on the 4th level: the
 original precision drops from 62 \% to 56 \%, and goes up to 68 \%
 with the tuning. 
 
-As explained in Section~\ref{manual}, the fairest test at this stage is to compare the
+The fairest test at this stage is to compare the
 tuned results of the original and the cleaned grammar.
 We see the cleaned and tuned grammar slightly outperforming the tuned original;
 the difference is not large, but we see it as a promising start.
-
-
 
 %Given that recall only improves 2 percentage points, but precision more than 20, the main problem
 %seems to be not disambiguating enough, and to only smaller extent removing the right reading.
@@ -1236,10 +1242,17 @@ Our main problem is the size of the tag set: all possible combinations of tags o
 and that would make the SAT-problems too big.
 We cannot just ignore all tags beyond level 2 or 3, because many of the rules rely on them as contexts.
 
-As a first approximation, we have created a reduced set of 21000 readings, which allows the program to check up to 200 
-rules at a time before running out of memory. We are still developing better solutions, and have not run the whole grammar with this setup.
-Among the first rules we tested, it has found a few redundancies, such as the following:
+As a first approximation, we have created a reduced set of 21000
+readings, which allows the program to check up to 200 rules at a time
+before running out of memory. The reduced readings, along with the
+relaxed lexicon handling (as explained in
+Section~\ref{sec:basqueChanges}), finds some nontrivial conflicts and
+redundancies, such as the following:
+%We are still developing better solutions, and have not run the whole grammar with this setup.
+%Among the first rules we tested, it has found a few redundancies, such as the following:
 
+\begin{itemize}
+\item[]
 \begin{verbatim}
   SELECT ADB IF
     (0 POSTPOSIZIOAK-9) 
@@ -1247,19 +1260,29 @@ Among the first rules we tested, it has found a few redundancies, such as the fo
   SELECT ADB IF  
     (0 ("<barrena>")) (-1 INE) ;
 \end{verbatim}
+\end{itemize}
 
-\noindent The problem is that the set \texttt{POSTPOSIZIOAK-9} contains the word form ``barrena'', and the other set contains the tag \texttt{INE}; in other words, the latter rule is fully contained in the first rule and hence redundant.
+\noindent The problem is that the set \texttt{POSTPOSIZIOAK-9}
+contains the word form ``barrena'', and the other set contains the tag
+\texttt{INE}; in other words, the latter rule is fully contained in
+the first rule and hence redundant.
 
 
-Our second strategy is to reduce the rules themselves: from a rule such as \texttt{SELECT Verb + Sg IF (1 Noun + Sg)},
-we just remove all tags higher than level 2, resulting in
-\texttt{SELECT Verb IF (1 Noun)}. We also keep all lexical tags
-intact, but unlike in \cite{listenmaa_claessen2016}, we allow them to attach to any morphological tags; this may
-lead to further false negatives, but reduces the size of the SAT-problem.
-This setup analyses the whole grammar, in the given order, in approximately 1 hour. 
-With the reduced rules, the program would not find the redundancy described earlier, because
-the problem lies in the 3rd-level tag \texttt{INE}. But this approximation found successfully 11 duplicates or near-duplicates in the whole grammar, such as the following:
+Our second strategy is to reduce the rules themselves: from a rule
+such as \texttt{SELECT Verb + Sg IF (1 Noun + Sg)}, we just remove all
+tags higher than level 2, resulting in \texttt{SELECT Verb IF (1
+  Noun)}. We also keep all lexical tags intact, but unlike in
+\cite{listenmaa_claessen2016}, we allow them to attach to any
+morphological tags; this may lead to further false negatives, but
+reduces the size of the SAT-problem.  This setup analyses the whole
+grammar, in the given order, in approximately 1 hour.  With the
+reduced rules, the program would not find the redundancy described
+earlier, because the problem lies in the 3rd-level tag
+\texttt{INE}. But this approximation found successfully 11 duplicates
+or near-duplicates in the whole grammar, such as the following:
 
+\begin{itemize}
+\item[]
 \begin{verbatim}
 SELECT IZE IF 	 # line 817
   (0 POSTPOSIZIOAK-10IZE LINK 0 IZE_ABS_MG) 
@@ -1268,8 +1291,11 @@ SELECT IZE IF 	 # line 829
   (0 POSTPOSIZIOAK-10IZE + IZE_ABS_MG) 
   (-1 IZE-DET-IOR-ADJ-ELI-SIG + GEN) ;
 \end{verbatim}
+\end{itemize}
 
-\noindent Both of the contextual tests contain 3rd-level tags (\texttt{ABS, MG, GEN}), but removing them keeps the sets identical, hence it is not a problem for the conflict check.
+\noindent Both of the contextual tests contain 3rd-level tags
+(\texttt{ABS, MG, GEN}), but removing them keeps the sets identical,
+hence it is not a problem for the conflict check.
 
 
 
@@ -1281,11 +1307,13 @@ illegal tags, which are the reason for a large number of internal
 conflicts.  But some cases are due to a mistake in logic, rather than
 a typo; examples such as the following were easily found by the
 tool. %elow are some examples of the internal conflicts found by the tool:
-
+\begin{itemize}
+\item[]
 \begin{verbatim}
-  REMOVE ADI IF (NOT 0 ADI) (1 BAT) ;
-  SELECT ADI IF (0C ADI LINK 0 IZE) ;
+REMOVE ADI IF (NOT 0 ADI) (1 BAT) ;
+SELECT ADI IF (0C ADI LINK 0 IZE) ;
 \end{verbatim}
+\end{itemize}
 
 \noindent The first rule is clearly an error; it is impossible to remove an ADI from a reading that does not have one.
 The conflict likely stems from a confusion between \texttt{NOT X} and \texttt{(*) - X}.
@@ -1320,10 +1348,6 @@ sense to keep two versions of the grammar: one for maintenance, and
 other for running, created automatically from the former.
 
 
-\section{Generative Constraint Grammar}
-
-
-\label{sec:expressivity}
 
 \input{chapters/cg-expressivity}
 
@@ -1387,11 +1411,13 @@ the lexicon. We may need to move to a more scalable solution.
 
 \subsection{Evaluation with user base}
 
-Our next step is to evaluate our tools together with actual grammar
-writers, in comparison with a corpus-based method or machine learning.
-Below, we envision some properties that might be interesting; however,
-we would be interested in getting feedback from actual grammarians and
-adding features based on what is needed.
+Cleaning up the Basque grammar was our first chance to test the tool
+together with grammarians, complemented with machine learning (the
+tuning step). We got to a promising start, but due to the performance
+problems, we had to simplify our approach considerably. Below, we
+envision some properties that might be interesting to test further;
+however, we would be interested in getting feedback from actual
+grammarians and adding features based on what is needed.
 
 \paragraph{Reformatting a rule}
 
@@ -1410,10 +1436,13 @@ On a speculative note, it could be interesting to identify pairs for a
 potential ``feeding order'' that is missed in the grammar. Say we have
 the following rule sequence:
 
+\begin{itemize}
+\item[]
 \begin{verbatim}
 REMOVE:r1 x IF (-1C y)
 SELECT:s2 y IF (...)
 \end{verbatim}
+\end{itemize}
 
 If $s2$ appears before $r1$, if makes way for $r1$ to act later on the
 same round.  However, if the rules are ordered as shown, and $y$ is
@@ -1431,6 +1460,25 @@ ordering within a grammar.
 Of course, it remains to be seen if any of these improvements would
 make a difference in speed; VISL CG-3 is already very fast, when the
 grammars are run multiple times.
+
+\paragraph{Alternative ways of deriving CGs}
+
+Learning CG rules from a corpus has been a popular topic since the
+beginning of the formalism
+\cite{inducing_cg1996,lindberg_eineborg98ilp,lager01transformation,asfrent14}.
+As an alternative, our method of transforming regular grammars into an
+approximate CG (see Section~\ref{sec:expressivity} could be of
+interest. To be fair, the resulting grammars are not very readable:
+they include extra cohorts and symbols, and the logic is spread across
+rules in a rather obscure way---in contrast to a human-written
+grammar, where each rule is a self-contained piece of truth about a
+language.  Therefore we do not envision the generated grammars being
+used as is, but rather as compilation targets.  Such CGs could be used
+as a part of a larger constraint grammar: some sections can be written
+manually, and others derived from existing grammars. So far we only
+have a working conversion tool for finite-state automata, but we are
+hoping to develop this further, to also include context-free or even
+mildly context-sensitive grammars.
 
 
 \subsection{Integration as a part of CG development environment}
