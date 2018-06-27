@@ -1,0 +1,198 @@
+\section{Fixpoint computation}
+\label{sec:moreFP}
+
+We touched upon fixpoint computation in the section for enumerating
+contexts. Here we explain the method with more focus, along with
+other, more general and language-independent analyses we can perform
+on a grammar. The reader uninterested in technical details may well
+skip this section and move on to evaluation.
+
+\subsection{Additional analyses}
+
+Aside from concrete language-dependent phenomena, there are more
+general questions a grammar writer may ask. For instance, say that our
+concrete type for a \t{CN} in some language is an inflection table
+from case to string, we would like to know if (a) a given string field
+is unreachable from the start category; (b) any two fields always
+contain the same string; or (c) some fields are always the empty
+string.  In addition, a whole argument may be erased by some function:
+say that \t{AdjCN~:~Adj~$\rightarrow$~CN~$\rightarrow$~CN} never adds
+the adjective to the new \t{CN}, in which case \t{AdjCN blue house}
+and \t{house} are linearised identically. Instead of testing every
+single function, we would like to know if there are any functions in
+the grammar that behave like this.
+
+% In Dutch, nominative and accusative are only different for
+% pronouns, so for this grammar we would indeed find out that case is
+% redundant: all nominative and accusative fields would be
+% identical. As grammarians, we could decide to keep the distinction for
+% further extension of the grammar---maybe we want to add pronouns in
+% the future---or remove it as redundant.
+
+The analyses mentioned in this section are implemented in a similar
+way to the method for enumerating all contexts: using fixpoint
+computation. We start from the easier cases of empty and unused
+fields, and move on to a detailed explanation of context generation.
+
+\subsection{Example: empty concrete categories}
+
+We start with an extremely simple analysis: detecting empty concrete
+categories. A single GF category compiles into multiple concrete
+categories, one for each combination of parameters. Thus we may wonder
+which combinations are actually in use in the lexicon.
+
+As a first step, we can see GF categories as mutually recursive
+datatypes. Take a fragment of the GF grammar in Figure~\ref{fig:exampleGrammar}:
+
+\begin{itemize}
+\item[] 
+\begin{verbatim}
+cat
+  Adv ; CN ; Det ; NP ; Prep ;
+fun
+  PrepNP : Prep -> NP -> Adv ;
+  AdvCN  : Adv  -> CN -> CN ;
+  DetCN  : Det  -> CN -> NP ;
+  house, … : CN ;
+  this, these, … : Det ;
+  on, … : Prep
+\end{verbatim}
+\end{itemize}
+
+We change the syntax of the functions slightly: move the result
+category to the left and remove arrows.
+
+\begin{itemize}
+\item[]
+\begin{verbatim}
+fun
+  Adv  ::= prepNP Prep NP ;
+  CN   ::= advCN Adv CN | house | … ;
+  NP   ::= detCN Det CN ;
+  Det  ::= this | these | … ;
+  Prep ::= on | … ;
+\end{verbatim}
+\end{itemize}
+
+
+Now, let us move from the \gf abstract syntax to the \pmcfg concrete
+categories. We label the different concrete categories with
+superscript numbers rather arbitrarily; they don't have any deeper
+meaning per se, and don't need to be memorised. Apart from the first
+lines, we show only one function for each concrete category. This is
+just to simplify the example; in reality, all of the result categories
+may have several functions that produce them.
+
+\begin{itemize}
+\item[]
+\begin{verbatim}
+  Adv0  ::= prepNP Prep⁷ NP³ | prepNP Prep⁷ NP⁴ ;
+  CN¹   ::= advCN Adv0 CN¹ | house | … ;
+  CN²   ::= advCN Adv0 CN² ;
+  NP³   ::= detCN Det⁵ CN¹ ;
+  NP⁴   ::= detCN Det⁶ CN² ;
+  Det⁵  ::= this ;
+  Det⁶  ::= these ;
+  Prep⁷ ::= on ;
+\end{verbatim}
+\end{itemize}
+
+Before, at the GF level, we could just look at the lexicon and check
+whether there is some \t{CN} (e.g. \t{house}). But now, we don't know 
+just by looking whether we have both \t{CN$^{\text 1}$} and
+\t{CN$^\text{2}$}: maybe one of the concrete categories is
+linguistically impossible. And if \t{CN$^\text{2}$} is empty, then
+\t{NP$^\text{4}$} is too, because it is constructed from
+\t{CN$^\text{2}$}. 
+Thus, we can compute if a category is empty, given the emptiness of its argument categories.
+
+We need some initial guesses for the values. Ultimately we want to
+just know if a given category has a member or no, so we can deal with
+Booleans. We give an initial value of False to all variables: that is,
+“all categories are empty”. We mark that with red text.
+
+\begin{itemize}
+\item[]
+\begin{verbatim}
+  Adv0  ::= prepNP Prep⁷ NP³ | prepNP Prep⁷ NP⁴ ;
+  CN¹   ::= advCN Adv0 CN¹ | house | … ;
+  CN²   ::= advCN Adv0 CN² ;
+  NP³   ::= detCN Det⁵ CN¹ ;
+  NP⁴   ::= detCN Det⁶ CN² ;
+  Det⁵  ::= this ;
+  Det⁶  ::= these ;
+  Prep⁷ ::= on ;
+\end{verbatim}
+\end{itemize}
+
+In fact, now that we’re reduced to Booleans, we don’t even need to
+care about what the original GF functions do with their arguments. So
+we can replace all of the GF functions with just a \t{\&\&}. In case
+of multiple functions that have the same concrete category as a
+result, we replace the | with \t{||}.
+
+\begin{itemize}
+\item[]
+\begin{verbatim}
+  Adv0  ::= Prep⁷ && NP³ || Prep⁷ && NP⁴ ;
+  CN¹   ::= Adv0 && CN¹ || house ;
+  CN²   ::= Adv0 && CN² ;
+  NP³   ::= Det⁵ && CN¹ ;
+  NP⁴   ::= Det⁶ && CN² ;
+  Det⁵  ::= this ;
+  Det⁶  ::= these ;
+  Prep⁷ ::= on ;
+\end{verbatim}
+\end{itemize}
+
+A variable for a given category turns into True, when we find a member
+of that category. On the first round, we start from the lexical
+categories: \t{CN$^\text{*}$}, \t{Det$^*$} and \t{Prep$^*$}. To
+continue with the example, say that all have a lexical item except for
+\t{CN$^\text{2}$}. Thus, after the first round, the following
+categories are found non-empty: \todo{fancy colours}
+
+\begin{itemize}
+\item[]
+\begin{verbatim}
+  Adv0  ::= Prep⁷ && NP³ || Prep⁷ && NP⁴ ;
+  CN¹   ::= Adv0 && CN¹ || house ; --TRUE
+  CN²   ::= Adv0 && CN² ;
+  NP³   ::= Det⁵ && CN¹ ;
+  NP⁴   ::= Det⁶ && CN² ;
+  Det⁵  ::= this ;  --TRUE
+  Det⁶  ::= these ; --TRUE
+  Prep⁷ ::= on ;    --TRUE
+\end{verbatim}
+\end{itemize}
+
+On the second round, the change of status in \t{Det$^\text{5}$} and \t{CN$^\text{1}$} updates \t{NP$^\text{3}$} into true. On the third and final round, also  \t{Adv$^\text{0}$} becomes true, due to \t{NP$^\text{3}$} being true. But after the third round, nothing is going to change anymore, no matter how much we recompute. In other words, we have found a fixed point.
+
+\subsection{Least fixpoint}
+
+In the previous example, we found \emph{a} fixed point. There are several of them---why is ours a good one?
+
+Pretend for a moment that the set of variables  \t{Adv$^\text{0}$}--\t{Prep$^\text{7}$} has nothing to do with the original GF grammar. Then, we could easily conceive of other assignments to the variables that are fixpoints: say, everything is False; only \t{Det$^\text{5}$} and \t{CN$^\text{2}$} are True; everything is True. (In contrast, “only \t{Det$^\text{5}$} and \t{CN$^\text{1}$} are True” is not a fixpoint, because if we iterated one more time, \t{NP$^\text{3}$} would change from False to True).
+
+Of course, given that these variables come from an actual GF grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. We don’t want to be too pessimistic either: why claim that a perfectly good category is empty? Instead, we want the most conservative solution that respects reality--the least fixpoint, given the actual GF grammar.
+
+To define \emph{least}, we need to define an ordering on the domain of possible solutions. In the case of Booleans, we just say False ≤ True, and hence a solution with more False is smaller.
+
+\subsection{Empty and unreachable fields}
+
+\subsection{Context generation revisited}
+
+The strongest clue was the notion of dependence: in order to compute contexts for Kind, we need to already have computed contexts for Item. All categories depend on other categories, except for the start category.
+
+So, in the beginning we know the optimal path (“do nothing, you’re already there!”) for the start category, but not for other categories. This is a hint that we could do top-down, just like we did when computing reachable categories. Let’s start writing and figure out the actual values and types as we go.
+
+Remember again that contexts are trees with holes, or in other words, functions of type Tree → Tree. To construct paths, we apply the trees that are closer to the start category to the trees that are lower. Well, technically we cannot apply Tree → Tree into another Tree → Tree–we just get a composition that is still Tree → Tree. But eventually there will be a Tree: one of those examples we’ve generated at the step before context generation. 
+
+% In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
+% $$
+% \textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)
+% $$
+% In words, to generate contexts with holes of type $H$, we enumerate all functions $F$ that have a $H$ as an argument, and enumerate all contexts $C$ that have the result type $H'$ of $F$ as a hole type, and put $C$ and $F$ together to get a new context. Then, we apply a function $\textsf{filter}$ to the result in order to filter out redudant contexts, i.e. contexts whose uses of the strings of $H$ are already covered by other contexts in the same set.
+% To compute relevant contexts with the start category \t{S} as a hole, we use the following definition $\textsf{contexts}(\t{S}) = \{ \; \_ \; \}$.
+
+% Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\varnothing$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.

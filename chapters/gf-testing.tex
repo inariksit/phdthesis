@@ -10,6 +10,7 @@
 \def\feat{\textsc{feat}}
 \def\numOfLex{17}
 \def\numOfFun{8}
+\def\gray#1{{\color{gray}\char`<#1\char`>}}
 \newcommand{\tts}[1]{{\tt #1}}
 % \newcommand{\quality}[1]{${\tt AP_{#1}}$}
 % \newcommand{\kind}[1]{${\tt CN_{#1}}$}
@@ -41,7 +42,7 @@ are working on the reflexive construct. In order to check correctness
 for the 3rd person singular, we need to test for three different
 subjects, because the object has to agree with the subject: ``he sees
 himself'', ``she sees herself'' and ``it sees itself''. Without seeing
-all three examples, we cannot be certain that the reflexive
+all three examples (along with the rest of the pronouns), we cannot be certain that the reflexive
 construction is implemented correctly. In contrast, the general
 pattern of a transitive verb with a non-reflexive object is enough to
 test with only one third person subject: \emph{he, she, it}, or any
@@ -77,11 +78,11 @@ general \gf{} introduction, and \ref{sec:PMCFG} especially for
 translation of a \gf{} grammar into \pmcfg{}.
 
 
-\section{Previous work}
+\section{Related work}
 
 Traditionally, \gf{} grammars are tested by the grammarians themselves,
 much in the way described in the introduction of this article. An example
-human-written treebank can be found in \cite[p.~136--142]{khegai2006phd}.
+human-written treebank can be found in Khegai's work \cite[p.~136--142]{khegai2006phd}.
 For testing the coverage of the grammars, grammarians have used
 treebanks such as the UD treebank \cite{nivre2016ud} and Penn treebank
 \cite{marcus1993penntreebank}, and for testing morphology, various open-source resources
@@ -92,7 +93,7 @@ project \cite{forcada2011apertium}.
 %function is used in the treebank.}
 
 
-As an example of other grammar formalisms,
+As an example of other grammar formalisms, Butt et al.
 \cite[pp.~212--213]{butt1999lfg} describe common methods of testing
 the {\sc lfg} formalism: similarly to \gf, they use a combination of
 human-written test suites meant to cover particular phenomena, and
@@ -104,15 +105,24 @@ grammars, whereas \gf{} tests are for multilingual grammars, so they are
 stored as trees. In other words, \gf{} tests only what the grammar
 outputs, not what it parses.
 
-\todo{``I suggest that the authors connect their work with generating test for software and automata and also to computational linguistic work on correcting grammars conceived for parsing to turn them into grammars for generation.''}
-
-\cite{bender2010} describe a system for creating and testing \hpsg{} \cite{pollard1994hpsg}
+Other related work in computational linguistics includes error mining
+for parsing grammars, such as Gardent
+\cite{gardent2012errormining}. \todo{More on this/other related.}
+Bender et al. \cite{bender2010} describe a system for creating and testing \hpsg{} \cite{pollard1994hpsg}
 grammars, by using a detailed questionnaire about the features of the
 given language. This system achieves both generating the grammar rules
 and testing them simultaneously, whereas our method relies on an
 existing grammar. On the other hand, our system is more general to any
 kinds of grammars, including application grammars where the
 distinctions are not syntactic but semantic.
+
+However, our biggest source of inspiration is automatic test case
+generation for general software, such as
+\cite{hamon2004testgen}. Software testing and grammar testing both
+deal with notions of coverage and compactness.
+
+
+\todo{``I suggest that the authors connect their work with generating test for software and automata and also to computational linguistic work on correcting grammars conceived for parsing to turn them into grammars for generation.''}
 
 \section{Grammar}
 
@@ -145,32 +155,35 @@ abstract NounPhrases = {
 \label{fig:exampleGrammar}
 \end{figure}
 
-Figure~\ref{fig:exampleGrammar} shows a small example of a \gf{} abstract
-grammar. The grammar generates noun phrases for a lexicon of 15
-words (\emph{a, the, \dots, without}) in four lexical categories,
-and seven functions to construct phrases. \t{CN} stands for common
-noun, and it can be modified by arbitrarily many adjectives (\t{Adj}),
-e.g. \emph{small blue house} is an English linearisation of the
-abstract syntax tree \t{AdjCN small (AdjCN blue house)}. A \t{CN} is
-quantified into a noun phrase (\t{NP}) by adding a determiner
-(\t{Det}), e.g. \emph{the small house} corresponds to tree \t{DetCN the (AdjCN small
-  house)}. Alternatively, a \t{Det} can also become an independent
-noun phrase (as in, \emph{(I like) this} instead of \emph{(I like) this
-  house}) using the constructor \t{DetNP}. Finally, we can form an
-adverb (\t{Adv}) by combining a preposition (\t{Prep}) with an \t{NP},
-and those adverbs can modify yet another \t{CN}. 
-We refer to this grammar throughout the chapter.
+Figure~\ref{fig:exampleGrammar} shows a small example of a \gf{}
+abstract grammar. The grammar generates noun phrases for a lexicon of
+\numOfLex{} words (\emph{a, the, \dots, without}) in four lexical
+categories, and \numOfFun{} functions to construct phrases. \t{CN} stands
+for common noun, and it can be modified by arbitrarily many adjectives
+(\t{Adj}), e.g. \emph{small blue house} is an English linearisation of
+the abstract syntax tree \t{AdjCN small (AdjCN blue house)}. A \t{CN}
+is quantified into a noun phrase (\t{NP}) by adding a determiner
+(\t{Det}), e.g. \emph{the small house} corresponds to tree \t{DetCN
+  the (AdjCN small house)}. Alternatively, a \t{Det} can also become
+an independent noun phrase (as in, \emph{(I like) this} instead of
+\emph{(I like) this house}) using the constructor \t{DetNP}. Finally,
+we can form an adverb (\t{Adv}) by combining a preposition (\t{Prep})
+with an \t{NP}, and those adverbs can modify yet another \t{CN}.  We
+refer to this grammar throughout the chapter.
+
+\subsection{Examples to test}
 
 As examples that help illustrate different testing needs for different
 languages, let us take four language-specific phenomena in the scope
-of our small grammar: adjective placement and agreement in Spanish,
-preposition contraction in Dutch, adjective agreement in Estonian and
-determiner placement in Basque. Concrete syntaxes for all four
-languages are found in Appendix~\todo{make appendix}; however, the
-chapter can be read without understanding the details of the grammar.
+of our small grammar: preposition contraction in Dutch, adjective
+agreement in Estonian, adjective placement and agreement in Spanish
+and determiner placement in Basque. Concrete syntaxes for all four
+languages are found in
+\url{https://github.com/inariksit/GF-testing/data/grammars/}; however,
+the chapter can be read without understanding the details of the
+concrete syntaxes.
 
-
-\subsection{Preposition contraction in Dutch} In Dutch, some prepositions should
+\paragraph{Preposition contraction in Dutch} In Dutch, some prepositions should
 merge with a single determiner or pronoun, e.g. \emph{met~dit} `with
 this' becomes \emph{hiermee} `herewith', but stay independent when the
 determiner quantifies a noun, e.g. \emph{met~dit~huis} `with this house'. 
@@ -183,11 +196,12 @@ single determiner, and one that comes from a noun. Since the result of
 \t{PrepNP} is an adverb, which does not inflect any further, we are
 happy with just finding the right arguments to \t{PrepNP}, no need for contexts.
 In order to catch a bug in the function, or confirm there is none, we
-need the following 4 trees: \\
+need the following 4 trees: 
 \t{PrepNP} \{ \stackanchor{\tt with}{\tt without} \} 
            \{ \stackanchor{\tt DetNP this}{\tt DetCN this house} \}. 
 
-\subsection{Adjective agreement in Estonian} In Estonian,
+
+\paragraph{Adjective agreement in Estonian} In Estonian,
 most adjectives agree with nouns in case and number in an attributive
 position. However, participles are invariable (singular nominative) as 
 attributes but inflect regularly in a predicative position, and a set
@@ -278,7 +292,19 @@ distinctions:
 %                  ready}{\tt tired}} \} 
 %              {\tt house)}.
 
-\subsection{Determiner placement in Basque} In Basque, there are three
+
+\paragraph{Adjective placement and agreement in Spanish}
+Spanish adjectives agree in number and gender with the noun, in both
+attributive and predicative position. In attributive position, most
+adjectives (e.g. \t{small}) come after its head, but some adjectives
+(e.g. \t{good}) are placed before the head. 
+In order to test \t{AdjCN}, with regards to both adjective placement
+and agreement, we need the following 8 trees: 
+\t{DetCN}  \{ \stackanchor{\tt this}{\tt these} \}
+ \t{AdjCN} \{ \stackanchor{\tt good}{\tt small} \} 
+           \{ \stackanchor{\tt house}{\tt hill} \}.
+
+\paragraph{Determiner placement in Basque} In Basque, there are three
 different ways to place a determiner into a noun phrase. When a number
 (other than 1) or a possessive pronoun acts as a determiner in a
 complex noun phrase, it is placed between ``heavy'' modifiers, such as
@@ -289,67 +315,104 @@ indefinite article, acts like demonstratives, but the definite article
 is a suffix. If there is a ``light'' modifier, such as an adjective,
 the definite article attaches to the modifier; otherwise it attaches
 to the noun. In order to test the implementation of this phenomenon,
-we need the following 12 trees:  \\ 
+we need the following 12 trees: 
 \t{DetCN} \{
 \stackanchor{\stackanchor{}{\tts{the}}}{\stackanchor{\tts{this}}{\tts{your}}}
 \} \{ \stackanchor{\tt AdvCN on (DetCN the hill)}{$\varnothing$} \} 
-\{ \stackanchor{\tt AdjCN small}{$\varnothing$} \}  {\tt house} 
+\{ \stackanchor{\tt AdjCN small}{$\varnothing$} \}  {\tt house}.
 
 
-\subsection{Adjective placement and agreement in Spanish}
-Spanish adjectives agree in number and gender with the noun, in both
-attributive and predicative position. In attributive position, most
-adjectives (e.g. \t{small}) come after its head, but some adjectives
-(e.g. \t{good}) are placed before the head. 
-In order to test \t{AdjCN}, with regards to both adjective placement
-and agreement, we need the following 8 trees: \\
-\t{DetCN}  \{ \stackanchor{\tt this}{\tt these} \}
- \t{AdjCN} \{ \stackanchor{\tt good}{\tt small} \} 
-           \{ \stackanchor{\tt house}{\tt hill} \}.
+\section{Using the tool}
 
-\subsection{Using our tool} We have seen that, in order to test
-whether or not we have implemented a linguistic phenomenon correctly,
-we take a single function as a base, and describe all combinations of
-arguments that are needed to test the function. If the result of the
-function is an inflection table rather than a fully specified result,
-then we need several \emph{contexts} to squeeze out all the different
-forms. For example, a \t{CN} in English is open for number---\t{house}
-is really a table \{\t{Sg~=>}~\emph{``house''}~\t{;~Pl~=>}
-\emph{``houses''}\}, and applying a determiner chooses the right form:
-\t{DetCN~this~house} linearises to \emph{this house} and \t{DetCN
-  these house} linearises to \emph{these houses}. 
+Here is a typical use for the tool. Let us take the noun phrase
+grammar for Dutch, and pick a single function, say \t{AdvCN}. We
+generate test cases, which include the following trees:
+\begin{itemize}
+\item[] \t{AdvCN (PrepNP next\_to (DetNP your)) hill} \\
+`hill next to yours'
+\item[] \t{AdvCN (PrepNP next\_to (DetNP your)) house} \\ `house next
+to yours'
+\end{itemize}
+In Dutch, the words \emph{hill} and \emph{house} have different
+genders, and the word \emph{yours} has to agree in gender with the
+antecedent: \emph{(de) heuvel naast de jouwe} and \emph{(het) huis
+  naast het jouwe}. The test cases reveal a bug, where \t{DetNP your}
+picks a gender too soon (always neuter), instead of leaving it open in
+an inflection table. To fix the bug, we add gender as a parameter to
+the \t{Adv} type, and have \t{AdvCN} choose the correct form based on
+the gender of the \t{CN}.
 
-\label{sec:wishlist_comments}
-The example grammar, with only \numOfLex{}-word lexicon and \numOfFun{} syntactic functions,
-generates over 10,000 %17,574
-trees\footnote{e.g. {\tt DetCN the (AdvCN (PrepNP on
-(DetCN a (AdjCN small hill)) (AdjCN blue house))} `the blue house on a
-small hill'}  up to depth 5. 
-However, as we have seen in the examples above, we can test complex
-morphosyntactic phenomena with just a set of 4, 8 or 12 trees,
-depending on the complexity of the language. 
+After implementing the fix, we run a second test case generation: this
+time, not meant for human eyes, but just to compare the old and new
+versions of the grammar. We want to make sure that our changes 
+to \t{Adv}, \t{AdvCN} and \t{DetNP} 
+have not caused new bugs in other categories and functions. The
+simplest strategy is to generate test cases for \emph{all} functions
+in both grammars, and only show those outputs that differ between the
+grammars. After our changes, we get the following differences: 
 
-As mentioned previously, the base of a test case is one syntactic
-function, but often the same sentence ends up showcasing several
-functions. In the Estonian example, we start from \t{AdjCN} 
-and end up in a context formed by \t{PrepNP}---in fact, these 8 trees
-cover all tests we would've needed for \t{PrepNP} itself. Thus,
-it is possible to shrink the test cases effectively, if one wants to
-test the whole grammar at one go.
+\begin{itemize}
+\item[] \t{DetCN the (AdvCN (PrepNP next\_to (DetNP your)) hill)}
+  \begin{itemize}
+   \item \emph{\sout{de heuvel naast {\bf  het} jouwe}}
+   \item[+] \emph{de heuvel naast {\bf  de} jouwe}
+  \end{itemize}
+\item[] \t{DetCN the (AdvCN (PrepNP without (DetNP this)) hill)}
+  \begin{itemize}
+   \item \emph{\sout{de heuvel zonder {\bf  dit}}}
+   \item[+] \emph{de heuvel zonder {\bf  deze}}
+  \end{itemize}
+\end{itemize}
 
-Of course, such a test set will not catch e.g. individual
-misspellings, or more systematic bugs in the morphological
-paradigms. But there are easier methods to test for such bugs---our 
-goal is to test the more abstract, syntactic phenomena with as few
-trees as possible.  
+\noindent We notice a side effect that we may not have thought of: the
+gender is retained in all adverbs made of NPs made of determiners, so
+now it has become impossible to say ``the hill without \emph{that}'' and
+pointing to a house. So we do another round of modifications, compute
+the difference (to the original grammar or to the intermediate), and
+see if something else has changed.
+
+%  We have seen that, in order to test
+% whether or not we have implemented a linguistic phenomenon correctly,
+% we take a single function as a base, and describe all combinations of
+% arguments that are needed to test the function. If the result of the
+% function is an inflection table rather than a fully specified result,
+% then we need several \emph{contexts} to squeeze out all the different
+% forms. For example, a \t{CN} in English is open for number---\t{house}
+% is really a table \{\t{Sg~=>}~\emph{``house''}~\t{;~Pl~=>}
+% \emph{``houses''}\}, and applying a determiner chooses the right form:
+% \t{DetCN~this~house} linearises to \emph{this house} and \t{DetCN
+%   these house} linearises to \emph{these houses}. 
+
+% \label{sec:wishlist_comments}
+% The example grammar, with only \numOfLex{}-word lexicon and \numOfFun{} syntactic functions,
+% generates over 10,000 %17,574
+% trees\footnote{e.g. {\tt DetCN the (AdvCN (PrepNP on
+% (DetCN a (AdjCN small hill)) (AdjCN blue house))} `the blue house on a
+% small hill'}  up to depth 5. 
+% However, as we have seen in the examples above, we can test complex
+% morphosyntactic phenomena with just a set of 4, 8 or 12 trees,
+% depending on the complexity of the language. 
+
+% As mentioned previously, the base of a test case is one syntactic
+% function, but often the same sentence ends up showcasing several
+% functions. In the Estonian example, we start from \t{AdjCN} 
+% and end up in a context formed by \t{PrepNP}---in fact, these 8 trees
+% cover all tests we would've needed for \t{PrepNP} itself. Thus,
+% it is possible to shrink the test cases effectively, if one wants to
+% test the whole grammar at one go.
+
+% Of course, such a test set will not catch e.g. individual
+% misspellings, or more systematic bugs in the morphological
+% paradigms. But there are easier methods to test for such bugs---our 
+% goal is to test the more abstract, syntactic phenomena with as few
+% trees as possible.  
 
 
 \section{Generating the test suite}
 \label{sec:testing}
 
-We now have all building blocks for creating a representative and
-minimal set of test cases.
-In Section~\ref{sec:PMCFG}, we saw how a single abstract category
+In this section, we explain how the test suites are built.
+Earlier in Section~\ref{sec:PMCFG}, we saw how a single abstract category
 compiles into multiple concrete categories, depending on the
 combinations of parameters. Instead of dealing with parameters
 directly, we now have a set of new \emph{types}, which is helpful for
@@ -363,7 +426,7 @@ the method with one syntactic function as a base.
 
 We assume that all test cases are trees with the same start
 (top-level) category, such as \t{S} in our example grammar. The
-requirement is that the start category is linearized as one string only. 
+requirement is that the start category is linearised as one string only. 
 
 \subsection{Enumerate functions} As we explained before, each syntactic
 function turns into multiple versions, one for each combination of
@@ -411,9 +474,9 @@ both of them, because their ambiguity manifests in different forms.
 In our implementation, we use the \feat{} framework \cite{feat} to
 enumerate possible combinations of argument trees, in size order. We
 stop when we have found a suitable set of combinations of arguments,
-according to the requirement above. We also stop (give up) when too
+according to the requirement above. \todo{Check the numbers: We also stop (give up) when too
 many tries have been made (currently 10.000), but we have not seen
-this happen in practice.
+this happen in practice.}
 
 \paragraph{Example: Test cases using \t{AdjCN}} Let us test the function
 \t{AdjCN : Adj $\rightarrow$ CN $\rightarrow$ CN} in Spanish
@@ -458,10 +521,10 @@ different sentences in which each of the 4 inflections is used.
 
 As an example, consider generating contexts for a tree of category \t{CN}.
 Since \t{CN} is variable for number, we need two contexts: 
-one that picks out the singular form and other that picks out
+one that chooses the singular form and other that chooses
 the plural form. 
 This suggests that we should apply two different
-\t{Det $\rightarrow$ CN $\rightarrow$ NP} functions, for instance
+\t{CN $\rightarrow$ NP} functions, for instance
 \t{DetCN this} and \t{DetCN these}, and
 give their results to the \t{UttNP} function, which constructs an \t{S}.
 
@@ -470,7 +533,6 @@ type \t{S}, but their second arguments don't make any difference as to
 which field we choose from the \t{NP}. In the name of minimalism, we
 choose \t{UttNP}, because it is the smallest tree. The concrete set of
 contexts is thus  \t{UttNP (DetCN this \char`_)}  and \t{UttNP (DetCN these \char`_)}.
-
 We insert the 4 test cases from Figure~\ref{tab:adjAttr} into the
 holes, and get 8 trees in total as shown in Figure~\ref{tab:testCases}.
 
@@ -499,33 +561,43 @@ estas casas peque\~{n}as      & estos cerros peque\~{n}os \\ \hline
 \label{tab:testCases}
 \end{table}
 
-\paragraph{Fixpoint iteration} In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
-$$
-\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)
-$$
-In words, to generate contexts with holes of type $H$, we enumerate all functions $F$ that have a $H$ as an argument, and enumerate all contexts $C$ that have the result type $H'$ of $F$ as a hole type, and put $C$ and $F$ together to get a new context. Then, we apply a function $\textsf{filter}$ to the result in order to filter out redudant contexts, i.e. contexts whose uses of the strings of $H$ are already covered by other contexts in the same set.
+\paragraph{Fixpoint iteration} 
+The contexts are generated using fixpoint iteration. We give a full
+explanation in Section~\ref{sec:moreFP} (which may be skipped by the
+uninterested reader), and just a quick intuition in the
+present section.
 
-To compute relevant contexts with the start category \t{S} as a hole, we use the following definition $\textsf{contexts}(\t{S}) = \{ \; \_ \; \}$.
+A subtree in any category \t{C} gets to show its strings to the world
+by one way: the strings need to end up in a tree of the start
+category.  If \t{C} is the start category, then the subtree of type
+\t{C} needs no further context. If \t{C} is not the start category,
+then the subtree depends on other categories in order to make it to
+the start category. We need to find a succession of function
+applications that take a string from some field in \t{C}, through all
+other intermediate categories, so that it finally ends up in the start
+category.
 
-Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\empty$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.
+The word \emph{depend} is a bit counterintuitive here: normally one
+would think that e.g. \t{NP}~depends~on~\t{CN}, because we form
+\t{NP}s by using functions of type \t{CN $\rightarrow$ NP}. But when
+we think of contexts, we say instead that the \emph{context of} \t{CN}
+depends on the \emph{context of} \t{NP}. A tree of type \t{CN} would
+like to show its strings, but the function \t{UttNP}, which is the
+fastest way to the start category, only takes \t{NP}s. So it has to
+rely on applications of \t{DetCN this} and \t{DetCN these} to lift it
+up into an \t{NP}, and only then can \t{UttNP} get access to its
+strings.
 
-
-\paragraph{Alternative priorities} The current implementation of
-context generation prioritises minimal trees, such as \t{UttNP} for
-\t{NP} instead of any other functions. An alternative method would be
-to choose contexts where the \t{NP} can also use its parameters, in
-addition to just showing all of its strings. Arguably, it would tell
-more to the user to see a sentence like ``the house is big'', formed
-with \t{PredAdj}, rather than just ``house'', formed by \t{UttNP}.
-With the current scheme, we have found it a useful practice to hide
-functions such as \t{UttNP}, which just lift a category into the start
-category without introducing other arguments. For future, especially
-if we plan to move away from per-function basis and target the whole
-grammar with minimal sentences, it could make sense for a context to
-serve double purpose: show all its strings and use as many of its
-parameters as possible.
-% Prefer contexts where there are no coercions
-
+We model this as a top-down fixpoint computation, where in the beginning, only
+the start category \t{S} has a context (some trivial context like the
+identity function, i.e. ``do nothing, you're already there!''). On the
+first round, we get to compute contexts for all categories \t{B} that
+are arguments to some function \t{g : B $\rightarrow$ S}. On the
+second round, we compute contexts for all categories \t{A} that are
+arguments to some function \t{f : A $\rightarrow$ B}. Each round
+unlocks more categories further down from the start category, so we
+get to compute more contexts for categories that depend on the newly
+unlocked ones, until all categories have their contexts.
 
 \subsection{Pruning the trees within one set of test cases} 
 
@@ -537,16 +609,18 @@ parameters as possible.
 %  definite, singular and contracting; finally, \t{these} as definite,
 %  plural and contracting. 
 
-Sometimes we can further reduce test cases created for a single function, taking
-advantage of the coercions in the grammar (explained in Section~\ref{sec:PMCFG}).
-Let us take as an example the function \t{DetNP : Det $\rightarrow$
-  NP} for Dutch. First, the category \t{Det} compiles into 8 concrete
-categories: combinations of singular vs. plural; contracting vs.
-non-contracting; and definite vs. indefinite. But our grammar only has
-5 determiners in total, out of 8 possible combinations---does this
-mean that we cannot test \t{DetNP} exhaustively with the small
-lexicon? To answer this, we look at the different concrete versions of
-\t{DetNP}.
+Sometimes we can further reduce test cases created for a single
+function, taking advantage of the coercions in the grammar (explained
+in Section~\ref{sec:PMCFG}).  Let us take as an example the function
+\t{DetNP : Det $\rightarrow$ NP} for Dutch. As usual, the category
+\t{Det} compiles into 8 concrete categories: combinations of singular
+vs. plural, contracting vs.  non-contracting, and definite
+vs. indefinite. But our grammar only has 5 determiners in total, out
+of 8 possible combinations---does this mean that we cannot test
+\t{DetNP} exhaustively with the small lexicon? Firstly, we look for
+coercions of \emph{arguments} (\t{Det}) in the different concrete
+versions of \t{DetNP}, and secondly, coercions of the \emph{goal
+  category} (\t{NP}) used in the contexts.
 
 \paragraph{Coercions of \t{Det} used by \t{DetNP}} Due to coercions, there are only 4
 different type signatures for \t{DetNP}: definiteness is not relevant
@@ -565,7 +639,7 @@ arguments for \t{DetNP}, shown below.
 % \noindent Four looks better than eight, but we are missing a plural
 % non-contracting determiner in the lexicon. However, we may still be
 % able to test \t{DetNP} exhaustively---
-\noindent The next step is to look at the \emph{contexts} for all goal
+\paragraph{Contexts for \t{NP}} The next step is to look at the \emph{contexts} for all goal
 categories of \t{DetNP}, as shown in Table~\ref{tbl:nps}.  The
 contracting \t{NP}s get two contexts, one to choose the full form and
 other the contracted form.  The non-contracting ones only get one
@@ -579,7 +653,8 @@ context each, because their field for the contracted form is empty.
 \t{NP$_\text{sg,noncontr}$} & \t{NP$_\text{pl,noncontr}$} & \t{NP$_\text{sg,contr}$}  & \t{NP$_\text{pl,contr}$}\\ \hline
 
 \t{UttNP~\char`_}   & \t{UttNP~\char`_}   & \t{UttNP~\char`_} & \t{UttNP~\char`_} \\
- &  & \t{PredAdv \dots{} (PrepNP on \char`_)} & \t{PredAdv \dots{} (PrepNP on \char`_)}
+ &  & \t{PredAdv \gray{any NP} (PrepNP on \char`_)} & \t{PredAdv
+                                                      \gray{any NP} (PrepNP on \char`_)}
   \\ \hline
 \end{tabular} %}
 \caption{Contexts to showcase all strings of different concrete \t{NP}s in the Dutch grammar}
@@ -587,23 +662,24 @@ context each, because their field for the contracted form is empty.
 \end{table}
 
 
-\paragraph{Coercions of \t{NP} used in contexts} In addition, we look for
-\emph{coercions} for all the goal categories. For instance, there is
-one that covers all \t{NP}s; let us call that \t{NP$_*$}. This tells
-us that there are functions that take \t{NP}, but don’t care anything
-about about its parameters. One such example is \t{UttNP}, which just
-takes an \t{NP}, chooses the nominative form and makes it into a
-standalone utterance.  There is another useful coercion, which covers
-both singular and plural contracting \t{NP}s; we call that
+\paragraph{Coercions of \t{NP} used in contexts} In addition, we look
+for \emph{coercions} for all the goal categories. For instance, there
+is one that covers all \t{NP}s; let us call that \t{NP$_*$}. This
+tells us that there are functions that take \t{NP}, but don’t care
+anything about about its parameters. One such example is \t{UttNP},
+which just takes an \t{NP}, chooses the nominative form and makes it
+into a standalone utterance.  There is another useful coercion, which
+covers both singular and plural contracting \t{NP}s; we call that
 \t{NP$_{*\text{,contr}}$}. It is used by \t{PrepNP}\footnote{Along
   with a similar coercion \t{NP$_{*\text{,noncontr}}$} for
-  non-contracting \t{NP}s}, which doesn't care about number, just
-whether to merge its arguments or not.
-In order to reduce the number of test cases for \t{DetNP}, two properties need to hold:
+  non-contracting \t{NP}s.}, which doesn't care about number, just
+whether to merge its arguments or not.  In order to reduce the number
+of test cases for any function \t{f~:~A~$\rightarrow$~B}, two
+properties need to hold:
 \begin{enumerate}
-\item A number of concrete categories for \t{NP} are interchangeable in a particular
+\item A number of concrete categories for \t{B} are interchangeable in a particular
 context;
-\item That context is one of those chosen to showcase \t{NP}.
+\item That context is one of those chosen to showcase \t{B}.
 \end{enumerate}
 
 \noindent With \t{NP$_*$} and \t{NP$_\text{*,contr}$}, both of these
@@ -612,7 +688,7 @@ properties hold.
 %  Prep  $\rightarrow$ NP$_\text{*,contr}$  $\rightarrow$ Adv}.
 Thus, we only need to put one representative of \emph{any} \t{NP} into
 the context \t{UttNP~\char`_}, and one representative of the
-contracting \t{NP}s into the context \t{PredAdv~\dots~(PrepNP~on~\char`_)}. 
+contracting \t{NP}s into the context \t{PredAdv~\gray{any NP}~(PrepNP~on~\char`_)}. 
 The following trees would fit the description:
 
 \begin{itemize}
@@ -623,8 +699,6 @@ The following trees would fit the description:
 \emph{een huis hierop} \\
 `a house on this'
 \end{itemize}
-
-
 
 
 % Now, in order to compute a context for a coercion, we simply take
@@ -651,127 +725,69 @@ The following trees would fit the description:
 
 \subsection{Pruning the trees to test the whole grammar}
 \label{sec:pruning_all}
-So far we have completely ignored that one tree can showcase more
-than one function. In fact, the 8 test sentences created for \t{Mod}
-happen to also test \t{Pred} exhaustively.
-Let us recap the steps we took to create them for \t{Mod}:
-enumerating arguments brought us \t{Good}, \t{Vegan}, \t{Pizza} and
-\t{Wine}, and enumerating contexts brought us \t{This} and
-\t{These}. Had we been creating test cases for \t{Pred}, we would've
-gotten \t{This} and \t{These} at the stage of enumerating arguments,
-and then there would've been no need for contexts, because \t{Pred}
-already creates the start category \t{S}.
 
-There is a simple way to detect the redundancy: make the generation of
-arguments completely deterministic, e.g. always choose the function
-that is alphabetically first. The downside is that we get a lot of
-redundancy, in the style of ``the good pizza is good''. The problem
-gets more severe when testing functions with more arguments: ``the
-pizza gives the pizza the pizza'' is not only boring but confusing.
-However, if we want to generate sentences for the whole grammar at one 
-go, we can split the generation in two stages: first stage is
-deterministic, where every feminine noun is \t{Pizza}, and we can 
-eliminate redundancies by just eliminating copies of the same
+So far we have completely ignored that one tree can showcase more than
+one function. In the example of Estonian adjective agreement, we start
+by testing \t{AdjCN} and end up in a context formed by \t{PrepNP}---in
+fact, these 8 trees cover all tests we would've needed for \t{PrepNP}
+itself. Thus, it is possible to shrink the test cases effectively, if
+one wants to test the whole grammar at one go.
+
+\paragraph{Alternative priorities for context generation} The current
+implementation of context generation prioritises minimal trees, such
+as \t{UttNP} for \t{NP} instead of any other functions. An alternative
+method would be to choose contexts where the \t{NP} can also use its
+parameters, in addition to just showing all of its strings. Arguably,
+it would tell more to the user to see a sentence like ``this house is
+big'', formed with \t{PredAdj}, rather than just ``this house'',
+formed by \t{UttNP}.  With the current scheme, we have found it a
+useful practice to hide functions such as \t{UttNP}, which just lift a
+category into the start category without introducing other
+arguments. For future, especially if we plan to move away from
+per-function basis and target the whole grammar with minimal
+sentences, it could make sense for a context to serve double purpose:
+show all its strings and use as many of its parameters as possible.
+% Prefer contexts where there are no coercions
+
+\paragraph{Deterministic argument generation}
+There is a simple way to detect redundancy in the generated trees,
+already in the current implementation. We make the generation of
+arguments and contexts completely deterministic, e.g. always choose
+the function that is alphabetically first. Then, we would get a
+sentence such as ``the good house is good'' for testing both \t{AdjCN}
+and \t{PredAdj}. The downside is that the sentences can get boring to
+read, or even confusing, in the style of ``the house gives the house
+the house''. 
+
+However, we can split the generation in two stages:
+first stage is deterministic, where every noun is \t{house}, and we
+can eliminate redundancies by just eliminating copies of the same
 tree. Then, when we have a set of unique trees, we can substitute
 individual words in them with other words in the same concrete
-category.
-A sentence such as ``the house gives the pizza the fountain'' tests
-the same properties as the version with pizza in every role, but at
-least it is easier to keep track who does what, and compare the
-translations of the same tree. 
+category.  A sentence such as ``the house gives the hill the blue
+house'' tests the same properties as the version with house in every
+role, but at least it is easier to keep track who does what, and
+compare the translations of the same tree.
 
-It would be ideal to generate sentences that make sense,
-such as ``the waitress gives the girl the pizza''. If the grammar is
-purely syntactic, we would need external tools to ensure semantic
-coherence, but if the grammatical categories already include semantic
-distinctions, e.g. limiting the subject and indirect object of
-\emph{give} into humans, that naturally restricts the generated test
-suite.
+In practice, we only apply the first step, and let the sentences be redundant. In
+Section~\ref{sec:evalGF}, we refer to total and unique trees when
+generating tests for the whole grammar; ``unique trees'' means the
+number after removing duplicate trees that are generated to test
+different functions, but happen to be the same.
 
-\section{General features of \pmcfg: unused, equal,
-  erased or empty fields}
-
-Aside from concrete language-dependent phenomena, there are more
-general, engineering questions a grammar writer may ask. For instance, say that our
-concrete type for a \t{CN} in Dutch is an inflection table from case
-to string, we would like to know if (a) a given string field is unreachable from the start category; (b) any two fields always contain the same string; or (c) some fields
-are always the empty string. A yes answer to any of these may indicate a bug in the grammar.
-
-In Dutch, nominative and accusative are only different for
-pronouns, so for this grammar we would indeed find out that case is
-redundant: all nominative and accusative fields would be
-identical. As grammarians, we could decide to keep the distinction for
-further extension of the grammar---maybe we want to add pronouns in
-the future---or remove it as redundant.
-
-\gf{} has the expressivity of \pmcfg{}, which means that it is
-possible to erase arguments: say that there is a bug, \t{AdjCN : Adj
-  $\rightarrow$ CN  $\rightarrow$ CN} never actually adds the
-adjective to the new \t{CN}, in which case \t{AdjCN blue house} and
-\t{house} are linearised identically. Instead of testing every single
-function, we would like to know if there are any functions in the
-grammar that behave like this.
-
-The analyses mentioned in this section are implemented in a similar way to the method for enumerating all contexts.
-
-\section{Use cases}
-
-Here is a typical use for the tool. 
-Let us take the noun phrase grammar for Dutch, and pick a single function,
-say \t{AdvCN}. We generate test cases, which include the following
-trees: 
-\begin{itemize}
-\item \t{AdvCN (PrepNP next\_to (DetNP your)) hill} `hill next to
-yours'
-\item \t{AdvCN (PrepNP next\_to (DetNP your)) house} `house next
-to yours'
-\end{itemize}
-In Dutch, the words \emph{hill} and \emph{house} have different
-genders, and the word \emph{yours} has to agree in gender 
-with the antecedent: \emph{(de) heuvel naast de jouwe} and \emph{(het)
-  huis naast het jouwe}. The test cases reveal a bug, where \t{DetNP your} 
-picks a gender too soon, instead of leaving it open in an inflection
-table. We implement a fix by adding gender as a parameter to the
-\t{Adv} type, and have \t{AdvCN} choose the correct form based on the gender of the \t{CN}. 
-
-After implementing the fix, we run a second test case generation: this
-time, not meant for human eyes, but just to compare the old and new
-versions of the grammar. We want to make sure that our changes 
-to \t{Adv}, \t{AdvCN} and \t{DetNP} 
-have not caused new bugs in other categories and functions. The
-simplest strategy is to generate test cases for \emph{all} functions
-in both grammars, and only show those outputs that differ between the
-grammars. After our changes, we get the following differences: 
-
-\begin{itemize}
-\item \t{DetCN the (AdvCN (PrepNP next\_to (DetNP your)) hill)}
-  \begin{itemize}
-   \item \emph{\sout{de heuvel naast {\bf  het} jouwe}}
-   \item \emph{de heuvel naast {\bf  de} jouwe}
-  \end{itemize}
-\item \t{DetCN the (AdvCN (PrepNP without (DetNP this)) hill)}
-  \begin{itemize}
-   \item \emph{\sout{de heuvel zonder {\bf  dit}}}
-   \item \emph{de heuvel zonder {\bf  deze}}
-  \end{itemize}
-\end{itemize}
-
-\noindent We notice a side effect that we may not have thought of: the
-gender is retained in all adverbs made of NPs made of determiners, so
-now it has become impossible to say ``the hill without \emph{that}'' and
-pointing to a house. So we do another round of modifications, compute
-the difference (to the original grammar or to the intermediate), and
-see if something else has changed.
+\input{chapters/gf-fixpoints.tex}
 
 \section{Evaluation}
+\label{sec:evalGF}
 
 \begin{table}[h]
 \centering
+\resizebox{\textwidth}{!}{
 \begin{tabular}{|lll|ll|ll|ll|}
 \hline
-\multicolumn{3}{|r}{Concrete grammar $\rightarrow$}              &
+\multicolumn{3}{|r}{Concrete syntax $\rightarrow$}              &
                                                                    \multicolumn{2}{|c}{\bf Dutch} & \multicolumn{2}{|c}{\bf Basque} & \multicolumn{2}{|c|}{\bf Estonian} \\
-$\downarrow$ Abstract grammar & \#funs+lex & \#trees  &
+$\downarrow$ Grammar & \#funs+lex & \#trees  &
                                                                  \#total & \#uniq & \#total & \#uniq  & \#total  & \#uniq \\ \hline
 {\bf Noun phrases}     & \numOfFun{}+\numOfLex{}        & \textgreater{}10,000          & 21    & 18     & 33      & 27      & 40       & 36     \\ \hline
 {\bf Phrasebook}       
@@ -779,7 +795,7 @@ $\downarrow$ Abstract grammar & \#funs+lex & \#trees  &
    & 513     & 419    & 610     & 505     & 538      & 503   \\ \hline
    {\bf Resource gr.}    & 217+446   & \textgreater{}500 billion  
    & 21,370  & 19,825 &  13,733  & 9,194    & TODO  & TODO \\ \hline
-\end{tabular}
+\end{tabular}}
 \caption{Test cases for all functions in three grammars}
 \label{results}
 \end{table}
@@ -793,13 +809,14 @@ $\downarrow$ Abstract grammar & \#funs+lex & \#trees  &
 {\bf Resource grammar function} & {\bf Dutch}
    & {\bf Estonian} & {\bf Basque} \\ \hline
  
-\t{ComparA} `younger than me'  & 10   & 20 & 6   \\
-%\t{ComplVS} `say that I sleep' & 89   & 171 & b   \\
+\t{ComparA} `stronger than you'  & 10   & 20 & 6   \\
+\t{ComplVS} `say that I sleep' & 89   & 171 & 104   \\
 \t{RelNP~~} `a cat that I saw' & 2    & 23 & 20   \\
-\t{ReflVP~} `see myself'       & 1034 & 343 & b   \\
+\t{ReflVP~} `see myself'       & 1034 & 343 & 1082   \\
 \hline
 \end{tabular}
-\caption{Test cases for some individual functions in the resource grammar}
+\caption{Test cases for some individual functions in the resource
+  grammar}
 \label{results_indiv}
 \end{table}
 
@@ -810,7 +827,7 @@ families, and cover a wide range of grammatical complexity. Dutch and
 Spanish are both Indo-European languages, with fairly simple nominal
 morphology. Dutch features word order changes in subordinate and
 question clauses, and separable prefixes in verb phrases (imagine
-English behaving ``look somethig \emph{up} \~ \emph{up}looked''). 
+English behaving ``look something \emph{up} \~{} {\it up}looked''). 
 Spanish has a large number of tenses and moods, and clitics for direct
 and indirect objects, which attach to verbs.  To add some linguistic
 variety, we include Estonian from the Finno-Ugric language family, and
@@ -839,9 +856,9 @@ The first grammar is the toy example introduced earlier in this
 article: NounPhrases with \numOfFun syntactic functions and \numOfLex words in the
 lexicon. We wrote the concrete syntaxes from scratch for each of the
 languages, instead of using the full resource grammar and reducing it
-to only noun phrases. All three concrete syntaxes were completed
-in less than an hour, by an experienced grammarian with knowledge in
-all three languages.
+to only noun phrases. All four concrete syntaxes were completed
+in less than an hour, by an experienced grammarian with some knowledge
+in all the languages.
 
 The second grammar is a mid-size application grammar: Phrasebook
 \cite{ranta2010phrasebook}, with 42 categories such as \t{Person,
@@ -859,7 +876,7 @@ sentence. Limiting up to depth 3, the Phrasebook grammar produces over
 much more compact than resource grammars, hence depth 3 covers already
 a lot of relevant trees.}.
 
-%  All three concrete syntaxes were
+%  All four concrete syntaxes were
 % implemented using their respective resource grammars; thus if some
 % Phrasebook function has a bug, say it produces ``Spaniard restaurant''
 % instead of ``Spanish restaurant'', the problem could be in either grammar.
@@ -998,18 +1015,25 @@ same problems apply.
 
 \section{Conclusion and future work}
 
-We have presented method for automatically generating minimal and exhaustive sets of test cases for testing grammars.  We have found the tool useful in large-scale grammar writing, in a context where grammars need to be \emph{reliable}.
+We have presented method for automatically generating minimal and
+exhaustive sets of test cases for testing grammars.  We have found the
+tool useful in large-scale grammar writing, in a context where
+grammars need to be \emph{reliable}.
 
-One problem
-we have encountered is that the test sentences from resource grammars are often
-nonsensical semantically, and hence a native speaker might intuitively
-say that a sentence is wrong, even though it is just unnatural. 
-For instance, the function \t{AdvQVP} covers constructions such as ``you
-did \emph{what}?''. However, the function itself is completely general
-and can take any verb phrase and any question adverb, thus  bizarre
-combinations like ``you saw the dog why'' may appear in the generated
-test cases. For future work, we plan to use an external treebank to
-guide the algorithm to pick trees that also make sense semantically.
+One problem we have encountered is that the test sentences from
+resource grammars are often nonsensical semantically, and hence a
+native speaker might intuitively say that a sentence is wrong, even
+though it is just unnatural.  For instance, the function \t{AdvQVP}
+covers constructions such as ``you did \emph{what}?''. However, the
+function itself is completely general and can take any verb phrase and
+any question adverb, thus bizarre combinations like ``you saw the dog
+why'' may appear in the generated test cases. If the grammar is purely
+syntactic, we would need external tools to ensure semantic coherence,
+but if the grammatical categories already include semantic
+distinctions, e.g. limiting the subject and indirect object of
+\emph{give} into humans, that naturally restricts the generated test
+suite.
+
 
 So far the only mode of operation is generating test cases for a
 single function. 
@@ -1025,3 +1049,4 @@ We have an implementation only for \gf{} grammars so far, but the
 general method works for any grammar formalism that can be compiled
 into \pmcfg{}. \gf{} already supports reading context-free grammars,
 so testing any existing \cfg{} is a matter of some preprocessing. 
+
