@@ -31,154 +31,166 @@ the grammar that behave like this.
 
 The analyses mentioned in this section are implemented in a similar
 way to the method for enumerating all contexts: using fixpoint
-computation. We start from the easier cases of empty and unused
-fields, and move on to a detailed explanation of context generation.
+computation. We start from the easier cases of empty and unused categories and empty fields, and move on to a detailed explanation of context generation.
 
-\subsection{Example: empty concrete categories}
+\subsection{Example I: empty concrete categories}
 
 We start with an extremely simple analysis: detecting empty concrete
 categories. A single GF category compiles into multiple concrete
-categories, one for each combination of parameters. Thus we may wonder
+categories, one for each combination of parameters. We get \t{Det$_{\text{sg}}$} and \t{Det$_{\text{pl}}$}, as well as \t{NP$_{\text{sg}}$} and \t{NP$_{\text{pl}}$}. But if there are no plural \t{Det}s in the lexicon, then there won't be any plural \t{NP}s either. Thus we may wonder
 which combinations are actually in use in the lexicon.
 
 As a first step, we can see GF categories as mutually recursive
 datatypes. Take a fragment of the GF grammar in Figure~\ref{fig:exampleGrammar}:
 
-\begin{itemize}
-\item[] 
-\begin{verbatim}
-cat
-  Adv ; CN ; Det ; NP ; Prep ;
-fun
-  PrepNP : Prep -> NP -> Adv ;
-  AdvCN  : Adv  -> CN -> CN ;
-  DetCN  : Det  -> CN -> NP ;
-  house, … : CN ;
-  this, these, … : Det ;
-  on, … : Prep
-\end{verbatim}
-\end{itemize}
+\begin{EmptyItem}
+\begin{Highlighting}[]
+\NormalTok{cat}
+  \DataTypeTok{Adv} \NormalTok{; }\DataTypeTok{CN} \NormalTok{; }\DataTypeTok{Det} \NormalTok{; }\DataTypeTok{NP} \NormalTok{; }\DataTypeTok{Prep} \NormalTok{;}
+\NormalTok{fun}
+  \NormalTok{PrepNP} \FunctionTok{:} \DataTypeTok{Prep} \OtherTok{->} \DataTypeTok{NP} \OtherTok{->} \DataTypeTok{Adv} \NormalTok{;}
+  \NormalTok{AdvCN}  \FunctionTok{:} \DataTypeTok{Adv}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{CN} \NormalTok{;}
+  \NormalTok{DetCN}  \FunctionTok{:} \DataTypeTok{Det}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{NP} \NormalTok{;}
+  \NormalTok{house, … }\FunctionTok{:} \DataTypeTok{CN} \NormalTok{;}
+  \NormalTok{this, these, … }\FunctionTok{:} \DataTypeTok{Det} \NormalTok{;}
+  \NormalTok{on, … }\FunctionTok{:} \DataTypeTok{Prep}
+\end{Highlighting}
+\end{EmptyItem}
 
-We change the syntax of the functions slightly: move the result
+\noindent We change the syntax of the functions slightly: move the result
 category to the left and remove arrows.
 
-\begin{itemize}
-\item[]
-\begin{verbatim}
-fun
-  Adv  ::= prepNP Prep NP ;
-  CN   ::= advCN Adv CN | house | … ;
-  NP   ::= detCN Det CN ;
-  Det  ::= this | these | … ;
-  Prep ::= on | … ;
-\end{verbatim}
-\end{itemize}
+\begin{EmptyItem}
+\begin{Highlighting}[]
+\NormalTok{fun}
+  \DataTypeTok{Adv}  \OtherTok{::=} \NormalTok{PrepNP }\DataTypeTok{Prep} \DataTypeTok{NP} \NormalTok{;}
+  \DataTypeTok{CN}   \OtherTok{::=} \NormalTok{AdvCN }\DataTypeTok{Adv} \DataTypeTok{CN} \FunctionTok{|} \NormalTok{house }\FunctionTok{|} \NormalTok{… ;}
+  \DataTypeTok{NP}   \OtherTok{::=} \NormalTok{DetCN }\DataTypeTok{Det} \DataTypeTok{CN} \NormalTok{;}
+  \DataTypeTok{Det}  \OtherTok{::=} \NormalTok{this }\FunctionTok{|} \NormalTok{these }\FunctionTok{|} \NormalTok{… ;}
+  \DataTypeTok{Prep} \OtherTok{::=} \NormalTok{on }\FunctionTok{|} \NormalTok{… ;}
+\end{Highlighting}
+\end{EmptyItem}
 
 
-Now, let us move from the \gf abstract syntax to the \pmcfg concrete
+Now, let us move from the \gf{} abstract syntax to the \pmcfg{} concrete
 categories. We label the different concrete categories with
-superscript numbers rather arbitrarily; they don't have any deeper
+subscript numbers rather arbitrarily; they don't have any deeper
 meaning per se, and don't need to be memorised. Apart from the first
 lines, we show only one function for each concrete category. This is
 just to simplify the example; in reality, all of the result categories
 may have several functions that produce them.
 
-\begin{itemize}
-\item[]
-\begin{verbatim}
-  Adv0  ::= prepNP Prep⁷ NP³ | prepNP Prep⁷ NP⁴ ;
-  CN¹   ::= advCN Adv0 CN¹ | house | … ;
-  CN²   ::= advCN Adv0 CN² ;
-  NP³   ::= detCN Det⁵ CN¹ ;
-  NP⁴   ::= detCN Det⁶ CN² ;
-  Det⁵  ::= this ;
-  Det⁶  ::= these ;
-  Prep⁷ ::= on ;
-\end{verbatim}
-\end{itemize}
+\begin{EmptyItem}
+\begin{Highlighting}[]
+  \DataTypeTok{Adv₀  }\OtherTok{::=} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₃} \FunctionTok{|} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₄} \NormalTok{;}
+  \DataTypeTok{CN₁   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₁ }\FunctionTok{|} \NormalTok{house} \NormalTok{;}
+  \DataTypeTok{CN₂   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₂} \NormalTok{;}
+  \DataTypeTok{NP₃   }\OtherTok{::=} \NormalTok{DetCN} \DataTypeTok{Det₅} \DataTypeTok{CN₁} \NormalTok{;}
+  \DataTypeTok{NP₄   }\OtherTok{::=} \NormalTok{DetCN} \DataTypeTok{Det₆} \DataTypeTok{CN₂} \NormalTok{;}
+  \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
+  \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
+  \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
+\end{Highlighting}
+\end{EmptyItem}
 
-Before, at the GF level, we could just look at the lexicon and check
-whether there is some \t{CN} (e.g. \t{house}). But now, we don't know 
-just by looking whether we have both \t{CN$^{\text 1}$} and
-\t{CN$^\text{2}$}: maybe one of the concrete categories is
-linguistically impossible. And if \t{CN$^\text{2}$} is empty, then
-\t{NP$^\text{4}$} is too, because it is constructed from
-\t{CN$^\text{2}$}. 
-Thus, we can compute if a category is empty, given the emptiness of its argument categories.
+
+Before, at the \gf{} level, we could just look at the lexicon and check whether there is some \t{CN} (e.g. \t{house}). But now, we don't know just by looking whether we have both \t{CN$_{\text 1}$} and \t{CN$_\text{2}$}: maybe the lexicon is so small that there are no instances of \t{CN$_\text{2}$}, or maybe some combination of parameters doesn't even exist. Regardless of the reason of emptiness, if \t{CN$_\text{2}$} is empty, then \t{NP$_\text{4}$} is too, because it is constructed from \t{CN$_\text{2}$}.  Thus, we can compute if a category is empty, given the emptiness of its argument categories.
 
 We need some initial guesses for the values. Ultimately we want to
 just know if a given category has a member or no, so we can deal with
 Booleans. We give an initial value of False to all variables: that is,
-“all categories are empty”. We mark that with red text.
+``this category are empty'', and we mark that with red text.
+In fact, now that we are reduced to Booleans, we don’t even need to care about what the original GF functions do with their arguments. So we can replace the GF functions \t{AdvCN}, \t{DetCN} and \t{PrepNP} with just a  conjunction ($\&\&$): both arguments to the function must be non-empty. In case of multiple functions that have the same concrete category as a result, we replace the | with a disjunction ($||$): \emph{some} way of constructing the category must have all of its arguments non-empty.
 
-\begin{itemize}
-\item[]
-\begin{verbatim}
-  Adv0  ::= prepNP Prep⁷ NP³ | prepNP Prep⁷ NP⁴ ;
-  CN¹   ::= advCN Adv0 CN¹ | house | … ;
-  CN²   ::= advCN Adv0 CN² ;
-  NP³   ::= detCN Det⁵ CN¹ ;
-  NP⁴   ::= detCN Det⁶ CN² ;
-  Det⁵  ::= this ;
-  Det⁶  ::= these ;
-  Prep⁷ ::= on ;
-\end{verbatim}
-\end{itemize}
-
-In fact, now that we’re reduced to Booleans, we don’t even need to
-care about what the original GF functions do with their arguments. So
-we can replace all of the GF functions with just a \t{\&\&}. In case
-of multiple functions that have the same concrete category as a
-result, we replace the | with \t{||}.
-
-\begin{itemize}
-\item[]
-\begin{verbatim}
-  Adv0  ::= Prep⁷ && NP³ || Prep⁷ && NP⁴ ;
-  CN¹   ::= Adv0 && CN¹ || house ;
-  CN²   ::= Adv0 && CN² ;
-  NP³   ::= Det⁵ && CN¹ ;
-  NP⁴   ::= Det⁶ && CN² ;
-  Det⁵  ::= this ;
-  Det⁶  ::= these ;
-  Prep⁷ ::= on ;
-\end{verbatim}
-\end{itemize}
+\begin{EmptyItem}
+\begin{Highlighting}[]
+  \AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
+  \AlertTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \ErrorTok{house} \NormalTok{;}
+  \AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+  \AlertTok{NP₃   }\OtherTok{::=} \AlertTok{Det₅ }\FunctionTok{&&} \AlertTok{CN₁} \NormalTok{;}
+  \AlertTok{NP₄   }\OtherTok{::=} \AlertTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+  \AlertTok{Det₅  }\OtherTok{::=} \ErrorTok{this} \NormalTok{;}
+  \AlertTok{Det₆  }\OtherTok{::=} \ErrorTok{these} \NormalTok{;}
+  \AlertTok{Prep₇ }\OtherTok{::=} \ErrorTok{on} \NormalTok{;}
+\end{Highlighting}
+\end{EmptyItem}
 
 A variable for a given category turns into True, when we find a member
 of that category. On the first round, we start from the lexical
-categories: \t{CN$^\text{*}$}, \t{Det$^*$} and \t{Prep$^*$}. To
+categories: \t{CN$_\text{*}$}, \t{Det$_*$} and \t{Prep$_*$}. To
 continue with the example, say that all have a lexical item except for
-\t{CN$^\text{2}$}. Thus, after the first round, the following
-categories are found non-empty: \todo{fancy colours}
+\t{CN$_\text{2}$}. Thus, after the first round, the following
+categories are found non-empty.
 
-\begin{itemize}
-\item[]
-\begin{verbatim}
-  Adv0  ::= Prep⁷ && NP³ || Prep⁷ && NP⁴ ;
-  CN¹   ::= Adv0 && CN¹ || house ; --TRUE
-  CN²   ::= Adv0 && CN² ;
-  NP³   ::= Det⁵ && CN¹ ;
-  NP⁴   ::= Det⁶ && CN² ;
-  Det⁵  ::= this ;  --TRUE
-  Det⁶  ::= these ; --TRUE
-  Prep⁷ ::= on ;    --TRUE
-\end{verbatim}
-\end{itemize}
+\begin{EmptyItem}
+\begin{Highlighting}[]
+  \AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
+  \DataTypeTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
+  \AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+  \AlertTok{NP₃   }\OtherTok{::=} \AlertTok{Det₅ }\FunctionTok{&&} \AlertTok{CN₁} \NormalTok{;}
+  \AlertTok{NP₄   }\OtherTok{::=} \AlertTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+  \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
+  \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
+  \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
+\end{Highlighting}
+\end{EmptyItem}
 
-On the second round, the change of status in \t{Det$^\text{5}$} and \t{CN$^\text{1}$} updates \t{NP$^\text{3}$} into true. On the third and final round, also  \t{Adv$^\text{0}$} becomes true, due to \t{NP$^\text{3}$} being true. But after the third round, nothing is going to change anymore, no matter how much we recompute. In other words, we have found a fixed point.
+
+On the second round, the change of status in \t{Det$_\text{5}$} and \t{CN$_\text{1}$} updates \t{NP$_\text{3}$} into true. On the third and final round, also  \t{Adv$_\text{0}$} becomes true, due to \t{NP$_\text{3}$} being true. But after the third round, nothing is going to change anymore, no matter how much we recompute. In other words, we have found a fixed point.
+
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+  \DataTypeTok{Adv₀  }\OtherTok{::=} \DataTypeTok{Prep₇ }\FunctionTok{&&} \DataTypeTok{NP₃ }\FunctionTok{||} \DataTypeTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
+  \DataTypeTok{CN₁   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \DataTypeTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
+  \AlertTok{CN₂   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+  \DataTypeTok{NP₃   }\OtherTok{::=} \DataTypeTok{Det₅ }\FunctionTok{&&} \DataTypeTok{CN₁} \NormalTok{;}
+  \AlertTok{NP₄   }\OtherTok{::=} \DataTypeTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+  \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
+  \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
+  \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
+\end{Highlighting}
+\end{EmptyItem}
 
 \subsection{Least fixpoint}
 
-In the previous example, we found \emph{a} fixed point. There are several of them---why is ours a good one?
+% In the previous example, we found \emph{a} fixed point. But there are several of them---why is ours a good one?
 
-Pretend for a moment that the set of variables  \t{Adv$^\text{0}$}--\t{Prep$^\text{7}$} has nothing to do with the original GF grammar. Then, we could easily conceive of other assignments to the variables that are fixpoints: say, everything is False; only \t{Det$^\text{5}$} and \t{CN$^\text{2}$} are True; everything is True. (In contrast, “only \t{Det$^\text{5}$} and \t{CN$^\text{1}$} are True” is not a fixpoint, because if we iterated one more time, \t{NP$^\text{3}$} would change from False to True).
+Assume for a moment that the set of variables  \t{Adv$_\text{0}$}--\t{Prep$_\text{7}$} has nothing to do with the original GF grammar. Then, we could easily conceive of other assignments to the variables that are also fixpoints: say, everything is False; only \t{Det$_\text{5}$} and \t{CN$_\text{2}$} are True; everything is True. (In contrast, “only \t{Det$_\text{5}$} and \t{CN$_\text{1}$} are True” is not a fixpoint, because if we iterated one more time, \t{NP$_\text{3}$} would change from False to True).
 
-Of course, given that these variables come from an actual GF grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. We don’t want to be too pessimistic either: why claim that a perfectly good category is empty? Instead, we want the most conservative solution that respects reality--the least fixpoint, given the actual GF grammar.
+Of course, given that these variables come from an actual GF grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. Likewise, we don’t want to be too pessimistic and claim that some non-empty category has no words in it. Instead, we want the most conservative solution that respects reality--the least fixpoint, given the actual GF grammar.
 
-To define \emph{least}, we need to define an ordering on the domain of possible solutions. In the case of Booleans, we just say False ≤ True, and hence a solution with more False is smaller.
+To define \emph{least}, we need to define an ordering on the domain of possible solutions. In the case of Booleans, we just say False ≤ True, and hence a solution with more False is smaller. 
+We start the computation by giving the least value to all variables.
+Another requirement is that all right-hand sides of the equations need to be monotonic (which they are because every boolean expression that only contains $\&\&$ and $||$ is monotonic). Under these circumstances, the least fixpoint will be calculated.
 
-\subsection{Empty and unreachable fields}
+\subsection{Example II: empty fields and unreachable categories}
+
+The previous was quite a trivial problem for two reasons: the values are not changing after they get confirmed as True, and we had absolutely no use for the actual \gf{} functions (or the \pmcfg{} versions of them).
+Before moving on to context generation, we demonstrate briefly two more simple problems: finding categories that are unreachable from the start category, and fields that are always empty.
+
+\paragraph{Is a category reachable from the start category?}
+
+\begin{itemize}
+\item Start value: False (all categories are non-reachable from the start category)
+\item Confirm that the start category is reachable from the start category.
+\item For each function whose result category is confirmed reachable, confirm its argument categories reachable.
+\end{itemize}
+
+We still don’t need the details of the function, just knowledge which arguments it takes. The values are still Booleans, and don’t change once they’ve become True.
+
+Notice that the first problem was bottom-up: we started from several terminal categories, and moved up all the way to the start category. This time we start from the top, and confirm more and more lower-level categories reachable. But the iterative process is the same in both cases.
+
+\paragraph{Are some fields always empty?}
+
+\begin{itemize}
+\item Start (least) value: all fields in all categories are empty. Now the value is not a Boolean, it is instead a set of fields that are non-empty empty–which in the beginning is an empty set. The ordering is the subset relation: \t{A ≤ B} if \t{A ⊆ B}.
+% \t{A $\leq$ B} if \t{A $\subseteq$ B}.
+ \item A field \t{s} in a terminal category \t{T} is non-empty, if there is some actual word with a non-empty string in \t{s}. When such a word is found, add that field to the initial set of non-empty fields.
+\item A field \t{s'} in a non-terminal category \t{N} is non-empty, if there is some function \t{f~:~T$_\text{1}$~$\rightarrow$ \dots~$\rightarrow$~T$_\text{n}$~$\rightarrow$~N}, that uses at least one non-empty field from some \t{T$_\text{i}$}, or alternatively, introduces new strings into \t{s'}.
+\end{itemize}
+
+Here we need the actual GF function, because we need to find out which fields of its arguments it is using---it is not enough to know that the argument has some fields with some properties. In fact, since functions may not only use their arguments but also introduce new strings, we definitely need all three pieces of information: the emptiness status of the arguments’ fields, which fields are used by \t{f}, and whether \t{f} introduces new strings.
 
 \subsection{Context generation revisited}
 
