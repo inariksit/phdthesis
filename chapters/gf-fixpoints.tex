@@ -5,13 +5,15 @@ We touched upon fixpoint computation in the section for enumerating
 contexts. Here we explain the method with more focus, along with
 other, more general and language-independent analyses we can perform
 on a grammar. The reader uninterested in technical details may well
-skip this section and move on to evaluation.
+skip everything after Section~\ref{additional-analyses} and move on to
+evaluation.
 
 \subsection{Additional analyses}
+\label{additional-analyses}
 
 Aside from concrete language-dependent phenomena, there are more
 general questions a grammar writer may ask. For instance, say that our
-concrete type for a \t{CN} in some language is an inflection table
+concrete type for \t{CN} in some language is an inflection table
 from case to string, we would like to know if (a) a given string field
 is unreachable from the start category; (b) any two fields always
 contain the same string; or (c) some fields are always the empty
@@ -31,14 +33,21 @@ the grammar that behave like this.
 
 The analyses mentioned in this section are implemented in a similar
 way to the method for enumerating all contexts: using fixpoint
-computation. We start from the easier cases of empty and unused categories and empty fields, and move on to a detailed explanation of context generation.
+computation. We use the simpler cases as examples to explain the
+method, and then move on to a detailed explanation of context
+generation.
 
 \subsection{Example I: empty concrete categories}
 
 We start with an extremely simple analysis: detecting empty concrete
-categories. A single GF category compiles into multiple concrete
-categories, one for each combination of parameters. We get \t{Det$_{\text{sg}}$} and \t{Det$_{\text{pl}}$}, as well as \t{NP$_{\text{sg}}$} and \t{NP$_{\text{pl}}$}. But if there are no plural \t{Det}s in the lexicon, then there won't be any plural \t{NP}s either. Thus we may wonder
-which combinations are actually in use in the lexicon.
+categories. A single \gf{} category compiles into multiple concrete
+categories, one for each combination of parameters. We have
+e.g. \t{Det$_{\text{sg}}$} and \t{Det$_{\text{pl}}$}, as well as
+\t{NP$_{\text{sg}}$} and \t{NP$_{\text{pl}}$}. But if there are no
+words of type \t{Det$_{\text{pl}}$} in the lexicon, then there won't
+be any way to construct elements of type \t{NP$_{\text{pl}}$}
+either. This way, we can compute if a category is empty, given that we
+know if its argument categories are empty or not.
 
 As a first step, we can see GF categories as mutually recursive
 datatypes. Take a fragment of the GF grammar in Figure~\ref{fig:exampleGrammar}:
@@ -94,13 +103,20 @@ may have several functions that produce them.
 \end{EmptyItem}
 
 
-Before, at the \gf{} level, we could just look at the lexicon and check whether there is some \t{CN} (e.g. \t{house}). But now, we don't know just by looking whether we have both \t{CN$_{\text 1}$} and \t{CN$_\text{2}$}: maybe the lexicon is so small that there are no instances of \t{CN$_\text{2}$}, or maybe some combination of parameters doesn't even exist. Regardless of the reason of emptiness, if \t{CN$_\text{2}$} is empty, then \t{NP$_\text{4}$} is too, because it is constructed from \t{CN$_\text{2}$}.  Thus, we can compute if a category is empty, given the emptiness of its argument categories.
+% Before, at the \gf{} level, we could just look at the lexicon and check whether there is some \t{CN} (e.g. \t{house}). But now, we don't know just by looking whether we have both \t{CN$_{\text 1}$} and \t{CN$_\text{2}$}: maybe the lexicon is so small that there are no instances of \t{CN$_\text{2}$}, or maybe some combination of parameters doesn't even exist. Regardless of the reason of emptiness, if \t{CN$_\text{2}$} is empty, then \t{NP$_\text{4}$} is too, because it is constructed from \t{CN$_\text{2}$}.  Thus, we can compute if a category is empty, given the emptiness of its argument categories.
 
 We need some initial guesses for the values. Ultimately we want to
 just know if a given category has a member or no, so we can deal with
 Booleans. We give an initial value of False to all variables: that is,
 ``this category are empty'', and we mark that with red text.
-In fact, now that we are reduced to Booleans, we don’t even need to care about what the original GF functions do with their arguments. So we can replace the GF functions \t{AdvCN}, \t{DetCN} and \t{PrepNP} with just a  conjunction ($\&\&$): both arguments to the function must be non-empty. In case of multiple functions that have the same concrete category as a result, we replace the | with a disjunction ($||$): \emph{some} way of constructing the category must have all of its arguments non-empty.
+In fact, now that we are reduced to Booleans, we don’t even need to
+care about what the original GF functions do with their arguments. So
+we can replace the GF functions \t{AdvCN}, \t{DetCN} and \t{PrepNP}
+with just a conjunction ($\&\&$): both arguments to the function must
+be non-empty. In case of multiple functions that have the same
+concrete category as a result, we replace the $|$ with a disjunction
+($||$): \emph{some} way of constructing the category must have only
+non-empty arguments.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -136,8 +152,12 @@ categories are found non-empty.
 \end{EmptyItem}
 
 
-On the second round, the change of status in \t{Det$_\text{5}$} and \t{CN$_\text{1}$} updates \t{NP$_\text{3}$} into true. On the third and final round, also  \t{Adv$_\text{0}$} becomes true, due to \t{NP$_\text{3}$} being true. But after the third round, nothing is going to change anymore, no matter how much we recompute. In other words, we have found a fixed point.
-
+On the second round, the change of status in \t{Det$_\text{5}$} and
+\t{CN$_\text{1}$} updates \t{NP$_\text{3}$} into true. On the third
+and final round, also \t{Adv$_\text{0}$} becomes true, due to
+\t{Prep$_\text{7}$} and \t{NP$_\text{3}$} being true. But after the
+third round, nothing is going to change, no matter how much we
+recompute. In other words, we have found a fixed point.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -166,13 +186,18 @@ Another requirement is that all right-hand sides of the equations need to be mon
 
 \subsection{Example II: empty fields and unreachable categories}
 
-The previous was quite a trivial problem for two reasons: the values are not changing after they get confirmed as True, and we had absolutely no use for the actual \gf{} functions (or the \pmcfg{} versions of them).
-Before moving on to context generation, we demonstrate briefly two more simple problems: finding categories that are unreachable from the start category, and fields that are always empty.
+Finding empty concrete categories was quite a trivial problem for two
+reasons: the values are not changing after they get confirmed as True,
+and we had absolutely no use for the actual \gf{} functions (or the
+\pmcfg{} versions of them).  Before moving on to context generation,
+we demonstrate briefly another two simple problems: finding categories
+that are unreachable from the start category, and fields that are
+always empty.
 
 \paragraph{Is a category reachable from the start category?}
 
 \begin{itemize}
-\item Start value: False (all categories are non-reachable from the start category)
+\item Start (least) value: False (all categories are non-reachable from the start category)
 \item Confirm that the start category is reachable from the start category.
 \item For each function whose result category is confirmed reachable, confirm its argument categories reachable.
 \end{itemize}
@@ -184,21 +209,90 @@ Notice that the first problem was bottom-up: we started from several terminal ca
 \paragraph{Are some fields always empty?}
 
 \begin{itemize}
-\item Start (least) value: all fields in all categories are empty. Now the value is not a Boolean, it is instead a set of fields that are non-empty empty–which in the beginning is an empty set. The ordering is the subset relation: \t{A ≤ B} if \t{A ⊆ B}.
+\item Start (least) value: all fields in all categories are empty. Now
+  the value is not a Boolean, it is instead a set of fields that are
+  non-empty empty–which in the beginning is an empty set. The ordering
+  is the subset relation: \t{A ≤ B} if \t{A ⊆ B}.
 % \t{A $\leq$ B} if \t{A $\subseteq$ B}.
- \item A field \t{s} in a terminal category \t{T} is non-empty, if there is some actual word with a non-empty string in \t{s}. When such a word is found, add that field to the initial set of non-empty fields.
-\item A field \t{s'} in a non-terminal category \t{N} is non-empty, if there is some function \t{f~:~T$_\text{1}$~$\rightarrow$ \dots~$\rightarrow$~T$_\text{n}$~$\rightarrow$~N}, that uses at least one non-empty field from some \t{T$_\text{i}$}, or alternatively, introduces new strings into \t{s'}.
+\item A field \t{s} in a terminal category \t{T} is non-empty, if
+  there is some actual word with a non-empty string in \t{s}. When
+  such a word is found, add that field to the initial set of non-empty
+  fields.
+\item A field \t{s'} in a non-terminal category \t{N} is non-empty, if
+  there is some function \t{f~:~T$_\text{1}$~$\rightarrow$
+    \dots~$\rightarrow$~T$_\text{n}$~$\rightarrow$~N}, that uses at
+  least one non-empty field from some \t{T$_\text{i}$}, or
+  alternatively, introduces new strings into \t{s'}.
 \end{itemize}
 
-Here we need the actual GF function, because we need to find out which fields of its arguments it is using---it is not enough to know that the argument has some fields with some properties. In fact, since functions may not only use their arguments but also introduce new strings, we definitely need all three pieces of information: the emptiness status of the arguments’ fields, which fields are used by \t{f}, and whether \t{f} introduces new strings.
+Here we need the actual GF function, because we need to find out which
+fields of its arguments it is using---it is not enough to know that
+the argument has some fields with some properties. In fact, since
+functions may not only use their arguments but also introduce new
+strings, we definitely need all three pieces of information: the
+emptiness status of the arguments’ fields, which fields are used by
+\t{f}, and whether \t{f} introduces new strings.
 
 \subsection{Context generation revisited}
 
-The strongest clue was the notion of dependence: in order to compute contexts for Kind, we need to already have computed contexts for Item. All categories depend on other categories, except for the start category.
+The strongest clue was the notion of dependence: in order to compute
+contexts for Kind, we need to already have computed contexts for
+Item. All categories depend on other categories, except for the start
+category.
 
-So, in the beginning we know the optimal path (“do nothing, you’re already there!”) for the start category, but not for other categories. This is a hint that we could do top-down, just like we did when computing reachable categories. Let’s start writing and figure out the actual values and types as we go.
+So, in the beginning we know the optimal path (“do nothing, you’re
+already there!”) for the start category, but not for other
+categories. This is a hint that we could do top-down, just like we did
+when computing reachable categories. Let’s start writing and figure
+out the actual values and types as we go.
 
-Remember again that contexts are trees with holes, or in other words, functions of type Tree → Tree. To construct paths, we apply the trees that are closer to the start category to the trees that are lower. Well, technically we cannot apply Tree → Tree into another Tree → Tree–we just get a composition that is still Tree → Tree. But eventually there will be a Tree: one of those examples we’ve generated at the step before context generation. 
+Remember again that contexts are trees with holes, or in other words,
+functions of type Tree -> Tree. To construct paths, we apply the trees
+that are closer to the start category to the trees that are
+lower. Well, technically we cannot apply Tree -> Tree into another Tree
+-> Tree–we just get a composition that is still Tree -> Tree. But
+eventually there will be a Tree: one of those examples we’ve generated
+at the step before context generation.
+
+So what kind of a trivial Tree -> Tree function we could use for
+Comment? Well, there is always id, the most trivial of all a -> a
+functions! So let’s plug that in there.
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+\DataTypeTok{CtxS}    \OtherTok{::=} \NormalTok{\{ id \}}
+\DataTypeTok{CtxNP}   \OtherTok{::=} \NormalTok{\{ \}}
+\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ \}}
+\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ \}}
+\DataTypeTok{CtxCN}   \OtherTok{::=} \NormalTok{\{ \}}
+\DataTypeTok{CtxDet}  \OtherTok{::=} \NormalTok{\{ \}}
+\DataTypeTok{CtxPrep} \OtherTok{::=} \NormalTok{\{ \}}
+\end{Highlighting}
+\end{EmptyItem}
+
+We also have information on the original grammar: for every category
+we know which functions take it as an argument, and which position it
+is. For instance, the category \t{NP} is consumed as the 0th argument
+of \t{PredAdj}, \t{PredAdv} and \t{UttNP}, and all of them pick the
+In addition, we know which fields from its argument it uses (i.e. sends upwards).
+
+This is just a trivial lookup table we get directly from the
+grammar. The notation is as follows: Category $\rightarrow$ (Function,
+arg. position, [fields from the argument the function uses]).
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+\DataTypeTok{NP}   \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{PredAdj}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Nom}\NormalTok{])          }\DataTypeTok{AP}   \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{PredAdj}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{])}
+       \NormalTok{, (}\DataTypeTok{PredAdv}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Nom}\NormalTok{])                 , (}\DataTypeTok{PredAdj}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{])}
+       \NormalTok{, (}\DataTypeTok{UttNP}\NormalTok{,  }\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Nom}\NormalTok{])                 , (}\DataTypeTok{AdjCN}\NormalTok{,  }\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{]) }
+       \NormalTok{, (}\DataTypeTok{PrepNP}\NormalTok{, }\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Acc}\NormalTok{]) \}               , (}\DataTypeTok{AdjCN}\NormalTok{,  }\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{]) \}}
+\DataTypeTok{CN}   \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{])             }\DataTypeTok{Adv}  \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{AdvCN}\NormalTok{,}\DecValTok{0}\NormalTok{,[s]) \}}
+       \NormalTok{, (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{])             }\DataTypeTok{Prep} \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{PrepNP}\NormalTok{,}\DecValTok{0}\NormalTok{,[s]) \}}
+       \NormalTok{, (}\DataTypeTok{AdjCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{])             }\DataTypeTok{Det}  \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Masc}\NormalTok{]) }
+       \NormalTok{, (}\DataTypeTok{AdjCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{]) \}                  , (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Fem}\NormalTok{]) \}}
+\end{Highlighting}
+\end{EmptyItem}
+
 
 % In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
 % $$

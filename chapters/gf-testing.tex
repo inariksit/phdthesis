@@ -366,10 +366,10 @@ grammars. After our changes, we get the following differences:
 
 \noindent We notice a side effect that we may not have thought of: the
 gender is retained in all adverbs made of NPs made of determiners, so
-now it has become impossible to say ``the hill without \emph{that}'' and
-pointing to a house. So we do another round of modifications, compute
-the difference (to the original grammar or to the intermediate), and
-see if something else has changed.
+now it has become impossible to say ``the hill next to \emph{that}'',
+where \emph{that} is referring to a house. So we do another round of
+modifications, compute the difference (to the original grammar or to
+the intermediate), and see if something else has changed.
 
 %  We have seen that, in order to test
 % whether or not we have implemented a linguistic phenomenon correctly,
@@ -727,15 +727,41 @@ The following trees would fit the description:
 \label{sec:pruning_all}
 
 So far we have completely ignored that one tree can showcase more than
-one function. In the example of Estonian adjective agreement, we start
-by testing \t{AdjCN} and end up with the following 8 trees, with
-\t{PrepNP} in the context:  \t{PrepNP} \{ \stackanchor{\tt in}{\tt with} \}
+one function. In the Estonian example, we start
+by testing \t{AdjCN} and end up with the following 8 trees, where
+\t{PrepNP} is in the context: 
+\t{PrepNP} \{ \stackanchor{\tt in}{\tt with} \}
              {\tt (DetCN} \{ \stackanchor{\tt this}{\tt these} \} 
              {\tt AdjCN}  \{\stackanchor{\tt blue}{\tt ready} \} 
-             {\tt house)}. In
-fact, these 8 trees cover all tests we would've needed for \t{PrepNP}
-itself. Thus, it is possible to shrink the test cases effectively, if
-one wants to test the whole grammar at one go.
+             {\tt house)}.
+In fact, these 8 trees cover all tests we would've needed for
+\t{PrepNP} itself. Thus, it is possible to shrink the test cases
+effectively, if one wants to test the whole grammar at one go.
+
+\paragraph{Deterministic argument generation}
+There is a simple way to detect redundancy in the generated trees. We
+make the generation of arguments and contexts completely
+deterministic, e.g. always choose the function that is alphabetically
+first. Then, we would get a sentence such as ``the good house is
+good'' for testing both \t{AdjCN} and \t{PredAdj}. The downside is
+that the sentences can get boring to read, or even confusing, in the
+style of ``the house gives the house the house''.
+
+However, we can split the generation in two stages:
+first stage is deterministic, where every noun is \t{house}, and we
+can eliminate redundancies by just eliminating copies of the same
+tree. Then, when we have a set of unique trees, we can substitute
+individual words in them with other words in the same concrete
+category.  A sentence such as ``the house gives the hill the
+ham'' tests the same properties as the version with \emph{house} in every
+role, but at least it is easier to keep track who does what, and
+compare the translations of the same tree.
+
+In practice, we only apply the first step, and let the sentences be
+redundant. In Section~\ref{sec:evalGF}, we refer to total and unique
+trees when generating tests for the whole grammar; ``unique trees''
+means the number after removing duplicate trees that are generated to
+test different functions, but happen to be the same.
 
 \paragraph{Alternative priorities for context generation} The current
 implementation of context generation prioritises minimal trees, such
@@ -744,40 +770,16 @@ method would be to choose contexts where the \t{NP} can also use its
 parameters, in addition to just showing all of its strings. Arguably,
 it would tell more to the user to see a sentence like ``this house is
 big'', formed with \t{PredAdj}, rather than just ``this house'',
-formed by \t{UttNP}.  With the current scheme, we have found it a
-useful practice to hide functions such as \t{UttNP}, which just lift a
-category into the start category without introducing other
-arguments. For future, especially if we plan to move away from
-per-function basis and target the whole grammar with minimal
-sentences, it could make sense for a context to serve double purpose:
-show all its strings and use as many of its parameters as possible.
+formed by \t{UttNP}. 
+
+However, these alternative priorities are not implemented yet. With
+the current scheme, we have found it a useful practice to hide
+functions such as \t{UttNP}, which just lift a category into the start
+category without introducing other arguments. For future, it would
+make sense for a context to serve double purpose: show all its strings
+and (try to) use all of its parameters.
 % Prefer contexts where there are no coercions
 
-\paragraph{Deterministic argument generation}
-There is a simple way to detect redundancy in the generated trees,
-already in the current implementation. We make the generation of
-arguments and contexts completely deterministic, e.g. always choose
-the function that is alphabetically first. Then, we would get a
-sentence such as ``the good house is good'' for testing both \t{AdjCN}
-and \t{PredAdj}. The downside is that the sentences can get boring to
-read, or even confusing, in the style of ``the house gives the house
-the house''. 
-
-However, we can split the generation in two stages:
-first stage is deterministic, where every noun is \t{house}, and we
-can eliminate redundancies by just eliminating copies of the same
-tree. Then, when we have a set of unique trees, we can substitute
-individual words in them with other words in the same concrete
-category.  A sentence such as ``the house gives the hill the blue
-house'' tests the same properties as the version with house in every
-role, but at least it is easier to keep track who does what, and
-compare the translations of the same tree.
-
-In practice, we only apply the first step, and let the sentences be redundant. In
-Section~\ref{sec:evalGF}, we refer to total and unique trees when
-generating tests for the whole grammar; ``unique trees'' means the
-number after removing duplicate trees that are generated to test
-different functions, but happen to be the same.
 
 \input{chapters/gf-fixpoints.tex}
 
