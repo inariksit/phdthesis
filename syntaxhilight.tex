@@ -19,8 +19,10 @@
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+%\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\},codes={\catcode`$=3\catcode`_=8}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},codes={\catcode`$=3\catcode`_=8}}
+
 % Add ',fontsize=\small' for more characters per line
 \usepackage{framed}
 \definecolor{shadecolor}{RGB}{248,248,248}

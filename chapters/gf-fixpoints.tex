@@ -49,34 +49,34 @@ be any way to construct elements of type \t{NP$_{\text{pl}}$}
 either. This way, we can compute if a category is empty, given that we
 know if its argument categories are empty or not.
 
-As a first step, we can see GF categories as mutually recursive
-datatypes. Take a fragment of the GF grammar in Figure~\ref{fig:exampleGrammar}:
+As a first step, we can see \gf{} categories as mutually recursive
+datatypes. Take a fragment of the \gf{} grammar in Figure~\ref{fig:exampleGrammar}:
 
-\begin{EmptyItem}
+\begin{itemize}
+\item[\t{\OtherTok{cat}}]
 \begin{Highlighting}[]
-\NormalTok{cat}
-  \DataTypeTok{Adv} \NormalTok{; }\DataTypeTok{CN} \NormalTok{; }\DataTypeTok{Det} \NormalTok{; }\DataTypeTok{NP} \NormalTok{; }\DataTypeTok{Prep} \NormalTok{;}
-\NormalTok{fun}
-  \NormalTok{PrepNP} \FunctionTok{:} \DataTypeTok{Prep} \OtherTok{->} \DataTypeTok{NP} \OtherTok{->} \DataTypeTok{Adv} \NormalTok{;}
-  \NormalTok{AdvCN}  \FunctionTok{:} \DataTypeTok{Adv}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{CN} \NormalTok{;}
-  \NormalTok{DetCN}  \FunctionTok{:} \DataTypeTok{Det}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{NP} \NormalTok{;}
-  \NormalTok{house, … }\FunctionTok{:} \DataTypeTok{CN} \NormalTok{;}
-  \NormalTok{this, these, … }\FunctionTok{:} \DataTypeTok{Det} \NormalTok{;}
-  \NormalTok{on, … }\FunctionTok{:} \DataTypeTok{Prep}
+\DataTypeTok{Adv} \NormalTok{; }\DataTypeTok{CN} \NormalTok{; }\DataTypeTok{Det} \NormalTok{; }\DataTypeTok{NP} \NormalTok{; }\DataTypeTok{Prep} \NormalTok{;}
 \end{Highlighting}
-\end{EmptyItem}
+\item[\t{\OtherTok{fun}}]\begin{Highlighting}[]
+\NormalTok{PrepNP} \FunctionTok{:} \DataTypeTok{Prep} \OtherTok{->} \DataTypeTok{NP} \OtherTok{->} \DataTypeTok{Adv} \NormalTok{;}
+\NormalTok{AdvCN}  \FunctionTok{:} \DataTypeTok{Adv}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{CN} \NormalTok{;}
+\NormalTok{DetCN}  \FunctionTok{:} \DataTypeTok{Det}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{NP} \NormalTok{;}
+\NormalTok{house, … }\FunctionTok{:} \DataTypeTok{CN} \NormalTok{;}
+\NormalTok{this, these, … }\FunctionTok{:} \DataTypeTok{Det} \NormalTok{;}
+\NormalTok{on, … }\FunctionTok{:} \DataTypeTok{Prep}
+\end{Highlighting}
+\end{itemize}
 
 \noindent We change the syntax of the functions slightly: move the result
 category to the left and remove arrows.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-\NormalTok{fun}
-  \DataTypeTok{Adv}  \OtherTok{::=} \NormalTok{PrepNP }\DataTypeTok{Prep} \DataTypeTok{NP} \NormalTok{;}
-  \DataTypeTok{CN}   \OtherTok{::=} \NormalTok{AdvCN }\DataTypeTok{Adv} \DataTypeTok{CN} \FunctionTok{|} \NormalTok{house }\FunctionTok{|} \NormalTok{… ;}
-  \DataTypeTok{NP}   \OtherTok{::=} \NormalTok{DetCN }\DataTypeTok{Det} \DataTypeTok{CN} \NormalTok{;}
-  \DataTypeTok{Det}  \OtherTok{::=} \NormalTok{this }\FunctionTok{|} \NormalTok{these }\FunctionTok{|} \NormalTok{… ;}
-  \DataTypeTok{Prep} \OtherTok{::=} \NormalTok{on }\FunctionTok{|} \NormalTok{… ;}
+\DataTypeTok{Adv}  \OtherTok{::=} \NormalTok{PrepNP }\DataTypeTok{Prep} \DataTypeTok{NP} \NormalTok{;}
+\DataTypeTok{CN}   \OtherTok{::=} \NormalTok{AdvCN }\DataTypeTok{Adv} \DataTypeTok{CN} \FunctionTok{|} \NormalTok{house }\FunctionTok{|} \NormalTok{… ;}
+\DataTypeTok{NP}   \OtherTok{::=} \NormalTok{DetCN }\DataTypeTok{Det} \DataTypeTok{CN} \NormalTok{;}
+\DataTypeTok{Det}  \OtherTok{::=} \NormalTok{this }\FunctionTok{|} \NormalTok{these }\FunctionTok{|} \NormalTok{… ;}
+\DataTypeTok{Prep} \OtherTok{::=} \NormalTok{on }\FunctionTok{|} \NormalTok{… ;}
 \end{Highlighting}
 \end{EmptyItem}
 
@@ -91,14 +91,14 @@ may have several functions that produce them.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-  \DataTypeTok{Adv₀  }\OtherTok{::=} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₃} \FunctionTok{|} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₄} \NormalTok{;}
-  \DataTypeTok{CN₁   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₁ }\FunctionTok{|} \NormalTok{house} \NormalTok{;}
-  \DataTypeTok{CN₂   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₂} \NormalTok{;}
-  \DataTypeTok{NP₃   }\OtherTok{::=} \NormalTok{DetCN} \DataTypeTok{Det₅} \DataTypeTok{CN₁} \NormalTok{;}
-  \DataTypeTok{NP₄   }\OtherTok{::=} \NormalTok{DetCN} \DataTypeTok{Det₆} \DataTypeTok{CN₂} \NormalTok{;}
-  \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
-  \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
-  \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
+\DataTypeTok{Adv₀  }\OtherTok{::=} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₃} \FunctionTok{|} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₄} \NormalTok{;}
+\DataTypeTok{CN₁   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₁ }\FunctionTok{|} \NormalTok{house} \NormalTok{;}
+\DataTypeTok{CN₂   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₂} \NormalTok{;}
+\DataTypeTok{NP₃   }\OtherTok{::=} \NormalTok{DetCN} \DataTypeTok{Det₅} \DataTypeTok{CN₁} \NormalTok{;}
+\DataTypeTok{NP₄   }\OtherTok{::=} \NormalTok{DetCN} \DataTypeTok{Det₆} \DataTypeTok{CN₂} \NormalTok{;}
+\DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
+\DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
+\DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
 \end{Highlighting}
 \end{EmptyItem}
 
@@ -107,8 +107,8 @@ may have several functions that produce them.
 
 We need some initial guesses for the values. Ultimately we want to
 just know if a given category has a member or no, so we can deal with
-Booleans. We give an initial value of False to all variables: that is,
-``this category are empty'', and we mark that with red text.
+Booleans. We give an initial value of False to all variables, meaning
+``this category is empty'', and we mark that with red text.
 In fact, now that we are reduced to Booleans, we don’t even need to
 care about what the original GF functions do with their arguments. So
 we can replace the GF functions \t{AdvCN}, \t{DetCN} and \t{PrepNP}
@@ -120,34 +120,34 @@ non-empty arguments.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-  \AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
-  \AlertTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \ErrorTok{house} \NormalTok{;}
-  \AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
-  \AlertTok{NP₃   }\OtherTok{::=} \AlertTok{Det₅ }\FunctionTok{&&} \AlertTok{CN₁} \NormalTok{;}
-  \AlertTok{NP₄   }\OtherTok{::=} \AlertTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
-  \AlertTok{Det₅  }\OtherTok{::=} \ErrorTok{this} \NormalTok{;}
-  \AlertTok{Det₆  }\OtherTok{::=} \ErrorTok{these} \NormalTok{;}
-  \AlertTok{Prep₇ }\OtherTok{::=} \ErrorTok{on} \NormalTok{;}
+\AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
+\AlertTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \ErrorTok{house} \NormalTok{;}
+\AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+\AlertTok{NP₃   }\OtherTok{::=} \AlertTok{Det₅ }\FunctionTok{&&} \AlertTok{CN₁} \NormalTok{;}
+\AlertTok{NP₄   }\OtherTok{::=} \AlertTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+\AlertTok{Det₅  }\OtherTok{::=} \ErrorTok{this} \NormalTok{;}
+\AlertTok{Det₆  }\OtherTok{::=} \ErrorTok{these} \NormalTok{;}
+\AlertTok{Prep₇ }\OtherTok{::=} \ErrorTok{on} \NormalTok{;}
 \end{Highlighting}
 \end{EmptyItem}
 
 A variable for a given category turns into True, when we find a member
 of that category. On the first round, we start from the lexical
-categories: \t{CN$_\text{*}$}, \t{Det$_*$} and \t{Prep$_*$}. To
+categories: \t{CN$_*$}, \t{Det$_*$} and \t{Prep$_*$}. To
 continue with the example, say that all have a lexical item except for
 \t{CN$_\text{2}$}. Thus, after the first round, the following
 categories are found non-empty.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-  \AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
-  \DataTypeTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
-  \AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
-  \AlertTok{NP₃   }\OtherTok{::=} \AlertTok{Det₅ }\FunctionTok{&&} \AlertTok{CN₁} \NormalTok{;}
-  \AlertTok{NP₄   }\OtherTok{::=} \AlertTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
-  \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
-  \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
-  \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
+\AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
+\DataTypeTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
+\AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+\AlertTok{NP₃   }\OtherTok{::=} \AlertTok{Det₅ }\FunctionTok{&&} \AlertTok{CN₁} \NormalTok{;}
+\AlertTok{NP₄   }\OtherTok{::=} \AlertTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+\DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
+\DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
+\DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
 \end{Highlighting}
 \end{EmptyItem}
 
@@ -161,14 +161,14 @@ recompute. In other words, we have found a fixed point.
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-  \DataTypeTok{Adv₀  }\OtherTok{::=} \DataTypeTok{Prep₇ }\FunctionTok{&&} \DataTypeTok{NP₃ }\FunctionTok{||} \DataTypeTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
-  \DataTypeTok{CN₁   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \DataTypeTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
-  \AlertTok{CN₂   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
-  \DataTypeTok{NP₃   }\OtherTok{::=} \DataTypeTok{Det₅ }\FunctionTok{&&} \DataTypeTok{CN₁} \NormalTok{;}
-  \AlertTok{NP₄   }\OtherTok{::=} \DataTypeTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
-  \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
-  \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
-  \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
+\DataTypeTok{Adv₀  }\OtherTok{::=} \DataTypeTok{Prep₇ }\FunctionTok{&&} \DataTypeTok{NP₃ }\FunctionTok{||} \DataTypeTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
+\DataTypeTok{CN₁   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \DataTypeTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
+\AlertTok{CN₂   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+\DataTypeTok{NP₃   }\OtherTok{::=} \DataTypeTok{Det₅ }\FunctionTok{&&} \DataTypeTok{CN₁} \NormalTok{;}
+\AlertTok{NP₄   }\OtherTok{::=} \DataTypeTok{Det₆ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
+\DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
+\DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
+\DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
 \end{Highlighting}
 \end{EmptyItem}
 
@@ -178,7 +178,7 @@ recompute. In other words, we have found a fixed point.
 
 Assume for a moment that the set of variables  \t{Adv$_\text{0}$}--\t{Prep$_\text{7}$} has nothing to do with the original GF grammar. Then, we could easily conceive of other assignments to the variables that are also fixpoints: say, everything is False; only \t{Det$_\text{5}$} and \t{CN$_\text{2}$} are True; everything is True. (In contrast, “only \t{Det$_\text{5}$} and \t{CN$_\text{1}$} are True” is not a fixpoint, because if we iterated one more time, \t{NP$_\text{3}$} would change from False to True).
 
-Of course, given that these variables come from an actual GF grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. Likewise, we don’t want to be too pessimistic and claim that some non-empty category has no words in it. Instead, we want the most conservative solution that respects reality--the least fixpoint, given the actual GF grammar.
+Of course, given that these variables come from an actual GF grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. Likewise, we don’t want to be too pessimistic and claim that some non-empty category has no words in it. Instead, we want the most conservative solution that respects reality---the least fixpoint, given the actual GF grammar.
 
 To define \emph{least}, we need to define an ordering on the domain of possible solutions. In the case of Booleans, we just say False ≤ True, and hence a solution with more False is smaller. 
 We start the computation by giving the least value to all variables.
@@ -235,6 +235,44 @@ emptiness status of the arguments’ fields, which fields are used by
 
 \subsection{Context generation revisited}
 
+Let us start by listing some information we have on the grammar.  For
+every category \t{C}, we know which functions take it as an argument, and
+which position \t is. For instance, the category \t{AP} is consumed as
+the first argument (position 0) of \t{AdjCN}, and second argument
+(position 1) of \t{PredAdj}.  In addition, we know which fields from
+its argument the function uses (i.e. sends upwards): nominative for
+\t{PredAdj}, \t{PredAdv} and \t{UttNP}, and accusative for \t{PrepNP}.
+Table~\ref{info-on-grammar} shows this information for the concrete
+categories based on the \gf{} categories \t{NP}, \t{AP}, \t{Prep},
+\t{CN}, \t{Det} and \t{Adv} in an English concrete syntax.
+In the table, \t{NP$_{\text{sg}}$} and \t{NP$_{\text{pl}}$} are merged
+into one, because the number of \t{NP} doesn't make a difference in
+any of the functions that take it as an argument; both
+\t{NP$_{\text{sg}}$} and \t{NP$_{\text{pl}}$} become the same concrete \t{S}.
+
+
+\begin{table}
+\ttfamily
+\begin{tabular}{p{0.25cm} p{0.18cm} p{5cm} p{0.35cm} p{0.18cm} l}
+\DataTypeTok{NP$_*$} & \OtherTok{$\mapsto$} & \NormalTok{\{ (}\DataTypeTok{PredAdj}\NormalTok{, }\DecValTok{0}\NormalTok{, [s }\DataTypeTok{Nom}\NormalTok{], }\DataTypeTok{S}\NormalTok{)} & \DataTypeTok{CN} &  \OtherTok{$\mapsto$} & \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,   }\DecValTok{1}\NormalTok{, [s }\DataTypeTok{Sg}\NormalTok{],  }\DataTypeTok{NP$_{\text{sg}}$}\NormalTok{)}\\
+ & & \NormalTok{, (}\DataTypeTok{PredAdv}\NormalTok{, }\DecValTok{0}\NormalTok{, [s }\DataTypeTok{Nom}\NormalTok{], }\DataTypeTok{S}\NormalTok{)}
+& & &                \NormalTok{, (}\DataTypeTok{DetCN}\NormalTok{,   }\DecValTok{1}\NormalTok{, [s }\DataTypeTok{Pl}\NormalTok{],  }\DataTypeTok{NP$_{\text{pl}}$}\NormalTok{)}\\
+ & & \NormalTok{, (}\DataTypeTok{UttNP}\NormalTok{,   }\DecValTok{0}\NormalTok{, [s }\DataTypeTok{Nom}\NormalTok{], }\DataTypeTok{S}\NormalTok{)}
+& & & \NormalTok{, (}\DataTypeTok{AdjCN}\NormalTok{,   }\DecValTok{1}\NormalTok{, [s }\DataTypeTok{Sg}\NormalTok{, s }\DataTypeTok{Pl}\NormalTok{], }\DataTypeTok{CN}\NormalTok{) \}}\\
+& & \NormalTok{, (}\DataTypeTok{PrepNP}\NormalTok{,  }\DecValTok{1}\NormalTok{, [s }\DataTypeTok{Acc}\NormalTok{], }\DataTypeTok{Adv}\NormalTok{) \}}
+& \DataTypeTok{Det$_{\text{sg}}$} & \OtherTok{$\mapsto$} & \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,   }\DecValTok{0}\NormalTok{, [s], }\DataTypeTok{NP$_{\text{sg}}$}\NormalTok{)}\\
+\DataTypeTok{AP} & \OtherTok{$\mapsto$} & \NormalTok{\{ (}\DataTypeTok{PredAdj}\NormalTok{, }\DecValTok{1}\NormalTok{, [s], }\DataTypeTok{S}\NormalTok{)              }
+& \DataTypeTok{Det$_{\text{pl}}$} & \OtherTok{$\mapsto$} & \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,   }\DecValTok{0}\NormalTok{, [s], }\DataTypeTok{NP$_{\text{pl}}$}\NormalTok{) \}}\\
+& & \NormalTok{, (}\DataTypeTok{AdjCN}\NormalTok{,   }\DecValTok{0}\NormalTok{, [s], }\DataTypeTok{CN}\NormalTok{) \}}
+& \DataTypeTok{Adv} & \OtherTok{$\mapsto$} &\NormalTok{\{ (}\DataTypeTok{PredAdv}\NormalTok{, }\DecValTok{1}\NormalTok{, [s], }\DataTypeTok{S}\NormalTok{)}\\
+\DataTypeTok{Prep} & \OtherTok{$\mapsto$} & \NormalTok{\{ (}\DataTypeTok{PrepNP}\NormalTok{,  }\DecValTok{0}\NormalTok{, [s], }\DataTypeTok{Adv}\NormalTok{)\}}
+& & & \NormalTok{, (}\DataTypeTok{AdvCN}\NormalTok{,   }\DecValTok{0}\NormalTok{, [s], }\DataTypeTok{CN}\NormalTok{) \}}\\
+\end{tabular}
+\caption{Category $\mapsto$ (function,
+arg. position, [fields used by function], result category)}
+\label{info-on-grammar}
+\end{table}
+
 The strongest clue was the notion of dependence: in order to compute
 contexts for Kind, we need to already have computed contexts for
 Item. All categories depend on other categories, except for the start
@@ -270,28 +308,6 @@ functions! So let’s plug that in there.
 \end{Highlighting}
 \end{EmptyItem}
 
-We also have information on the original grammar: for every category
-we know which functions take it as an argument, and which position it
-is. For instance, the category \t{NP} is consumed as the 0th argument
-of \t{PredAdj}, \t{PredAdv} and \t{UttNP}, and all of them pick the
-In addition, we know which fields from its argument it uses (i.e. sends upwards).
-
-This is just a trivial lookup table we get directly from the
-grammar. The notation is as follows: Category $\rightarrow$ (Function,
-arg. position, [fields from the argument the function uses]).
-
-\begin{EmptyItem}
-\begin{Highlighting}[]
-\DataTypeTok{NP}   \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{PredAdj}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Nom}\NormalTok{])          }\DataTypeTok{AP}   \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{PredAdj}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{])}
-       \NormalTok{, (}\DataTypeTok{PredAdv}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Nom}\NormalTok{])                 , (}\DataTypeTok{PredAdj}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{])}
-       \NormalTok{, (}\DataTypeTok{UttNP}\NormalTok{,  }\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Nom}\NormalTok{])                 , (}\DataTypeTok{AdjCN}\NormalTok{,  }\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{]) }
-       \NormalTok{, (}\DataTypeTok{PrepNP}\NormalTok{, }\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Acc}\NormalTok{]) \}               , (}\DataTypeTok{AdjCN}\NormalTok{,  }\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{]) \}}
-\DataTypeTok{CN}   \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{])             }\DataTypeTok{Adv}  \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{AdvCN}\NormalTok{,}\DecValTok{0}\NormalTok{,[s]) \}}
-       \NormalTok{, (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{])             }\DataTypeTok{Prep} \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{PrepNP}\NormalTok{,}\DecValTok{0}\NormalTok{,[s]) \}}
-       \NormalTok{, (}\DataTypeTok{AdjCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Sg}\NormalTok{])             }\DataTypeTok{Det}  \OtherTok{→} \NormalTok{\{ (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Masc}\NormalTok{]) }
-       \NormalTok{, (}\DataTypeTok{AdjCN}\NormalTok{,}\DecValTok{1}\NormalTok{,[s }\DataTypeTok{Pl}\NormalTok{]) \}                  , (}\DataTypeTok{DetCN}\NormalTok{,}\DecValTok{0}\NormalTok{,[s }\DataTypeTok{Fem}\NormalTok{]) \}}
-\end{Highlighting}
-\end{EmptyItem}
 
 
 % In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
