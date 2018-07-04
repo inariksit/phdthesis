@@ -970,54 +970,34 @@ in the second one, also for phonological features.
 
 \subsection{Qualitative analysis} 
 
-We read through the test sentences of the small grammar in all the
-four languages. 
-For Dutch we had a native speaker; for Estonian and Spanish an
-intermediate non-native, and for Basque, a beginner. None of the
-\todo{four? is Spanish tested?}
-grammars had been tested systematically before---for the Estonian grammar
-\cite{listenmaa_kaljurand2014}, the morphological paradigms had been
-tested extensively against existing resources, but syntactic functions
-were only tested with a treebank of 425 trees.
+The Basque resource grammar is still a work in progress, and the test
+sentences showed serious problems in morphology. We thought it
+premature to get a fluent speaker to evaluate the grammar, because the
+errors in morphology would probably make it difficult to assess syntax
+separately. Phrasebook was implemented using the resource grammar, so
+it was equally error-ridden.
 
-We read through all the 1314 sentences from Estonian Phrasebook,
-which took around 45 minutes (not including the time to fix the bugs).
-We found 4 errors in the inflection of individual words---they did not
-come from the resource lexicon, which was tested in
-\cite{listenmaa_kaljurand2014}, but were implemented separately in the
-grammar. In addition, we found one error in forming compound words,
-also coming from the Phrasebook grammar and not from the resource
-library. There was one bug in a syntactic function: using a wrong form
-of nationality when applied to a human and when to an institution,
-along the lines of ``Spaniard restaurant''. As expected, Phrasebook
-sentences were easier to read, and made more sense semantically than
-sentences from the resource grammar. For a similarly sized grammar,
-reading through the whole test set at one go seems like a feasible
-strategy, even when the tool creates examples for a single function at
-a time.
-
+For Estonian, we read through all the Phrasebook test sentences. These
+505 sentences showed a handful of bugs, all coming from Phrasebook
+itself not the resource grammar. Most were individual words having the
+wrong inflection paradigm (the right one exists in the resource
+grammar, but wrong one was chosen by the application grammarian), but
+there were also some bugs in more general functions—for example, using
+a wrong form of nationality when applied to a human and when to an
+institution, along the lines of ``Spaniard restaurant''. As expected,
+Phrasebook sentences were easier to read, and made more sense
+semantically than sentences from the resource grammar.
 
 We have been developing the tool by testing it on the Dutch resource
-grammar, and during 6 months, we have committed 22 bugfixes on Dutch
-in the \gf{} main repository. (In the name of honesty, a few of the bugs were
-caused by our earlier ``fixes''---that was before we had implemented
-the comparison against an older version of the grammar!) In addition,
-one of the bugs found in Dutch was also present in other languages, so
-we fixed it in German and English.
+grammar---this process is described in more detail in
+Section~\ref{dutch-experiment}. During 6 months, we have committed 22
+bugfixes on Dutch in the \gf{} main repository. (In the name of
+honesty, a few of the bugs were caused by our earlier “fixes”—that was
+before we had implemented the comparison against an older version of
+the grammar.) One of the bugs found in Dutch was also present in other
+languages, so we fixed it in German and English.
 
-The Basque resource grammar is still a work in progress, and the
-test sentences showed serious problems in morphology.
-We thought it premature to get a fluent speaker to evaluate the grammar,
-because the errors in morphology would probably make it
-difficult to assess syntax separately. We think that the best course
-of action is to evaluate the morphological paradigms against existing
-resources, fix the implementation, and then concentrate on syntax.
-The Phrasebook was implemented using the resource grammar, so the
-same problems apply.
-
-
-
-
+\input{chapters/dutch-experiment.tex}
 
 \section{Conclusion and future work}
 

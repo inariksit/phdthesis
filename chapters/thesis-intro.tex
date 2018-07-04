@@ -55,7 +55,7 @@ morphologically analysed text: the correct analysis for the sentence
 is attained by removing improper readings from ambiguous words.
 Consider the word \emph{wish}: without context, it could be a noun or a verb.
 But any English speaker can easily tell that ``a wish'' is a noun.
-In CG, we can generalize the observation and write the following rule:
+In CG, we can generalise the observation and write the following rule:
 
 \begin{itemize}
 \item[] \texttt{SELECT noun IF (0 noun/verb) (-1 article) ;}
@@ -98,12 +98,14 @@ As opposed to CG, where the rules \emph{reduce} the number of possible readings,
 The most typical example of a generative grammar is a context-free grammar. GF is slightly more complex formalism, and we will present it in Section~\ref{sec:gf-intro}. To quickly illustrate the properties of a generative grammar, we use the following context-free grammar $G$:
 
 \begin{verbatim}
-              Sentence ::= Noun Verb
+              Sentence ::= Noun Verb | Noun "says that" Sentence
      G =      Noun     ::= "John" | "Mary"
               Verb     ::= "eats" | "sleeps"
 \end{verbatim}
 
-We call \t{Sentence} as the start category: all valid constructions in the language $G$ are sentences. There is only one way of forming sentences, which is to combine a \t{Noun} and a \t{Verb}, and each of them has two terminals (i.e. lexical items). Thus, the full language described by $G$ is \{\emph{John eats, John sleeps, Mary eats, Mary sleeps}\}. Again, the grammars we are really interested in are much larger, and the GF formalism has more complex machinery in place, such as taking care of agreement, i.e. allowing \emph{John sleeps} and \emph{I sleep}, but rejecting \emph{*I sleeps} and \emph{*John sleep}. But the basic mechanism is the same: a formal, rather compact description that generates a potentially infinite set of sentences.
+We call \t{Sentence} as the start category: all valid constructions in the language $G$ are sentences. There are two ways of forming sentences: one is to combine a \t{Noun} and a \t{Verb}, which results in the finite set \{\emph{John eats, John sleeps, Mary eats, Mary sleeps}\}. However, the second way of constructing a sentence is recursive, resulting in an infinite amount of sentences: \emph{John says that Mary says that \dots Mary eats}.
+
+Again, the grammars we are really interested in are much larger, and the GF formalism has more complex machinery in place, such as taking care of agreement, i.e. allowing \emph{John sleeps} and \emph{I sleep}, but rejecting \emph{*I sleeps} and \emph{*John sleep}. But the basic mechanism is the same: a formal, rather compact description that generates a potentially infinite set of sentences.
 
 It is fully possible to write a ``bad'' generative grammar, in the sense that it produces sentences that any English speaker would deem grammatically incorrect. But there is no notion of internal inconsistency, like there was in CG---the question is simply ``does this grammar describe the English language adequately?''.
 In order to test this, we must go beyond the grammar itself, and find a human oracle to answer the question.

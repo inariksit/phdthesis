@@ -54,30 +54,30 @@ datatypes. Take a fragment of the \gf{} grammar in Figure~\ref{fig:exampleGramma
 
 \begin{itemize}
 \item[\t{\OtherTok{cat}}]
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \DataTypeTok{Adv} \NormalTok{; }\DataTypeTok{CN} \NormalTok{; }\DataTypeTok{Det} \NormalTok{; }\DataTypeTok{NP} \NormalTok{; }\DataTypeTok{Prep} \NormalTok{;}
-\end{Highlighting}
-\item[\t{\OtherTok{fun}}]\begin{Highlighting}[]
+\end{HighlightingFancy}
+\item[\t{\OtherTok{fun}}]\begin{HighlightingFancy}[]
 \NormalTok{PrepNP} \FunctionTok{:} \DataTypeTok{Prep} \OtherTok{->} \DataTypeTok{NP} \OtherTok{->} \DataTypeTok{Adv} \NormalTok{;}
 \NormalTok{AdvCN}  \FunctionTok{:} \DataTypeTok{Adv}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{CN} \NormalTok{;}
 \NormalTok{DetCN}  \FunctionTok{:} \DataTypeTok{Det}  \OtherTok{->} \DataTypeTok{CN} \OtherTok{->} \DataTypeTok{NP} \NormalTok{;}
 \NormalTok{house, … }\FunctionTok{:} \DataTypeTok{CN} \NormalTok{;}
 \NormalTok{this, these, … }\FunctionTok{:} \DataTypeTok{Det} \NormalTok{;}
 \NormalTok{on, … }\FunctionTok{:} \DataTypeTok{Prep}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{itemize}
 
 \noindent We change the syntax of the functions slightly: move the result
 category to the left and remove arrows.
 
 \begin{EmptyItem}
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \DataTypeTok{Adv}  \OtherTok{::=} \NormalTok{PrepNP }\DataTypeTok{Prep} \DataTypeTok{NP} \NormalTok{;}
 \DataTypeTok{CN}   \OtherTok{::=} \NormalTok{AdvCN }\DataTypeTok{Adv} \DataTypeTok{CN} \FunctionTok{|} \NormalTok{house }\FunctionTok{|} \NormalTok{… ;}
 \DataTypeTok{NP}   \OtherTok{::=} \NormalTok{DetCN }\DataTypeTok{Det} \DataTypeTok{CN} \NormalTok{;}
 \DataTypeTok{Det}  \OtherTok{::=} \NormalTok{this }\FunctionTok{|} \NormalTok{these }\FunctionTok{|} \NormalTok{… ;}
 \DataTypeTok{Prep} \OtherTok{::=} \NormalTok{on }\FunctionTok{|} \NormalTok{… ;}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{EmptyItem}
 
 
@@ -90,7 +90,7 @@ just to simplify the example; in reality, all of the result categories
 may have several functions that produce them.
 
 \begin{EmptyItem}
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \DataTypeTok{Adv₀  }\OtherTok{::=} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₃} \FunctionTok{|} \NormalTok{PrepNP} \DataTypeTok{Prep₇} \DataTypeTok{NP₄} \NormalTok{;}
 \DataTypeTok{CN₁   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₁ }\FunctionTok{|} \NormalTok{house} \NormalTok{;}
 \DataTypeTok{CN₂   }\OtherTok{::=} \NormalTok{AdvCN} \DataTypeTok{Adv₀} \DataTypeTok{CN₂} \NormalTok{;}
@@ -99,7 +99,7 @@ may have several functions that produce them.
 \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
 \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
 \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{EmptyItem}
 
 
@@ -119,7 +119,7 @@ concrete category as a result, we replace the $|$ with a disjunction
 non-empty arguments.
 
 \begin{EmptyItem}
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
 \AlertTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \ErrorTok{house} \NormalTok{;}
 \AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
@@ -128,7 +128,7 @@ non-empty arguments.
 \AlertTok{Det₅  }\OtherTok{::=} \ErrorTok{this} \NormalTok{;}
 \AlertTok{Det₆  }\OtherTok{::=} \ErrorTok{these} \NormalTok{;}
 \AlertTok{Prep₇ }\OtherTok{::=} \ErrorTok{on} \NormalTok{;}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{EmptyItem}
 
 A variable for a given category turns into True, when we find a member
@@ -139,7 +139,7 @@ continue with the example, say that all have a lexical item except for
 categories are found non-empty.
 
 \begin{EmptyItem}
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \AlertTok{Adv₀  }\OtherTok{::=} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₃ }\FunctionTok{||} \AlertTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
 \DataTypeTok{CN₁   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
 \AlertTok{CN₂   }\OtherTok{::=} \AlertTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
@@ -148,7 +148,7 @@ categories are found non-empty.
 \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
 \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
 \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{EmptyItem}
 
 
@@ -160,7 +160,7 @@ third round, nothing is going to change, no matter how much we
 recompute. In other words, we have found a fixed point.
 
 \begin{EmptyItem}
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \DataTypeTok{Adv₀  }\OtherTok{::=} \DataTypeTok{Prep₇ }\FunctionTok{&&} \DataTypeTok{NP₃ }\FunctionTok{||} \DataTypeTok{Prep₇ }\FunctionTok{&&} \AlertTok{NP₄} \NormalTok{;}
 \DataTypeTok{CN₁   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \DataTypeTok{CN₁ }\FunctionTok{||} \NormalTok{house} \NormalTok{;}
 \AlertTok{CN₂   }\OtherTok{::=} \DataTypeTok{Adv₀ }\FunctionTok{&&} \AlertTok{CN₂} \NormalTok{;}
@@ -169,7 +169,7 @@ recompute. In other words, we have found a fixed point.
 \DataTypeTok{Det₅  }\OtherTok{::=} \NormalTok{this} \NormalTok{;}
 \DataTypeTok{Det₆  }\OtherTok{::=} \NormalTok{these} \NormalTok{;}
 \DataTypeTok{Prep₇ }\OtherTok{::=} \NormalTok{on} \NormalTok{;}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{EmptyItem}
 
 \subsection{Least fixpoint}
@@ -273,31 +273,10 @@ arg. position, [fields used by function], result category)}
 \label{info-on-grammar}
 \end{table}
 
-The strongest clue was the notion of dependence: in order to compute
-contexts for Kind, we need to already have computed contexts for
-Item. All categories depend on other categories, except for the start
-category.
-
-So, in the beginning we know the optimal path (“do nothing, you’re
-already there!”) for the start category, but not for other
-categories. This is a hint that we could do top-down, just like we did
-when computing reachable categories. Let’s start writing and figure
-out the actual values and types as we go.
-
-Remember again that contexts are trees with holes, or in other words,
-functions of type Tree -> Tree. To construct paths, we apply the trees
-that are closer to the start category to the trees that are
-lower. Well, technically we cannot apply Tree -> Tree into another Tree
--> Tree–we just get a composition that is still Tree -> Tree. But
-eventually there will be a Tree: one of those examples we’ve generated
-at the step before context generation.
-
-So what kind of a trivial Tree -> Tree function we could use for
-Comment? Well, there is always id, the most trivial of all a -> a
-functions! So let’s plug that in there.
+\todo{Write the rest of this section}
 
 \begin{EmptyItem}
-\begin{Highlighting}[]
+\begin{HighlightingFancy}[]
 \DataTypeTok{CtxS}    \OtherTok{::=} \NormalTok{\{ id \}}
 \DataTypeTok{CtxNP}   \OtherTok{::=} \NormalTok{\{ \}}
 \DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ \}}
@@ -305,16 +284,19 @@ functions! So let’s plug that in there.
 \DataTypeTok{CtxCN}   \OtherTok{::=} \NormalTok{\{ \}}
 \DataTypeTok{CtxDet}  \OtherTok{::=} \NormalTok{\{ \}}
 \DataTypeTok{CtxPrep} \OtherTok{::=} \NormalTok{\{ \}}
-\end{Highlighting}
+\end{HighlightingFancy}
 \end{EmptyItem}
 
 
+\todo{The following is what Koen wrote in the paper. Bridge the gap
+  between ``fixpoints for dummies'' and ``now that you understand the thing,
+  here's a concise definition''.}
 
-% In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
-% $$
-% \textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)
-% $$
-% In words, to generate contexts with holes of type $H$, we enumerate all functions $F$ that have a $H$ as an argument, and enumerate all contexts $C$ that have the result type $H'$ of $F$ as a hole type, and put $C$ and $F$ together to get a new context. Then, we apply a function $\textsf{filter}$ to the result in order to filter out redudant contexts, i.e. contexts whose uses of the strings of $H$ are already covered by other contexts in the same set.
-% To compute relevant contexts with the start category \t{S} as a hole, we use the following definition $\textsf{contexts}(\t{S}) = \{ \; \_ \; \}$.
+In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
+$$
+\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)
+$$
+In words, to generate contexts with holes of type $H$, we enumerate all functions $F$ that have a $H$ as an argument, and enumerate all contexts $C$ that have the result type $H'$ of $F$ as a hole type, and put $C$ and $F$ together to get a new context. Then, we apply a function $\textsf{filter}$ to the result in order to filter out redudant contexts, i.e. contexts whose uses of the strings of $H$ are already covered by other contexts in the same set.
+To compute relevant contexts with the start category \t{S} as a hole, we use the following definition $\textsf{contexts}(\t{S}) = \{ \; \_ \; \}$.
 
-% Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\varnothing$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.
+Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\varnothing$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.

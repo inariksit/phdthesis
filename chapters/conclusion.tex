@@ -8,10 +8,79 @@ For the remainder of this chapter, we discuss insights gained from this work, an
 
 \section{Summary of the thesis}
 
-We set out to test and verify natural language grammars.
-This 
+We set out to test and verify natural language grammars. In this
+thesis, we've described two systems for two different grammar
+formalisms: GF and CG.
+
+When testing GF grammars, earlier we relied on the informant to
+remember and explain all important phenomena to test, and the
+grammarian to form all relevant trees that show those phenomena. Now,
+we have a system that takes a GF grammar, a concrete language and a
+list of functions and/or categories. Then the system generates a
+representative and minimal set of example sentences that showcases all
+important variation in the given functions and categories.
+
+For CG, previous evaluation methods relied on a gold standard corpus,
+or manual inspection if there was no corpus available. Our method
+tests the internal consistency of a grammar, only relying on a
+morphological lexicon. The system explores all possibilities to see if
+a particular rule can apply: if there is no input that would trigger a
+rule $r$ after rule $s$, we know that rules $r$ and $s$ are in
+conflicting.  In addition, the mechanisms that we developed in order
+to test CG have interesting side effects: namely, they let us model CG
+as a generative formalism.
+
+% Our method only tests the internal consistency of a grammar. It is a
+% separate question whether the CG grammar is also good for
+% disambiguating natural language. Such questions are better left for
+% corpus-based methods.
+
+
+% If we were sculpting a statue, generative formalism would start from an empty place and start splashing some clay around. In contrast, a reductionist formalism would start from a heavy stone block and carve away everything that is not part of the statue. In the end, both have formed an identical statue. An empty generative grammar would output just thin air, and empty reductionist grammar would output an intact stone block.
+
+% We can see symbolic sentences as these stone blocks. To give a classic example, say we have the alphabet {a,b} and the language aⁿbⁿ. Then we can construct a CG grammar, apply it to an even-length symbolic sentence consisting of as and bs, and have it output a string where the first half is as, followed by a second half of bs. This language is context-free, and we have only found a method to write such a grammar manually, but we have a method that can translate any regular language into a corresponding CG automatically, and apply it to a symbolic sentence.
 
 
 \section{Insights and future directions}
 
+\subsection{Completeness}
 
+\todo{This is just a rough draft}
+
+“How can we test a whole big infinite grammar?”
+
+Easy: there’s a finite amount of functions, just test each function separately.
+
+“How can we be sure to use one function in all the different ways?”
+
+No problem: split it into several functions that can all be used in
+only one way, then test each of them.
+
+\subsection{Failure modes}
+
+How can we still mess things up?
+
+A given CG grammar is internally consistent given a certain tagset, rules to combine tags into readings, and ambiguity classes. All of this information comes from a morphological lexicon, and we all know that morphological lexica are generated at airports at 04:00 after the conference dinner, because that was the cheapest flight and you didn’t have to pay for one more night of accommodation, and the free drinks would keep you up and cheerful until your flight departs.
+
+So, CG analysis is as reliable as is the morphological lexicon where the tags and the readings come from. How about GF test cases?
+
+I've tried to convince you how the system produces a test case for
+each combination of parameters. But the failure mode here is, simply,
+not enough parameters.  Consider the \t{AdjCN} function for Spanish
+again, and say that we don’t have the parameter for pre- and
+postmodifier at all, and \t{AdjCN} only comes in two variants, one for
+feminine and one for masculine. Suppose that all adjectives are,
+incorrectly, postmodifiers. Then we would notice the error only if the
+single \t{AP} argument for \t{AdjCN$_{\text{fem}}$} and
+\t{AdjCN$_{\text{masc}}$} happened to be a premodifier one.
+
+If the missing parameter handles a common phenomenon, it is more
+likely that we catch the error even with missing parameters. This was
+the case with, for example, Dutch preposition contraction (from
+Chapter 5). Originally, none of the prepositions contracted, but this
+is the most common behaviour—only a handful of prepositions don’t
+contract. Thus we got some test cases which showed the error, and went
+on to fix the grammar. After the fixes, the system created separate
+test cases for contracting and non-contracting prepositions.
+
+\subsection{I should probably end this document with something more end-like.}
