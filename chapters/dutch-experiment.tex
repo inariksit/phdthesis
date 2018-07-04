@@ -1,0 +1,401 @@
+\section{Fixing the Dutch grammar}
+\label{dutch-experiment}
+
+In this section, we describe the long-term project of fixing bugs in
+the Dutch resource grammar. The reader uninterested in details of
+grammar writing may well skip the section and go to conclusions.
+
+
+\subsection{Experimental setup}\label{experimental-setup}
+
+We describe a collaboration between a grammarian (the author), who is an
+expert in \gf, and a native Dutch speaker. We wanted to investigate the
+feasibility of this division of labour: ideally, the tester can be any
+native speaker, with no skills in \gf{} whatsoever. In our case, the tester
+also had \gf{} skills, but did not have access to the grammar, only to the
+produced sentences.
+
+We generated a set of test sentences for each function in Dutch, with
+English translations, and gave them to the native tester to read. The
+tester replied with a list of sentences that were wrong, along with
+suggestions for improvement. Communication between the grammarian and
+the tester was conducted via email.
+
+\subsection{Types of bugs}\label{types-of-bugs}
+
+We can classify the bugs in two dimensions: how easy it is to understand
+what the problem is, and how easy it is to fix the grammar. Ease of
+understanding is relative to the grammarian: a trained linguist who is
+fluent in Dutch would have easy time pinpointing the error from the
+generated test cases, having both intuition and technical names for
+things. Ease of fixing is relative to the grammar: a given grammatical
+phenomenon can be implemented in a variety of ways, some of which are
+harder to understand. Say that relative clauses are implemented as
+terrible spaghetti code in a Dutch grammar, but very elegantly in a
+German grammar, and both have a bug that results in a similar
+ungrammatical sentences. In such a case, the problem would be equally
+easy to understand in both languages, but fixing the bug would be easier
+in the German grammar.
+
+In more concrete terms, \emph{easy to fix} means just some local changes
+in a single function. In contrast, bugs that are \emph{hard to fix}
+usually involve modifying several functions, restructuring the code or
+adding new parameters.
+
+\subsubsection{Easy to understand, easy to
+fix}\label{easy-to-understand-easy-to-fix}
+
+Perhaps the easiest bug to fix is to correct a wrong lexical choice.
+Below is an example feedback from the tester.
+
+\begin{quote}
+``opschakelen'' is not the right translation of ``switch on''.
+``aanzetten'' or ``aandoen'' is better.
+\end{quote}
+
+Other examples include wrong inflection or agreement, e.g.~the polite
+second person pronoun should take the third person singular verb form,
+but was mistakenly taking second person forms.
+
+Typically, bugs that are due to an almost complete implementation are
+easy to fix``. For instance, particle verbs were missing the particle in
+future tense. Looking at the generated sentences, we could see the
+particle being in the right place in all other tenses, except for the
+future. There was a single function that constructed all the tenses, and
+looking at the source code, we could see the line
+\texttt{++ verb.particle} in all other tenses except the future. In such
+a case, fixing the bug is fairly trivial.
+
+\subsubsection{Easy to understand, hard to
+fix}\label{easy-to-understand-hard-to-fix}
+Dutch negation uses two strategies: the clausal negation particle
+\emph{niet} `not', and the noun phrase negation \emph{geen} `no'. There
+are some subtleties in their usage--the following quote comes from the
+tester:
+
+\begin{quote}
+In any case, one can never say ``eet niet wormen'' (don't eat worms,
+literally).\\That should always be ``eet geen wormen'' (don't eat worms,
+correctly translated)
+\end{quote}
+
+\noindent We sent three more sentences as follow-up, and got the
+following answer:
+
+\begin{quote}
+eet niet deze wormen - maybe OK?, feels strange\\eet deze wormen niet -
+definitely OK\\eet niet 5 wormen - definitely OK
+\end{quote}
+
+In the brain of a computational linguist, those two feedbacks translated
+into ``clauses with indefinite noun phrases (\emph{worms}) use noun
+phrase negation, but if the noun phrase is quantified (\emph{these}
+worms, \emph{five} worms), then clausal negation is okay''. This makes
+sense also semantically (if you're the kind of person who reads this
+blog): the negation of ``eat 5 worms'' is not ``eat no worms'', you can
+still eat 4 worms or 400.
+
+In the grammar, this fix required changes to 13 categories. Not all
+categories had to be changed manually, but e.g.~a change in \texttt{NP}
+changes all categories that depend on it, such as \texttt{Comp} and
+\texttt{VP}. Depending on how modularly the grammar is implemented, this
+means that some functions that operate on \texttt{VP} or \texttt{Comp}
+need to be changed too, when \texttt{NP} changes.
+
+\subsubsection{Hard to understand, easy to
+fix}\label{hard-to-understand-easy-to-fix}
+
+The following two sentences were generated by the same function, which
+turns superlative adjectives and ordinal numbers into complements. The
+tester reported problems with both of them, as follows:
+
+\begin{quote}
+ik wil roodst worden --\textgreater{} ik wil \textbf{het} roodst worden
+(`I want to become reddest')\\ik wil \sout{tiend} worden
+--\textgreater{} ik wil \textbf{tiende} worden (`I want to become
+tenth')
+\end{quote}
+
+\noindent We gave some more sentences to the tester, and got the following
+feedback:
+
+\begin{quote}
+ik wil linker worden --\textgreater{} ik wil \textbf{de} linker worden
+(`I want to become left')\\ik wil 224e worden = OK (`I want to become
+224th')
+\end{quote}
+
+This small example gave at least three different ways of using these
+complements: for numerals, no article and -e at the end (\emph{tiende}
+`tenth'); for superlative adjectives, the article \emph{het} and no -e
+at the end of the adjective (\emph{het roodst} `the reddest'), and for
+a class of adjectives like \emph{left} and \emph{right} \todo{or is it
+  only those?}, the article \emph{de} (\emph{de linker} `the left
+one').
+
+In addition, the grammar has a separate construction for combining a
+numeral and a superlatice adjective, e.g. ``tenth best''. Since the
+tests were generated per function, the main tester didn't read those
+sentences at the same time. After noticing the additional function, we
+asked another informant how to say \emph{Nth best}, and got an
+alternative construction \emph{op (N-1) na best}. Eventually, we got an
+answer that the strategy used for superlative adjectives, i.e.~with the
+article \emph{het} and no -e in the number, is acceptable.
+
+Once it was clear to the grammarian how to proceed, fixing the bug was
+easy. There was already a parameter for the adjective form: attributive
+in two forms (strong and weak) and one predicative, and the different
+classes of adjectives corresponded to the abstract syntax of the \gf{}
+Resource Grammar Library (RGL).
+Thus it was easy to modify the predicative form in a different way for
+different adjective types. Earlier, the predicative was just identical
+to the other attributive form, but now the \texttt{AP} type actually
+contains 3 different strings for superlatives: \emph{beste} and
+\emph{best} for attributive and \emph{het best} for predicative.
+Adjectives in positive or comparative don't get the article: \emph{good}
+is just \emph{goede}, \emph{goed} and \emph{goed} (not \emph{✱het
+goed}).
+
+If there hadn't been already a parameter for different adjective forms,
+or if the classes of words with different behaviours hadn't corresponded
+to the RGL categories, then this bug would've required more work to fix.
+
+\subsubsection{Hard to understand, hard to
+fix}\label{hard-to-understand-hard-to-fix}
+
+As an example of a problem that was hard to understand and hard to fix,
+we take the agreement of a reflexive construction in conjunction with a
+verbal complement. More concretely, consider the following sentences:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  I like myself / you like yourself / \ldots{}
+\item
+  I help ( you like yourself / them like themselves / \ldots{} )
+\end{itemize}
+
+These seem like reasonable choices: if the object of liking was \emph{I}
+in the second example, it wouldn't be \emph{myself} but \emph{me}: ``I
+help you like me''.
+
+In the \gf{} grammar, these sentences are constructed in a series of steps:
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+\DataTypeTok{PredVP} \NormalTok{(}\DataTypeTok{UsePron} \NormalTok{i_Pron)}
+       \NormalTok{(}\DataTypeTok{ComplSlash}
+           \NormalTok{(}\DataTypeTok{SlashV2V} \NormalTok{help_V2V}
+               \NormalTok{(}\DataTypeTok{ReflVP}
+                 \NormalTok{(}\DataTypeTok{SlashV2a} \NormalTok{like_V2)}
+               \NormalTok{)}
+           \NormalTok{)}
+           \NormalTok{(}\DataTypeTok{UsePron} \NormalTok{they_Pron)}
+       \NormalTok{)}
+\end{Highlighting}
+\end{EmptyItem}
+
+The innermost subtree is \texttt{SlashV2a like\_V2}: the transitive verb
+\emph{like} is converted into a \texttt{VPSlash} (i.e.
+\texttt{VP\textbackslash{}NP}). Right after, the function
+\texttt{ReflVP} fills the \texttt{NP} slot and creates a \texttt{VP}.
+However, no concrete string for the object is yet chosen, because the
+reflexive object depends on the subject. The status of the VP is as
+follows at the stage \texttt{ReflVP (SlashV2a like\_V2)}:
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+    \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
+\NormalTok{vcomp }\FunctionTok{=} \NormalTok{[] ;}
+\end{Highlighting}
+\end{EmptyItem}
+
+If we added a subject at that point, the subject would choose the
+appropriate agreement: \emph{I} like \emph{myself}, \emph{you} like
+\emph{yourself}. But instead, we add another slash-making construction,
+\texttt{SlashV2V help\_V2V}. Now the new verb \texttt{help\_V2V}, which
+takes both a direct object and a verbal complement, becomes the main
+verb. The old verb \emph{like} becomes a verbal complement.
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+    \NormalTok{s }\FunctionTok{=} \StringTok{"help"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"}\NormalTok{; … \} ;}
+\NormalTok{vcomp }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\end{Highlighting}
+\end{EmptyItem}
+
+The next stage is to add an \texttt{NP} complement \texttt{they\_Pron},
+using the function \texttt{ComplSlash}. The standard way for
+\texttt{ComplSlash} is to insert its \texttt{NP} argument into the
+\texttt{ncomp} table, taking the \texttt{vcomp} field along.
+
+In the old buggy version, \texttt{ComplSlash} just concatenated the new
+object and the \texttt{vcomp} with the reflexive that was already in the
+\texttt{ncomp} table. But the scope of the reflexive was wrong: when
+adding an object to a \texttt{VPSlash} that has a verbal complement
+clause, the object should complete the verbal complement and pick the
+agreement. It is not in the scope for the subject.
+
+This was the old behaviour:
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+    \NormalTok{s }\FunctionTok{=} \StringTok{"help"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"them like myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"them like yourself"}\NormalTok{; … \} ; }\CommentTok{--ERROR}
+\NormalTok{vcomp }\FunctionTok{=} \NormalTok{[] \} ;}
+\end{Highlighting}
+\end{EmptyItem}
+
+And this is after fixing the bug:
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+    \NormalTok{s }\FunctionTok{=} \StringTok{"help"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ _ }\OtherTok{=>} \StringTok{"them like themselves"} \NormalTok{\} ;}
+\NormalTok{vcomp }\FunctionTok{=} \NormalTok{[] ;}
+\end{Highlighting}
+\end{EmptyItem}
+
+But this turned out not to be a perfect solution. The exception to this
+is when the \texttt{VPSlash} is formed by
+\texttt{VPSlashPrep : VP -\textgreater{} Prep -\textgreater{} VPSlash}.
+With the changes to \texttt{ComplSlash}, we suddenly got sentences such
+as ``{[}I like \emph{ourselves}{]} without \emph{us}''. This would be a
+valid linearisation for a tree where {[}\emph{ourselves} without
+\emph{us}{]} is a constituent (such a tree is formed by another set of
+functions and was linearised correctly), but in this case, the order of
+the constructors is as follows:
+
+\begin{itemize}
+\item
+  \texttt{ReflVP like}
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
+\end{Highlighting}
+\end{EmptyItem}
+\item
+  \texttt{VPSlashPrep (ReflVP like) without}
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
+ \NormalTok{prep }\FunctionTok{=} \StringTok{"without"}
+\end{Highlighting}
+\end{EmptyItem}
+\item
+  \texttt{ComplSlash (VPSlashPrep (ReflVP like) without) we\_Pron)}
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
+    \NormalTok{adv }\FunctionTok{=} \StringTok{"without us"}
+\end{Highlighting}
+\end{EmptyItem}
+
+  The desired behaviour is to put the complement into an adverbial slot
+  and keeping the agreement in \texttt{ncomp} open to wait for the
+  subject. But the following happened after our initial changes in
+  \texttt{ComplSlash}:
+
+\begin{EmptyItem}
+\begin{Highlighting}[]
+      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ _ }\OtherTok{=>} \StringTok{"ourselves without us"} \NormalTok{\} ; }\CommentTok{--ERROR}
+\end{Highlighting}
+\end{EmptyItem}
+\end{itemize}
+
+To fix this problem, we added another parameter to the category
+\texttt{VPSlash}. All \texttt{VPSlash}es constructed by
+\texttt{VPSlashPrep} have now a \texttt{missingAdv} set True: this tells
+that the \texttt{VPSlash} is not missing a core argument, so it
+shouldn't affect the agreement. With the new parameter,
+\texttt{ComplSlash} can now distinguish when to choose the agreement
+from the \texttt{NP} argument and when to leave it open for the subject.
+
+The same bug was found in languages, and we fixed it for Dutch, English
+and German, using the same strategy.
+
+\subsection{Numbers}\label{numbers}
+
+Excited, aren't you! You thought they had already fixed
+\texttt{ComplSlash} but then came \texttt{VPSlashPrep} and revealed that
+all of this was part of its plan. While trying to help, you actually
+planted more bugs into the grammar. Will the \sout{hero}grammarian make
+it in time before a critical application outputs a wrong translation and
+loses the customer a million SEK?
+
+Anyway. After all these personal tales, you might want to know how many
+bugs were fixed and how many were of which kind. Ease of understanding
+is so subjective that it's not very interesting here, so here's just how
+easy the bugs were to fix.
+
+\subsubsection{Easy to fix:}\label{easy-to-fix}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Several lexical changes.
+\item
+  Several inflection fixes.
+\item
+  youPol\_Pron had agreement of Sg P2, changed it to Sg P3 so that a
+  correct reflexive pronoun is chosen.
+\item
+  Choose always stressed forms of personal pronouns.
+\item
+  Change agreement in conjunctions
+\item
+  Extra prefix in prefix verbs for perfect tense
+\item
+  Missing participle in future tense
+\item
+  Plural imperatives
+\item
+  Two bugs in postmodifier \texttt{AP}s: placement and the adjective
+  form. ``een getrouwde worm'' is correct, but a heavier \texttt{AP}
+  should become a postmodifier, and in that case, the adjective form
+  should be without the e at the end.
+\item
+  Superlatives and ordinals
+\item
+  DetQuant (and DetQuantOrd) combining a Quant and a Num, and when Num
+  is an actual digit, both Quant and the Num contribute with a string,
+  thus becoming \emph{een 1 huis} `a 1 house'.
+\end{enumerate}
+
+\subsubsection{Hard to fix}\label{hard-to-fix}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Add missing inclected forms for past participles + add missing
+  linearisation for the function \texttt{PastPartAP}
+\item
+  Preposition contraction
+\item
+  Negation patterns (\emph{niet} and \emph{geen})
+\item
+  Variety of word order weirdness in verbal complements: affected
+  several functions, fixed in several functions
+\item
+  Scope of \texttt{ReflVP} with \texttt{VPSlash}
+\end{enumerate}
+
+\subsubsection{Time spent by testers + how many sentences they
+read}\label{time-spent-by-testers-how-many-sentences-they-read}
+
+Tester 1 has read probably hundreds or thousands of sentences by now. We
+wonder if he's still sane. (TODO: get some more accurate numbers).
+
+Tester 2 has been used as a backup when Tester 1 was not available and
+Grammarian wanted quick feedback. She's read roughly tens of sentences.
