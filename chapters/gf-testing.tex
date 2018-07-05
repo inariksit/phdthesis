@@ -107,17 +107,32 @@ outputs, not what it parses.
 
 Other related work in computational linguistics includes error mining
 for parsing grammars, such as Gardent
-\cite{gardent2012errormining}. \todo{More on this/other related.}
-Bender et al. \cite{bender2010} describe a system for creating and testing \hpsg{} \cite{pollard1994hpsg}
-grammars, by using a detailed questionnaire about the features of the
-given language. This system achieves both generating the grammar rules
-and testing them simultaneously, whereas our method relies on an
-existing grammar. On the other hand, our system is more general to any
-kinds of grammars, including application grammars where the
-distinctions are not syntactic but semantic.
+\cite{gardent2012errormining}. The setup includes triples of dependency
+tree, generated sentence and the gold standard sentence. For every triple
+where the generated sentence and the gold standard sentence are different, their algorithm
+finds the smallest subtrees that cause the problems. Gardent's
+algorithm fills a slightly different need than ours: it relies on the
+correct linearisation so be known, which we don't. Instead, we want to
+generate trees whose linearisations are then read by humans. On the
+other hand, Gardent's method would prove very useful once an error is
+found---it can be tricky to determine which function exactly caused
+the error.
+
+Further away from our approach, \todo{cite and find relevant stuff}
+works on parsing grammars rather than generation, with the goal of
+detecting strings that cause parsing errors.
+
+Bender et al. \cite{bender2010} describe a system for creating and
+testing \hpsg{} \cite{pollard1994hpsg} grammars, by using a detailed
+questionnaire about the features of the given language. This system
+achieves both generating the grammar rules and testing them
+simultaneously, whereas our method relies on an existing grammar. On
+the other hand, our system is more general to any kinds of grammars,
+including application grammars where the distinctions are not
+syntactic but semantic.
 
 However, our biggest source of inspiration is automatic test case
-generation for general software, such as
+generation for general software, such as \todo{Find more stuff!}
 \cite{hamon2004testgen}. Software testing and grammar testing both
 deal with notions of coverage and compactness.
 
@@ -789,18 +804,19 @@ and (try to) use all of its parameters.
 \begin{table}[h]
 \centering
 \resizebox{\textwidth}{!}{
-\begin{tabular}{|lll|ll|ll|ll|}
+\begin{tabular}{|lll|ll|ll|ll|ll|}
 \hline
 \multicolumn{3}{|r}{Concrete syntax $\rightarrow$}              &
-                                                                   \multicolumn{2}{|c}{\bf Dutch} & \multicolumn{2}{|c}{\bf Basque} & \multicolumn{2}{|c|}{\bf Estonian} \\
+                                                                   \multicolumn{2}{|c}{\bf Dutch} & \multicolumn{2}{|c}{\bf Spanish} & \multicolumn{2}{|c}{\bf Estonian} & \multicolumn{2}{|c|}{\bf Basque} \\
 $\downarrow$ Grammar & \#funs+lex & \#trees  &
-                                                                 \#total & \#uniq & \#total & \#uniq  & \#total  & \#uniq \\ \hline
-{\bf Noun phrases}     & \numOfFun{}+\numOfLex{}        & \textgreater{}10,000          & 21    & 18     & 33      & 27      & 40       & 36     \\ \hline
+                                                          \#total & \#uniq & \#total & \#uniq & \#total & \#uniq  & \#total  & \#uniq \\ \hline
+{\bf Noun phrases}     & \numOfFun{}+\numOfLex{}  
+                               & \textgreater{}10,000  &    21    & 18     & 16     &15     & 33      & 27      & 40       & 36     \\ \hline
 {\bf Phrasebook}       
                   & 130+160   & \textgreater{}480,000       
-   & 513     & 419    & 610     & 505     & 538      & 503   \\ \hline
+                                                       &   513    & 419     & 504     &382    & 610     & 505     & 538      & 503   \\ \hline
    {\bf Resource gr.}    & 217+446   & \textgreater{}500 billion  
-   & 21,370  & 19,825 &  13,733  & 9,194    & TODO  & TODO \\ \hline
+                                                       &  21,370  & 19,825  & 19,689  & 16,662 & 13,733  & 9,194    & 100,967  & 64,390 \\ \hline
 \end{tabular}}
 \caption{Test cases for all functions in three grammars}
 \label{results}
@@ -810,15 +826,15 @@ $\downarrow$ Grammar & \#funs+lex & \#trees  &
 \begin{table}[h]
 
 \centering
-\begin{tabular}{|l|l|l|l|}
+\begin{tabular}{|l|l|l|l|l|}
 \hline
-{\bf Resource grammar function} & {\bf Dutch}
+{\bf Resource grammar function} & {\bf Dutch} & {\bf Spanish}
    & {\bf Estonian} & {\bf Basque} \\ \hline
  
-\t{ComparA} `stronger than you'  & 10   & 20 & 6   \\
-\t{ComplVS} `say that I sleep' & 89   & 171 & 104   \\
-\t{RelNP~~} `a cat that I saw' & 2    & 23 & 20   \\
-\t{ReflVP~} `see myself'       & 1034 & 343 & 1082   \\
+\t{ComparA~} `stronger than you' & 10   & 4   & 20 & 6   \\
+\t{RelNP~~~} `a cat that I saw'  & 2    & 23 & 23 & 20   \\
+\t{ComplVS~} `say that I sleep'  & 89   & 206 & 171 & 104 \\
+\t{ReflVP~~} `see myself'        & 1034 & 890 & 343 & 1082 \\
 \hline
 \end{tabular}
 \caption{Test cases for some individual functions in the resource
@@ -842,10 +858,9 @@ Estonian and Basque have a rich nominal morphology, with 14
 grammatical cases in each. In addition, Basque has the most complex
 verb morphology out of all the 4 languages, featuring agreement in
 subject, object and indirect object.
-
-\todo{add Spanish. Contrary to our expectations, we found
-Dutch and Estonian behaving similarly to each other and Basque
-significantly worse, both in execution time and examples generated.}
+The Dutch, Spanish and Estonian grammars behaved similarly to each other
+and Basque significantly worse, both in execution time and examples
+generated.
 
 Table~\ref{results} shows the number of generated trees for 
 in total for all syntactic functions in the three grammars, and
@@ -859,12 +874,12 @@ in the following sections.
 \subsection{Grammars}
 
 The first grammar is the toy example introduced earlier in this
-article: NounPhrases with \numOfFun syntactic functions and \numOfLex words in the
-lexicon. We wrote the concrete syntaxes from scratch for each of the
-languages, instead of using the full resource grammar and reducing it
-to only noun phrases. All four concrete syntaxes were completed
-in less than an hour, by an experienced grammarian with some knowledge
-in all the languages.
+article: \t{NounPhrases} with \numOfFun syntactic functions and
+\numOfLex words in the lexicon. We wrote the concrete syntaxes from
+scratch for each of the languages, instead of using the full resource
+grammar and reducing it to only noun phrases. All four concrete
+syntaxes were completed in less than an hour, by an experienced
+grammarian with some knowledge in all the languages.
 
 The second grammar is a mid-size application grammar: Phrasebook
 \cite{ranta2010phrasebook}, with 42 categories such as \t{Person,
@@ -899,12 +914,13 @@ with 84 categories, 217 syntactic functions and 446 words in the
 lexicon. Since all the languages did not have a complete
 implementation, we simply took the subset of functions that was
 common, and removed manually a couple of rare constructions and words
-that are potentially distracting. However, we should not limit the
-lexicon too much, because we may miss important distinctions 
-in some languages---to give a hypothetical example, some grammar may
-have a bug that shows up only in animate nouns which end in a
-consonant. This subset of the resource grammar produces hundreds of
-billions of trees up to depth 5. 
+that are potentially distracting. 
+This fragment produces hundreds of billions of trees already up to depth 5.
+None of the resource grammars has been tested systematically before---for
+the Estonian grammar \cite{listenmaa_kaljurand2014}, the morphological
+paradigms were tested extensively against existing resources, but
+syntactic functions were only tested with a treebank of 425 trees.
+
 %: say, animate and inanimate nouns, ending in front vowel and back vowel.
 
 \subsection{Execution time} We ran all the experiments on a MacBook Air
@@ -912,37 +928,40 @@ with 1,7 GHz processor and 8 GB RAM. For Phrasebook, it took just
 seconds to generate the test suite for all languages. For the resource
 grammar, Dutch and Estonian finished in 3--4 minutes. However, the
 Basque resource grammar is noticeably more complex, and creating test
-trees for all functions took several hours. We ran the experiment in
-smaller batches over two days, and noticed a lot of variance:
-functions that handle e.g. noun phrases, adjectives and adverbs ran in
-a few minutes, but a function involving verb phrases could take an
-hour just by itself.
+trees for all functions took almost three hours.
 
 \subsection{Generated trees}
 
 We report both total and unique trees: total trees are simply the sum
 of all trees for all functions, and unique trees is the count after
-removing duplicates, as explained in Section~\ref{sec:pruning_all}.
+removing duplicates, as explained in Section~\ref{sec:pruning_all}
+(``the pizza gives the pizza the pizza'' style).
 
-As we can see, the number of trees differs a lot. We believe this has
-both language typological and grammar engineering reasons---there
-is no way to implement Basque in a way that results in as few example
-sentences as English, but other resource grammarians have reported
-significant differences in complexity between implementations: Enache
-et al. \cite{enache2010} report a 200-time reduction in the number of
-concrete rules after changing the implementation of clitics in verb
-phrases.
+As we can see, the number of trees differs a
+lot. Table~\ref{results_indiv} shows some expected patterns: Basque
+and Estonian have more complex nouns than Dutch, so \t{RelNP} needs
+more tests. Likewise, Basque and Dutch have more complex verb phrases
+(for different reasons!) than Estonian, so \t{ReflVP} needs more
+tests.  In general, we believe the number of test cases has both
+language typological and grammar engineering reasons. Other resource
+grammarians have reported significant differences in complexity
+between implementations: \cite{enache2010} report a 200-time reduction
+in the number of concrete rules after changing the implementation of
+clitics in verb phrases. It would be interesting to test two different
+implementations of the same language using this method.
 
-We experimented with the noun phrase grammar for
-Basque. In one of them, we implemented nominal morphology using
-inflection tables, and syntactic functions choose the correct one.
-In another grammar, we implemented nouns as stems, and syntactic
-functions concatenate suffixes to the stems. The second approach
-required inherent parameters for nouns, in order to add correct
-suffixes to each noun. For test case generation, this had the added
-benefit or curse of implicitly testing morphology as well---in the first
-approach, there may be a concrete category for animacy or gender, but
-in the second one, also for phonological features. 
+We experimented with the noun phrase grammar for Basque. In one of
+them, we implemented nominal morphology using inflection tables, and
+syntactic functions choose the correct one.  In another grammar, we
+used the Basque resource grammar, which has implemented nouns as
+stems, and syntactic functions concatenate suffixes to the stems. 
+In the stem-based grammar, nouns have phonological features as
+inherent parameters, in order to attach the correct form of the
+inflectional morphemes. For test case generation, this had
+the added benefit or curse of implicitly testing morphology as
+well. For instance, the test cases for \t{AdjCN} included the
+adjectives \t{good} and \t{small} just because \emph{good} ends in a
+consonant and \emph{small} in a vowel. 
 
 \begin{table}[h]
 
@@ -952,21 +971,43 @@ in the second one, also for phonological features.
 {\bf Function} & {\bf Inflection table}
    & {\bf Concatenate suffixes to stems} \\ \hline
  
-\t{UttNP}    & TODO & TODO  \\
-\t{PredAdj}  & TODO & TODO  \\
-\t{PredAdv}  & TODO & TODO    \\
-\t{DetNP}    & TODO & TODO   \\
-\t{DetCN}    & TODO & TODO   \\
-\t{PrepNP}   & TODO & TODO   \\
-\t{AdjCN}    & TODO & TODO   \\
-\t{AdvCN}    & TODO & TODO   \\ \hline
-{\bf Total:} & & \\ 
+\t{UttNP}    & 1 & 1  \\
+\t{PredAdj}  & 1 & 1  \\
+\t{PredAdv}  & 1 & 1    \\
+\t{DetNP}    & 3 & 4   \\
+\t{DetCN}    & 3 & 4   \\
+\t{PrepNP}   & 1 & 1   \\
+\t{AdjCN}    & 7 & 4   \\
+\t{AdvCN}    & 7 & 4   \\ \hline
+{\bf Total:} & 24 & 20 \\ 
 \hline
 \end{tabular}
 \caption{Two versions of Basque concrete syntax for noun phrase grammar}
 \label{basque_versions}
 \end{table}
 
+\todo{Other differences: AdjCN for infl.table behaved more nicely: the
+argument generation gave a nice and manageable \t{AdjCN small house}
+and put it in all kinds of weird contexts:
+
+\begin{itemize}
+\item UttNP (DetCN a \char`_)
+\item UttNP (DetCN your \char`_)
+\item UttNP (DetCN thePl \char`_)
+\item PredAdv (DetNP your) (PrepNP on (DetCN your \char`_))
+\item PredAdv (DetNP your) (PrepNP from (DetCN your \char`_))
+ \item PredAdv (DetNP your) (PrepNP on (DetCN thePl \char`_))
+ \item PredAdv (DetNP your) (PrepNP from (DetCN thePl \char`_))
+
+\end{itemize}
+
+In contrast, the stem-based grammar created an argument where all the
+awkwardness was already: AdjCN good (AdvCN (PrepNP without (DetCN a
+house)) house) `good house without a house', and only put it in two
+contexts, singular and plural. This is because the lincat for NP
+includes all this stuff in different fields, and the most
+representative example, i.e. no empty fields, has this awkward adverb
+in there.}
 
 \subsection{Qualitative analysis} 
 

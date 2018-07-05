@@ -87,13 +87,12 @@ eet niet deze wormen - maybe OK?, feels strange\\eet deze wormen niet -
 definitely OK\\eet niet 5 wormen - definitely OK
 \end{quote}
 
-In the brain of a computational linguist, those two feedbacks translated
-into ``clauses with indefinite noun phrases (\emph{worms}) use noun
-phrase negation, but if the noun phrase is quantified (\emph{these}
-worms, \emph{five} worms), then clausal negation is okay''. This makes
-sense also semantically (if you're the kind of person who reads this
-blog): the negation of ``eat 5 worms'' is not ``eat no worms'', you can
-still eat 4 worms or 400.
+In the brain of a computational linguist, those two feedbacks
+translated into ``clauses with indefinite noun phrases (\emph{worms})
+use noun phrase negation, but if the noun phrase is quantified
+(\emph{these} worms, \emph{five} worms), then clausal negation is
+okay''. This makes sense also semantically: the negation of ``eat 5
+worms'' is not ``eat no worms'', you can still eat 4 worms or 400.
 
 In the grammar, this fix required changes to 13 categories. Not all
 categories had to be changed manually, but e.g.~a change in \texttt{NP}
@@ -178,7 +177,6 @@ verbal complement. More concretely, consider the following sentences:
 These seem like reasonable choices: if the object of liking was \emph{I}
 in the second example, it wouldn't be \emph{myself} but \emph{me}: ``I
 help you like me''.
-
 In the \gf{} grammar, these sentences are constructed in a series of steps:
 
 \begin{EmptyItem}
@@ -243,7 +241,7 @@ This was the old behaviour:
 \begin{EmptyItem}
 \begin{Highlighting}[]
     \NormalTok{s }\FunctionTok{=} \StringTok{"help"} \NormalTok{;}
-\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"them like myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"them like yourself"}\NormalTok{; … \} ; }\CommentTok{--ERROR}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \AlertTok{"them like myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \AlertTok{"them like yourself"}\NormalTok{; … \} ; }
 \NormalTok{vcomp }\FunctionTok{=} \NormalTok{[] \} ;}
 \end{Highlighting}
 \end{EmptyItem}
@@ -274,7 +272,7 @@ the constructors is as follows:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+    \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
 \NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
 \end{Highlighting}
 \end{EmptyItem}
@@ -283,7 +281,7 @@ the constructors is as follows:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+    \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
 \NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
  \NormalTok{prep }\FunctionTok{=} \StringTok{"without"}
 \end{Highlighting}
@@ -293,9 +291,9 @@ the constructors is as follows:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+    \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
 \NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
-    \NormalTok{adv }\FunctionTok{=} \StringTok{"without us"}
+  \NormalTok{adv }\FunctionTok{=} \StringTok{"without us"}
 \end{Highlighting}
 \end{EmptyItem}
 
@@ -306,8 +304,8 @@ the constructors is as follows:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
-      \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
-\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ _ }\OtherTok{=>} \StringTok{"ourselves without us"} \NormalTok{\} ; }\CommentTok{--ERROR}
+    \NormalTok{s }\FunctionTok{=} \StringTok{"like"} \NormalTok{;}
+\NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ _ }\OtherTok{=>} \AlertTok{"ourselves without us"} \NormalTok{\} ; }
 \end{Highlighting}
 \end{EmptyItem}
 \end{itemize}
@@ -325,17 +323,8 @@ and German, using the same strategy.
 
 \subsection{Numbers}\label{numbers}
 
-Excited, aren't you! You thought they had already fixed
-\texttt{ComplSlash} but then came \texttt{VPSlashPrep} and revealed that
-all of this was part of its plan. While trying to help, you actually
-planted more bugs into the grammar. Will the \sout{hero}grammarian make
-it in time before a critical application outputs a wrong translation and
-loses the customer a million SEK?
-
-Anyway. After all these personal tales, you might want to know how many
-bugs were fixed and how many were of which kind. Ease of understanding
-is so subjective that it's not very interesting here, so here's just how
-easy the bugs were to fix.
+How many bugs were fixed and how many were of which kind? We skip the
+ease of understanding, and just classify the bugs by how easy they were to fix.
 
 \subsubsection{Easy to fix:}\label{easy-to-fix}
 
@@ -394,8 +383,8 @@ easy the bugs were to fix.
 \subsubsection{Time spent by testers + how many sentences they
 read}\label{time-spent-by-testers-how-many-sentences-they-read}
 
-Tester 1 has read probably hundreds or thousands of sentences by now. We
-wonder if he's still sane. (TODO: get some more accurate numbers).
+Tester 1 has read probably hundreds or thousands of sentences by now.
+ \todo{get some more accurate numbers}
 
 Tester 2 has been used as a backup when Tester 1 was not available and
 Grammarian wanted quick feedback. She's read roughly tens of sentences.
