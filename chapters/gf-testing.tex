@@ -937,6 +937,7 @@ of all trees for all functions, and unique trees is the count after
 removing duplicates, as explained in Section~\ref{sec:pruning_all}
 (``the pizza gives the pizza the pizza'' style).
 
+\paragraph{\todo{some nice heading}}
 As we can see, the number of trees differs a
 lot. Table~\ref{results_indiv} shows some expected patterns: Basque
 and Estonian have more complex nouns than Dutch, so \t{RelNP} needs
@@ -947,8 +948,28 @@ language typological and grammar engineering reasons. Other resource
 grammarians have reported significant differences in complexity
 between implementations: \cite{enache2010} report a 200-time reduction
 in the number of concrete rules after changing the implementation of
-clitics in verb phrases. It would be interesting to test two different
-implementations of the same language using this method.
+clitics in verb phrases. 
+
+To further explore the effect of grammar engineering vs. inherent
+language complexity, it would be interesting to generate test cases
+for two different implementations of the same language.  However,
+there is not much material to explore---writing a full resource
+grammar is several months' effort, thus writing a second
+implementation for a language that already is in the RGL is not a
+motivating thing to do. We could explore related languages, but in
+practice they are often based on one another, either by copying an
+existing one and modifying it (e.g. Afrikaans based on Dutch, Estonian
+on Finnish), or writing a parameterised module from the beginning,
+with the intention of fitting several languages (e.g. Romance and
+Scandinavian languages).  It could be interesting to compare a grammar
+similar to a \gf{} resource grammar, but written in some different
+grammar formalism. \todo{Find references about converting other
+  grammars into a PMCFG format (something by Peter Ljunglöf?)},
+convert it to a \pmcfg{} format, and then compare the generated test
+cases. 
+
+\paragraph{Two different implementations of Basque noun phrase grammar}
+
 
 We experimented with the noun phrase grammar for Basque. In one of
 them, we implemented nominal morphology using inflection tables, and
@@ -986,7 +1007,7 @@ consonant and \emph{small} in a vowel.
 \label{basque_versions}
 \end{table}
 
-\todo{Other differences: AdjCN for infl.table behaved more nicely: the
+Other differences: AdjCN for inflection table behaved more nicely: the
 argument generation gave a nice and manageable \t{AdjCN small house}
 and put it in all kinds of weird contexts:
 
@@ -1007,7 +1028,13 @@ house)) house) `good house without a house', and only put it in two
 contexts, singular and plural. This is because the lincat for NP
 includes all this stuff in different fields, and the most
 representative example, i.e. no empty fields, has this awkward adverb
-in there.}
+in there.
+
+Why the RG version didn't include \t{your}: because all determiners
+have two fields in the RG, \t{pre} and \t{post}, and no matter if one
+is empty, all applications of \t{DetCN} are just implemented as
+\t{det.pre ++ noun ++ det.post}. So there is no parameter in the RG
+for ``det comes before/det comes after''.
 
 \subsection{Qualitative analysis} 
 
