@@ -937,11 +937,27 @@ of all trees for all functions, and unique trees is the count after
 removing duplicates, as explained in Section~\ref{sec:pruning_all}
 (``the pizza gives the pizza the pizza'' style).
 
-\paragraph{\todo{some nice heading}}
+\paragraph{Grammar engineering vs. language typology}
 As we can see, the number of trees differs a
-lot. Table~\ref{results_indiv} shows some expected patterns: Basque
-and Estonian have more complex nouns than Dutch, so \t{RelNP} needs
-more tests. Likewise, Basque and Dutch have more complex verb phrases
+lot. Table~\ref{results_indiv} shows some expected patterns. For
+instance, Basque and Estonian have more complex noun morphology than
+Dutch, so \t{RelNP} needs more tests (20+ vs. 2): any function that
+constructs an \t{NP} needs to put it in all relevant contexts. We
+would expect Spanish to behave more like Dutch, with only 2 distinct
+forms, so what is the deal? Looking at the implementation of \t{NP} in
+the Spanish grammar, we discover that it actually includes 14
+fields. In fact, around 80 \% of the code in the Spanish grammar is
+inherited from a common module to all Romance languages (except for
+Romanian); thus the implementation is meant to be as general as
+possible, and support distinctions that appear in some language, not
+necessarily in Spanish.
+% In addition to nominative and accusative, which differ for
+% personal pronouns (\emph{yo} `I' vs. \emph{m\'{i}} `me'), a few
+% prepositions are also encoded as cases, perhaps to generalise among
+% all Romance languages so that they can share code. In addition,
+% each ``case'' includes a stressed and unstressed form
+
+Likewise, Basque and Dutch have more complex verb phrases
 (for different reasons!) than Estonian, so \t{ReflVP} needs more
 tests.  In general, we believe the number of test cases has both
 language typological and grammar engineering reasons. Other resource
