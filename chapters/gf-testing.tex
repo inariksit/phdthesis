@@ -187,6 +187,7 @@ with an \t{NP}, and those adverbs can modify yet another \t{CN}.  We
 refer to this grammar throughout the chapter.
 
 \subsection{Examples to test}
+\label{gf-testing-examples}
 
 As examples that help illustrate different testing needs for different
 languages, let us take four language-specific phenomena in the scope
@@ -826,15 +827,15 @@ $\downarrow$ Grammar & \#funs+lex & \#trees  &
 \begin{table}[h]
 
 \centering
-\begin{tabular}{|l|l|l|l|l|}
+\begin{tabular}{|ll|l|l|l|l|}
 \hline
-{\bf Resource grammar function} & {\bf Dutch} & {\bf Spanish}
+\multicolumn{2}{|c|}{\bf Resource grammar function} & {\bf Dutch} & {\bf Spanish}
    & {\bf Estonian} & {\bf Basque} \\ \hline
  
-\t{ComparA~} `stronger than you' & 10   & 4   & 20 & 6   \\
-\t{RelNP~~~} `a cat that I saw'  & 2    & 23 & 23 & 20   \\
-\t{ComplVS~} `say that I sleep'  & 89   & 206 & 171 & 104 \\
-\t{ReflVP~~} `see myself'        & 1034 & 890 & 343 & 1082 \\
+\t{ComparA : A  $\rightarrow$ NP $\rightarrow$ AP~} & `stronger than you' & 10   & 4   & 20 & 6   \\
+\t{RelNP~~~: NP $\rightarrow$ RS $\rightarrow$ NP~} & `a cat that I saw'  & 2    & 23 & 23 & 20   \\
+\t{ComplVS : VS $\rightarrow$ S  $\rightarrow$ VP~} &`say that I sleep'  & 89   & 206 & 171 & 104 \\
+\t{ReflVP~~: VPSlash $\rightarrow$ VP~~} & `see myself'        & 1034 & 890 & 343 & 1082 \\
 \hline
 \end{tabular}
 \caption{Test cases for some individual functions in the resource
@@ -938,119 +939,185 @@ removing duplicates, as explained in Section~\ref{sec:pruning_all}
 (``the pizza gives the pizza the pizza'' style).
 
 \paragraph{Grammar engineering vs. language typology}
-As we can see, the number of trees differs a
-lot. Table~\ref{results_indiv} shows some expected patterns. For
-instance, Basque and Estonian have more complex noun morphology than
-Dutch, so \t{RelNP} needs more tests (20+ vs. 2): any function that
-constructs an \t{NP} needs to put it in all relevant contexts. We
-would expect Spanish to behave more like Dutch, with only 2 distinct
-forms, so what is the deal? Looking at the implementation of \t{NP} in
-the Spanish grammar, we discover that it actually includes 14
-fields. In fact, around 80 \% of the code in the Spanish grammar is
-inherited from a common module to all Romance languages (except for
-Romanian); thus the implementation is meant to be as general as
-possible, and support distinctions that appear in some language, not
-necessarily in Spanish.
+As we can see in Table~\ref{results}, the number of trees differs between
+languages. Table~\ref{results_indiv} shows some expected patterns in
+individual functions. For instance, Basque and Estonian have more
+complex noun morphology than Dutch, so \t{RelNP} needs more tests (20+
+vs. 2): if the type for \t{NP} is a large inflection table, it needs
+to be put in many contexts. However, if the question was purely about
+language complexity, we would expect Spanish to behave more like
+Dutch: both have only 2 cases, nominative and accusative. 
+%  Looking at the implementation of \t{NP} in the Spanish grammar, we
+% discover that it includes 14 fields.
+
+In fact, around 80 \% of the code in the Spanish grammar is inherited
+from a common module to all Romance languages; thus the implementation
+is meant to be as general as possible, and support all distinctions
+that appear in some language, not necessarily in Spanish itself. In
+this case, the pan-Romance category for \t{NP} includes nominative,
+accusative, dative and genitive as cases in the inflection table, even
+though the latter two are realised as just prepositions (\emph{a} and
+\t{de}) in Spanish. In addition, all cases include a stressed and
+unstressed form---this makes for 8 fields in total.
+
 % In addition to nominative and accusative, which differ for
 % personal pronouns (\emph{yo} `I' vs. \emph{m\'{i}} `me'), a few
 % prepositions are also encoded as cases, perhaps to generalise among
 % all Romance languages so that they can share code. In addition,
 % each ``case'' includes a stressed and unstressed form
 
-Likewise, Basque and Dutch have more complex verb phrases
-(for different reasons!) than Estonian, so \t{ReflVP} needs more
-tests.  In general, we believe the number of test cases has both
-language typological and grammar engineering reasons. Other resource
+As another example, Basque, Spanish and Dutch have more complex verb
+phrases (for different reasons!) than Estonian, so they need more test
+cases to test \t{ReflVP}. This time it is not only about the contexts,
+but also the arguments: \t{ReflVP} takes a \t{VPSlash}, which has many
+parameters, so the tool needs to create many examples to cover all
+different \t{VPSlash}es. The inflection tables 
+
+In general, we believe the number of test cases has both language
+typological and grammar engineering reasons. Other resource
 grammarians have reported significant differences in complexity
-between implementations: \cite{enache2010} report a 200-time reduction
-in the number of concrete rules after changing the implementation of
-clitics in verb phrases. 
+between implementations: Enache et al. \cite{enache2010} report a
+200-time reduction in the number of concrete rules after changing the
+implementation of clitics in verb phrases.
 
 To further explore the effect of grammar engineering vs. inherent
 language complexity, it would be interesting to generate test cases
 for two different implementations of the same language.  However,
 there is not much material to explore---writing a full resource
 grammar is several months' effort, thus writing a second
-implementation for a language that already is in the RGL is not a
-motivating thing to do. We could explore related languages, but in
+implementation for a language that already is in the RGL is hardly a
+justifiable use of resources. We could explore related languages, but in
 practice they are often based on one another, either by copying an
 existing one and modifying it (e.g. Afrikaans based on Dutch, Estonian
 on Finnish), or writing a parameterised module from the beginning,
 with the intention of fitting several languages (e.g. Romance and
-Scandinavian languages).  It could be interesting to compare a grammar
-similar to a \gf{} resource grammar, but written in some different
-grammar formalism. \todo{Find references about converting other
-  grammars into a PMCFG format (something by Peter Ljunglöf?)},
-convert it to a \pmcfg{} format, and then compare the generated test
-cases. 
+Scandinavian languages). 
+
+% If there was an easy way to convert other grammar formalisms into
+% \pmcfg{} (or more specifically, into the particular format that our
+% tool reads \cite{angelov2010pgf}), 
+% get a resource
+% grammar written in some different formalism, convert it to a \pmcfg{}, and then compare the generated test cases.
 
 \paragraph{Two different implementations of Basque noun phrase grammar}
 
-
-We experimented with the noun phrase grammar for Basque. In one of
-them, we implemented nominal morphology using inflection tables, and
-syntactic functions choose the correct one.  In another grammar, we
-used the Basque resource grammar, which has implemented nouns as
-stems, and syntactic functions concatenate suffixes to the stems. 
-In the stem-based grammar, nouns have phonological features as
-inherent parameters, in order to attach the correct form of the
-inflectional morphemes. For test case generation, this had
-the added benefit or curse of implicitly testing morphology as
-well. For instance, the test cases for \t{AdjCN} included the
-adjectives \t{good} and \t{small} just because \emph{good} ends in a
-consonant and \emph{small} in a vowel. 
+Given the lack of large-scale language resources with different
+implementations, we experimented with the noun phrase grammar for
+Basque. In the first implementation, the one described earlier in this
+chapter, we implemented nominal morphology using inflection tables,
+and syntactic functions choose the correct case for each purpose. In
+another grammar, we used the Basque resource grammar, which has
+implemented nouns as stems, and syntactic functions concatenate
+suffixes to the stems.  In the stem-based grammar, nouns have
+phonological features as inherent parameters, in order to attach the
+correct form of the inflectional morphemes. For test case generation,
+this had the added benefit or curse of implicitly testing morphology
+as well. For instance, \t{AdjCN} needs to generate test cases with the
+arguments \{\stackanchor{\tt \small good}{\tt \small small}\} {\tt
+  house}, just because \emph{good} ends in a consonant and
+\emph{small} in a vowel. 
+%Usually, this level of detail is not encoded in the \gf{} grammar.
 
 \begin{table}[h]
 
 \centering
-\begin{tabular}{| l | l | l |}
+\begin{tabular}{| p{2.3cm} | l | l |}
 \hline
 {\bf Function} & {\bf Inflection table}
-   & {\bf Concatenate suffixes to stems} \\ \hline
+   & {\bf Stems} \\ \hline
  
-\t{UttNP}    & 1 & 1  \\
-\t{PredAdj}  & 1 & 1  \\
-\t{PredAdv}  & 1 & 1    \\
-\t{DetNP}    & 3 & 4   \\
-\t{DetCN}    & 3 & 4   \\
-\t{PrepNP}   & 1 & 1   \\
-\t{AdjCN}    & 7 & 4   \\
+\t{PredAdj}, \t{PredAdv}, \t{UttNP}, \t{PrepNP}  & 1, 1, 1, 1 & 1, 1,
+                                                                1, 1
+  \\ \hline
+\t{DetNP}    & 3 & 4   \\ \hline
+\t{DetCN}    & 3 & 4   \\ \hline
+\t{AdjCN}    & 7 & 4   \\ \hline
 \t{AdvCN}    & 7 & 4   \\ \hline
-{\bf Total:} & 24 & 20 \\ 
+% \t{UttNP}    & 1 & 1  \\
+% \t{PredAdj}  & 1 & 1  \\
+% \t{PredAdv}  & 1 & 1    \\
+% \t{DetNP}    & 3 & 4   \\
+% \t{DetCN}    & 3 & 4   \\
+% \t{PrepNP}   & 1 & 1   \\
+% \t{AdjCN}    & 7 & 4   \\
+% \t{AdvCN}    & 7 & 4   \\ \hline
+{\bf Total:} & {\bf 24} & {\bf 20} \\ 
 \hline
 \end{tabular}
 \caption{Two versions of Basque concrete syntax for noun phrase grammar}
 \label{basque_versions}
 \end{table}
 
-Other differences: AdjCN for inflection table behaved more nicely: the
-argument generation gave a nice and manageable \t{AdjCN small house}
-and put it in all kinds of weird contexts:
+In the version based on inflection tables, \t{AdjCN} needs only one
+adjective and one noun to form the test cases, for instance \t{AdjCN
+  small house}.
+This tree is then put in 7 different contexts, in order to showcase
+all the different fields in the \t{CN}.
 
-\begin{itemize}
-\item UttNP (DetCN a \char`_)
-\item UttNP (DetCN your \char`_)
-\item UttNP (DetCN thePl \char`_)
-\item PredAdv (DetNP your) (PrepNP on (DetCN your \char`_))
-\item PredAdv (DetNP your) (PrepNP from (DetCN your \char`_))
- \item PredAdv (DetNP your) (PrepNP on (DetCN thePl \char`_))
- \item PredAdv (DetNP your) (PrepNP from (DetCN thePl \char`_))
+\begin{EmptyItem}
+\begin{Highlighting}[]
+UttNP (DetCN a _)
+UttNP (DetCN your _)
+UttNP (DetCN the _)
+PredAdv \gray{any NP} (PrepNP on (DetCN your _))
+PredAdv \gray{any NP} (PrepNP from (DetCN your _))
+PredAdv \gray{any NP} (PrepNP on (DetCN the _))
+PredAdv \gray{any NP} (PrepNP from (DetCN the _))
+\end{Highlighting}
+\end{EmptyItem}
 
-\end{itemize}
+\noindent In Section~\ref{gf-testing-examples}, we described the
+placement of determiners in Basque. In the hand-written fragment for
+noun phrases, we introduced a parameter in the \t{Det} type, which
+controls the placement of the determiner, and which form it chooses
+from the \t{NP}. We can see quite clearly which part comes from where:
+\t{AdjCN} only creates an inflection table, and the rest of the
+context chooses different forms.
 
-In contrast, the stem-based grammar created an argument where all the
-awkwardness was already: AdjCN good (AdvCN (PrepNP without (DetCN a
-house)) house) `good house without a house', and only put it in two
-contexts, singular and plural. This is because the lincat for NP
-includes all this stuff in different fields, and the most
-representative example, i.e. no empty fields, has this awkward adverb
-in there.
 
-Why the RG version didn't include \t{your}: because all determiners
-have two fields in the RG, \t{pre} and \t{post}, and no matter if one
-is empty, all applications of \t{DetCN} are just implemented as
-\t{det.pre ++ noun ++ det.post}. So there is no parameter in the RG
-for ``det comes before/det comes after''.
+In contrast, the stem-based grammar creates much more unwieldy
+arguments for \t{AdjCN}. We explained the choice of good and small
+already, due to phonetic features as inherent parameters, but the full
+trees are more complex: \t{AdjCN \{\stackanchor{\tt \small
+    good}{\tt \small small}\} (AdvCN (PrepNP without (DetCN a house))
+  house)} `good/small house without a house'.  This is because in the full
+resource grammar, there is no parameter for the modifier and
+determiner placement, instead, each \t{CN} just includes fields for
+heavy and non-heavy modifier, and all determiners include the fields
+for pre- and postdeterminer. This way the functions don't need to
+include any pattern matching, just concatenate \t{det.pre ++
+  cn.heavyMod ++ cn.noun ++ cn.lightMod ++ det.post}, and any of these
+fields may be empty. The downside is that, in order to generate a
+minimal number of test cases, the best strategy is to generate a test
+case where the fewest possible of these strings are empty. This leads
+into fewer examples, but they are harder to read.
+
+The number of generated test cases doesn't differ much in this
+example. Furthermore, the version implemented with resource grammar
+includes many unnecessary distinctions for such a small grammar: for
+instance, each of the two trees generated for \t{AdjCN} are put in
+singular and plural contexts, which is completely irrelevant in the
+scope of our tiny grammar.  Thus we cannot draw any conclusions which
+strategy leads to more test cases. However, just reading the generated
+44 trees suggests that the full resource grammar generates less
+readable test cases.
+
+% For
+% instance, each of the two trees generated for \t{AdjCN} are put in two
+% contexts each: singular and plural. Strictly speaking, even singular
+% and plural are unnecessary for this particular grammar, but the Basque
+% resource grammar includes a variable number in \t{CN}, because in the
+% full resource grammar, \t{CN} may be modified by a relative clause,
+% which has to keep its agreement open.
+
+
+
+
+% Why the RG version didn't include \t{your}: because all determiners
+% have two fields in the RG, \t{pre} and \t{post}, and no matter if one
+% is empty, all applications of \t{DetCN} are just implemented as
+% \t{det.pre ++ noun ++ det.post}. So there is no parameter in the RG
+% for ``det comes before/det comes after''.
 
 \subsection{Qualitative analysis} 
 
