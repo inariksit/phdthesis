@@ -115,16 +115,21 @@ The problem is relevant for any kind of software testing, and we use existing te
 
 \section{Structure of this thesis}
 
-The thesis is divided in two parts: one about Constraint Grammar (Chapter~\ref{chapterCGSAT}) and other about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapter~\ref{chapterCGSAT} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. 
-%A third article, ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, presents a practical application of the method on a Basque CG, and is included in the evaluation section.
-% and ``Exploring the expressivity of Constraint Grammar'' \cite{kokke2017expressivity}.
-Chapter~\ref{chapterGFtest} is an extension of one article, ``Automatic systematic test case generation for producing reliable grammars'' \cite{listenmaa_claessen2018} (under submission). For both parts, some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
+The thesis is divided in two parts: one about Constraint Grammar (Chapters~\ref{chapterCGSAT} and \ref{chapterCGana}) and other about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapters~\ref{chapterCGSAT}  and \ref{chapterCGana} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} 
+and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. 
+A third article, ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, presents a practical application of the method on a Basque CG, and is included in the evaluation section.
+A fourth article, ``Exploring the Expressivity of Constraint Grammar'' \cite{kokke2017expressivity}, presents a novel use for the SAT-encoding.
 
-Chapter 2 presents a general introduction to both software testing and computational grammars, aimed for a reader who is unfamiliar with the topics.
-Chapter 3 describes the method of analysing CG by using symbolic evaluation, along with evaluation on three different grammars.
-The chapter is followed by an appendix, which describes the SAT-encoding in detail.
-Chapter 4 presents the method of generating test cases for GF grammars, along with evaluation on a large-scale resource grammar and a couple of smaller grammars.
-Chapter 5 concludes the thesis.
+Chapter~\ref{chapterGFtest} is an extension of one article, ``Automatic test suite generation for PMCFG grammars'' \cite{listenmaa_claessen2018}. 
+
+For both parts, some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter~\ref{chapterBackground}.
+
+Chapter~\ref{chapterBackground} presents a general introduction to both software testing and computational grammars, aimed for a reader who is unfamiliar with the topics.
+Chapter~\ref{chapterCGSAT} introduces the SAT-encoding of Constraint Grammar, with two different schemes for conflict handling. The chapter is followed by an appendix, which describes the SAT-encoding of every rule in detail.
+Chapter~\ref{chapterCGana}
+describes the method of analysing CG by using symbolic evaluation, along with evaluation on three different grammars.
+Chapter~\ref{chapterGFtest} presents the method of generating test cases for GF grammars, along with evaluation on a large-scale resource grammar and a couple of smaller grammars.
+Chapter~\ref{chapterConclusions} concludes the thesis.
 
 
 \section{Contributions of the author}
@@ -138,9 +143,9 @@ The version appearing in this monograph, Chapter~\ref{chapterCGSAT}, is thorough
 
 For the second article \cite{listenmaa_claessen2016}, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen. 
 %Writing the article was joint effort of both authors. 
-The version appearing in Chapter~\ref{chapterCGSAT} is to large extent the same as the original article, with added detail and examples throughout the chapter.
+The version appearing in Chapter~\ref{chapterCGana} is to large extent the same as the original article, with added detail and examples throughout the chapter. The chapter incorporates material from two additional articles: ``Exploring the Expressivity of Constraint Grammar'' \cite{kokke2017expressivity}, which is joint work between the author and Wen Kokke, and ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, co-authored with Jose Maria Arriola, Itziar Aduriz and Eckhard Bick. In \cite{kokke2017expressivity}, the initial idea was developed together, implementation was split in approximately half, and writing was done together. In \cite{listenmaa2017basque}, the author was in a main role in both the implementation and writing.
 
-The work in the third article \cite{listenmaa_claessen2018} was joint effort: both authors participated in all parts of planning, implementation and writing.
+The work in the third article \cite{listenmaa_claessen2018} was joint effort: both authors participated in all parts of planning and implementation. Both the original article and the version appearing in this monograph, Chapter~\ref{chapterGFtest}, was mainly written by the author.
 
 
 %The two remaining articles about CG were written with different coauthors: \cite{listenmaa2017basque} is a practical application of the method where the author was in charge with the experiments, and \cite{kokke2017expressivity} is a rather theoretical side trip, w a smaller role of the implementation, but actively participating in the ideas behind the work.

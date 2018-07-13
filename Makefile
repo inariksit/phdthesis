@@ -1,14 +1,15 @@
 tex = phdthesis
+latex = xelatex -interaction=nonstopmode
 
 all: pdf 
 
 # Build the PDF
 
 pdf:
-	xelatex $(tex)
+	$(latex) $(tex)
 
 cite:
-	xelatex $(tex) ; bibtex $(tex) ; xelatex $(tex) ; xelatex $(tex)
+	$(latex) $(tex) ; bibtex $(tex) ; $(latex) $(tex) ; $(latex) $(tex)
 
 
 outline:
