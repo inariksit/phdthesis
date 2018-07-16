@@ -97,16 +97,25 @@ performed on a \emph{target}, conditional on a \emph{context}.
 
 \subsection{Related work}
 
-\cg{} is one in the family of shallow and reductionist grammar formalisms. Disambiguation using constraint rules dates back to 1960s and 1970s---the closest system to modern \cg{} was Taggit \cite{taggit}, which was used to tag the Brown Corpus.
-Karlsson \cite{karlsson1995constraint} lists various approaches to the disambiguation 
-problem, including manual intervention, statistical optimisation, unification and Lambek calculus. 
-For disambiguation rules based on local constraints, Karlsson mentions \cite{hindle1989disamrules,herz1991local}.
+\cg{} is one in the family of shallow and reductionist grammar
+formalisms. Disambiguation using constraint rules dates back to 1960s
+and 1970s---the closest system to modern \cg{} was Taggit
+\cite{taggit}, which was used to tag the Brown Corpus.  Karlsson
+\cite{karlsson1995constraint} lists various approaches to the
+disambiguation problem, including manual intervention, statistical
+optimisation, unification and Lambek calculus.  For disambiguation
+rules based on local constraints, Karlsson mentions
+\cite{herz1991local,hindle1989disamrules}.
 
-\cg{} itself was introduced in 1990. Around the same time, a related formalism was proposed: 
-finite-state parsing and disambiguation system using constraint rules \cite{koskenniemi90}, which was later named Finite-State Intersection Grammar (\fsig{}) \cite{piitulainen1995}. 
-Like \cg{}, a \fsig{} grammar contains a set of rules which remove impossible readings based on contextual tests, 
-in a parallel manner: a sentence must satisfy all individual rules in a given \fsig{}. 
-Due to these similarities, the name Parallel Constraint Grammar was also suggested \cite{koskenniemi97}.
+\cg{} itself was introduced in 1990. Around the same time, a related
+formalism was proposed: finite-state parsing and disambiguation system
+using constraint rules \cite{koskenniemi90}, which was later named
+Finite-State Intersection Grammar (\fsig{}) \cite{piitulainen1995}.
+Like \cg{}, a \fsig{} grammar contains a set of rules which remove
+impossible readings based on contextual tests, in a parallel manner: a
+sentence must satisfy all individual rules in a given \fsig{}.  Due to
+these similarities, the name Parallel Constraint Grammar was also
+suggested \cite{koskenniemi97}.
 % However, \fsig{} rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than \cg{}. 
 % In this thesis, we use the name \fsig{} to refer to the framework that is aimed at producing a full syntactic analysis with the more expressive rules, 
 % and PCG to describe any \cg{}-variant which happens to be parallel.
@@ -179,50 +188,56 @@ For that reason, we decided to apply software testing and verification methods t
 \section{Grammatical Framework}
 \label{sec:gf-intro}
 
-Grammatical Framework (GF) \cite{ranta2011gfbook} 
-is a framework for building multilingual grammar applications. Its main
-components are a functional programming language for writing grammars
-and a resource library that contains the linguistic details of many
-natural languages.
-A GF program consists of an \emph{abstract syntax} (a set of functions
-and their categories) and a set of one or more
-\emph{concrete syntaxes} which describe how the abstract
-functions and categories are linearized (turned into surface strings) in each
-respective concrete language. The resulting grammar
-describes a mapping between concrete language strings and
-their corresponding abstract trees (structures of function names).
-This mapping is bidirectional---strings can be \emph{parsed} to
-trees, and trees \emph{linearized} to strings.
-As an abstract syntax can have multiple corresponding concrete syntaxes,
-the respective languages can be automatically \emph{translated} from one to the other by
-first parsing a string into a tree and then linearizing the obtained tree
-into a new string.
+Grammatical Framework (GF) \cite{ranta2011gfbook} is a framework for
+building multilingual grammar applications. Its main components are a
+functional programming language for writing grammars and a resource
+library that contains the linguistic details of many natural
+languages.  A GF program consists of an \emph{abstract syntax} (a set
+of functions and their categories) and a set of one or more
+\emph{concrete syntaxes} which describe how the abstract functions and
+categories are linearised (turned into surface strings) in each
+respective concrete language. The resulting grammar describes a
+mapping between concrete language strings and their corresponding
+abstract trees (structures of function names).  This mapping is
+bidirectional---strings can be \emph{parsed} to trees, and trees
+\emph{linearised} to strings.  As an abstract syntax can have multiple
+corresponding concrete syntaxes, the respective languages can be
+automatically \emph{translated} from one to the other by first parsing
+a string into a tree and then linearising the obtained tree into a new
+string.
+
+Another main component of \gf{} is the Resource Grammar Library (RGL)
+\cite{ranta2009rgl}, which, as of July 2018, contains the linguistic
+details of 40 natural languages. The library has had over 50
+contributors, and it consists of 1900 program modules and 3 million
+lines of code. As the name suggests, the RGL modules are not meant to
+be used for translation as such; instead, they are used as libraries
+to build smaller, domain-specific application grammars.
 
 \subsection{Related work}
 
 \gf{} comes from the theoretical background of type theory and logical
-frameworks, such as Montague grammar \cite{montague} and
-Categorial grammar \cite{catgram}.
+frameworks. The prime example of a system which combines logic and
+linguistic syntax is Montague grammar \cite{montague}; in fact, \gf{}
+can be seen as a general framework for Montague-style grammars.
 
+The notion of abstract and concrete syntax appeared in both computer
+science, specifically compiler construction \cite{mccarthy62}, and
+linguistics, introduced by Haskell Curry \cite{curry1961} as
+\emph{tectogrammatical} (abstract) and \emph{phenogrammatical}
+(concrete) structure.
 
-% Montague, R. Formal Philosophy. Collected papers edited by Richmond
-% Thomason. New Haven: Yale University Press, 1974. The pioneering
-% formalization of syntax and semantics together; GF can be seen as a
-% framework for Montague-style grammars.
-
-
-Abstract and concrete syntax: compiler construction \& tectogrammatical/phenogrammatical \todo{cite (Curry 1961)}. Multi-source multi-target compiler is multilingual by design, but tecto/pheno stuff wasn't multilingual before GF.
-
-
-Ranta \cite{ranta2011gfbook} mentions a few grammar formalisms that
-also build upon abstract and concrete syntax
+\gf{} is analogous to a multi-source multi-target compiler---a program
+in any programming language can be parsed into the common abstract
+syntax, and linearised into any of the other programming languages
+that the compiler supports.  In the domain of linguistics, Ranta
+\cite{ranta2011gfbook} mentions a few grammar formalisms that also
+build upon abstract and concrete syntax, such as
 \cite{deGroote2001acg,pollard2004hog,muskens2001lambda}. However, none
 of these systems have focused on multilinguality.
-
-
-
-
-
+The inspiration for a large resource grammar used as a library to
+build smaller applications comes from  CLE (Core Language Engine)
+\cite{CLE,cle2}.
 
 
 \begin{figure}[h]
