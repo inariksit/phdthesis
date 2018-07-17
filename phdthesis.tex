@@ -187,13 +187,14 @@
 
 \usepackage{pdfpages}
 
-% Appendix after chapter 3
+% Appendix after chapters 3 and 5
 \usepackage{appendix}
 \usepackage{chngcntr}
 \usepackage{etoolbox}
+\def\appendixname{Appendix: SAT-encoding}
 \AtBeginEnvironment{subappendices}{
-  \chapter*{Appendix: SAT-encoding}
-  \addcontentsline{toc}{chapter}{Appendix: SAT-encoding}
+  \chapter*{\appendixname}
+  \addcontentsline{toc}{chapter}{\appendixname}
   \counterwithin{figure}{section}
   \counterwithin{table}{section}
 }
@@ -239,12 +240,16 @@
   \include{chapters/cg-sat-encoding}
 \begin{subappendices}
   \include{chapters/sat-appendix}
-\end{subappendices}  
+\end{subappendices}
 
   \include{chapters/cg-analysis}
  
-
+\renewcommand{\appendixname}{Appendix: General algorithm}
   \include{chapters/gf-testing}
+\begin{subappendices}
+  \include{chapters/gf-appendix}
+\end{subappendices}
+
 
   \include{chapters/conclusion}
 

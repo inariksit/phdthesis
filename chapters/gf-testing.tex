@@ -427,7 +427,11 @@ the intermediate), and see if something else has changed.
 \section{Generating the test suite}
 \label{sec:testing}
 
-In this section, we explain how the test suites are built.
+In this section, we explain how the test suites are built. The
+explanation aims to be pedagogical and high-level, with Appendices
+\ref{general-algorithm-argument} and \ref{general-algorithm-context}
+serving as a reference.
+
 Earlier in Section~\ref{sec:PMCFG}, we saw how a single abstract category
 compiles into multiple concrete categories, depending on the
 combinations of parameters. Instead of dealing with parameters
@@ -454,13 +458,14 @@ to supply the function with \emph{arguments}, as well as put the resulting tree
 into a \emph{context} that produces a tree in the correct start
 category.
 
-\subsection{Enumerate arguments} Some syntactic functions are
-simply a single lexical item (for example the word \emph{good}); in
-this case just the tree \t{Good} is our answer.
-If we choose a function with arguments, such as \t{PrepNP}, then we have
-to supply it with argument trees. Each argument needs to be a
-tree belonging to the right category (in the example, \t{Prep} and
-\t{NP}, respectively). 
+\subsection{Enumerate arguments} 
+\label{enumerate-arguments}
+Some syntactic functions are simply a single lexical item (for example
+the word \emph{good}); in this case just the tree \t{good} is our
+answer.  If we choose a function with arguments, such as \t{PrepNP},
+then we have to supply it with argument trees. Each argument needs to
+be a tree belonging to the right category (in the example, \t{Prep}
+and \t{NP}, respectively).
 
 When we test a function, we want to see whether or not it uses the
 right information from its arguments, in the right way. The

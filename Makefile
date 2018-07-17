@@ -1,5 +1,5 @@
 tex = phdthesis
-latex = xelatex -interaction=nonstopmode
+latex = xelatex #-interaction=nonstopmode
 
 all: pdf 
 

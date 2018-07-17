@@ -150,7 +150,7 @@ to the other attributive form, but now the \texttt{AP} type actually
 contains 3 different strings for superlatives: \emph{beste} and
 \emph{best} for attributive and \emph{het best} for predicative.
 Adjectives in positive or comparative don't get the article: \emph{good}
-is just \emph{goede}, \emph{goed} and \emph{goed} (not \emph{✱het
+is just \emph{goede}, \emph{goed} and \emph{goed} (not \emph{*het
 goed}).
 
 If there hadn't been already a parameter for different adjective forms,
@@ -240,7 +240,7 @@ This was the old behaviour:
 \begin{Highlighting}[]
     \NormalTok{s }\FunctionTok{=} \StringTok{"help"} \NormalTok{;}
 \NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \AlertTok{"them like myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \AlertTok{"them like yourself"}\NormalTok{; … \} ; }
-\NormalTok{vcomp }\FunctionTok{=} \NormalTok{[] \} ;}
+\NormalTok{vcomp }\FunctionTok{=} \NormalTok{[] ;}
 \end{Highlighting}
 \end{EmptyItem}
 
@@ -316,8 +316,8 @@ shouldn't affect the agreement. With the new parameter,
 \texttt{ComplSlash} can now distinguish when to choose the agreement
 from the \texttt{NP} argument and when to leave it open for the subject.
 
-The same bug was found in languages, and we fixed it for Dutch, English
-and German, using the same strategy.
+The same bug was found in other languages as well. We fixed it for
+Dutch, English and German, using the same strategy.
 
 \subsection{Numbers}\label{numbers}
 
@@ -334,7 +334,7 @@ ease of understanding, and just classify the bugs by how easy they were to fix.
 \item
   Several inflection fixes.
 \item
-  youPol\_Pron had agreement of Sg P2, changed it to Sg P3 so that a
+  \t{youPol\_Pron} had agreement of \t{Sg P2}, changed it to \t{Sg P3} so that a
   correct reflexive pronoun is chosen.
 \item
   Choose always stressed forms of personal pronouns.
@@ -353,10 +353,10 @@ ease of understanding, and just classify the bugs by how easy they were to fix.
   should be without the e at the end.
 \item
   Superlatives and ordinals
-\item
-  DetQuant (and DetQuantOrd) combining a Quant and a Num, and when Num
-  is an actual digit, both Quant and the Num contribute with a string,
-  thus becoming \emph{een 1 huis} `a 1 house'.
+\item \t{DetQuant} (and \t{DetQuantOrd}) combining a \t{Quant} and a
+  \t{Num}, and when \t{Num} is an actual digit, both \t{Quant} and the \t{Num}
+  contribute with a string, thus becoming \emph{een 1 huis} `a 1
+  house'.
 \end{enumerate}
 
 \subsubsection{Hard to fix}\label{hard-to-fix}
@@ -384,5 +384,5 @@ read}\label{time-spent-by-testers-how-many-sentences-they-read}
 Tester 1 has read probably hundreds or thousands of sentences by now.
  \todo{get some more accurate numbers}
 
-Tester 2 has been used as a backup when Tester 1 was not available and
-Grammarian wanted quick feedback. She's read roughly tens of sentences.
+Tester 2 has been used as a backup when Tester 1 was not available and the
+grammarian wanted quick feedback. She's read roughly tens of sentences.

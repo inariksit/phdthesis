@@ -237,6 +237,9 @@ fields are used by \t{f}, and whether \t{f} introduces new strings.
 
 \subsection{Context generation revisited}
 
+We present context generation with fixpoints in the present section,
+by using a concrete example. The general algorithm is presented in
+Appendix~\ref{general-algorithm-context}.
 
 
 \begin{table}
@@ -307,9 +310,9 @@ the contexts for \t{NP}, \t{AP} and \t{Adv} at round 1.
 \begin{EmptyItem}
 \begin{HighlightingFancy}[]
 \DataTypeTok{CtxS}    \OtherTok{::=} \NormalTok{\{ (id, [s]) \}}
-\DataTypeTok{CtxNP$_*$}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{UttNP} \NormalTok{•), [s Nom]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}} 
-\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdj} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}}
-\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdv} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}}
+\DataTypeTok{CtxNP$_*$}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{UttNP} \NormalTok{•), [s Nom]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}} 
+\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdj} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}}
+\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdv} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}}
 \DataTypeTok{CtxCN}   \OtherTok{::=} \NormalTok{\{ \}}
 \DataTypeTok{CtxDet$_*$} \OtherTok{::=} \NormalTok{\{ \}}
 \DataTypeTok{CtxPrep} \OtherTok{::=} \NormalTok{\{ \}}
@@ -331,10 +334,10 @@ unlock more contexts on round 2.
 \begin{HighlightingFancy}[]
 \DataTypeTok{CtxS}    \OtherTok{::=} \NormalTok{\{ (id, [s]) \}}
 \DataTypeTok{CtxNP$_*$}  \OtherTok{::=} \NormalTok{\{ (ctx
- (}\DataTypeTok{UttNP} \NormalTok{•), [s Nom]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}} $\cup$
+ (}\DataTypeTok{UttNP} \NormalTok{•), [s Nom]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}} $\cup$
             \NormalTok{\{ (ctx (}\DataTypeTok{PrepNP} \NormalTok{\gray{any Prep} •), [s Acc]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxAdv}\NormalTok{\}}
-\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdj} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}}
-\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdv} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}}
+\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdj} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}}
+\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdv} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}}
 \DataTypeTok{CtxCN}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{DetCN} \NormalTok{\gray{any Det$_{\text{sg}}$} •), [s Sg]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxNP$_{\text{sg}}$}\NormalTok{\}} $\cup$
             \NormalTok{\{ (ctx (}\DataTypeTok{DetCN} \NormalTok{\gray{any Det$_{\text{pl}}$} •), [s Pl]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxNP$_{\text{pl}}$}\NormalTok{\}}
 \DataTypeTok{CtxDet$_{\text{sg}}$} \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{DetCN} \NormalTok{• \gray{any CN}), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxNP$_{\text{sg}}$}\NormalTok{\}}
@@ -369,11 +372,11 @@ no more empty, to find a context that covers \t{s Attr}.
 \begin{HighlightingFancy}[]
 \DataTypeTok{CtxS}    \OtherTok{::=} \NormalTok{\{ (id, [s]) \}}
 \DataTypeTok{CtxNP$_*$}  \OtherTok{::=} \NormalTok{\{ (ctx
- (}\DataTypeTok{UttNP} \NormalTok{•), [s Nom]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}} $\cup$
+ (}\DataTypeTok{UttNP} \NormalTok{•), [s Nom]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}} $\cup$
             \NormalTok{\{ (ctx (}\DataTypeTok{PrepNP} \NormalTok{\gray{any Prep} •), [s Acc]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxAdv}\NormalTok{\}}
-\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdj} \NormalTok{\gray{any NP} •), [s Pred]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}} $\cup$
+\DataTypeTok{CtxAP}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdj} \NormalTok{\gray{any NP} •), [s Pred]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}} $\cup$
             \NormalTok{\{ (ctx (}\DataTypeTok{AdjCN} \NormalTok{• \gray{any CN}), [s Attr]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxCN}\NormalTok{\}}
-\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdv} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxComment}\NormalTok{\}}
+\DataTypeTok{CtxAdv}  \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{PredAdv} \NormalTok{\gray{any NP} •), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxS}\NormalTok{\}}
 \DataTypeTok{CtxCN}   \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{DetCN} \NormalTok{\gray{any Det$_{\text{sg}}$} •), [s Sg]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxNP$_{\text{sg}}$}\NormalTok{\}} $\cup$
             \NormalTok{\{ (ctx (}\DataTypeTok{DetCN} \NormalTok{\gray{any Det$_{\text{pl}}$} •), [s Pl]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxNP$_{\text{pl}}$}\NormalTok{\}}
 \DataTypeTok{CtxDet$_{\text{sg}}$} \OtherTok{::=} \NormalTok{\{ (ctx (}\DataTypeTok{DetCN} \NormalTok{• \gray{any CN}), [s]) | (ctx,\_) $\leftarrow$} \DataTypeTok{CtxNP$_{\text{sg}}$}\NormalTok{\}}
@@ -457,7 +460,8 @@ we just enumerate all trees (using the \feat{} framework \cite{feat}),
 and choose the alphabetically first; this is both extremely simple
 solution, and it makes it easy to find identical trees. We could as
 easily choose a random tree, or use some other heuristic.
-This concludes the context generation.
+
+
 
 % In our tool, computing relevant contexts in a given start category \t{S}, is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
 % $$
