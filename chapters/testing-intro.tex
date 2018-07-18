@@ -10,8 +10,8 @@
 
 The intelligent reader may complete the syllogism.
 
-We can approach the elimination of bugs in two ways: find them
-by devising clever tests, or build safeguards into the program that
+We can approach the elimination of bugs in two ways: reveal them
+by constructing tests, or build safeguards into the program that
 make it more difficult for bugs to occur in the first place. The
 latter approach is more of a concern for developers of new programming
 languages---the language can impose more checks and constraints on the
@@ -20,62 +20,42 @@ approach the problem from particular, existing grammar formalisms that
 already have millions of lines of code written in them. Thus, we want
 to develop methods that help finding bugs in existing software.
 
-% Simplified model of programming languages: if it's easy to write
-% programs in a language, it's easy to write buggy programs. There are
-% languages that impose more checks and constraints, and thus make it
-% harder to write buggy code, but the overall effect is that it's harder
-% to write \emph{any} code. Some argue that the combination ``easy to
-% write correct code, hard to write buggy code'' exists, but the actual
-% language to achieve this varies from person to person.\footnote{There
-%   is more of a consensus of the existence of programming languages
-%   that are hard to write correct but easy to write buggy.} 
+% \subsection{Purpose of testing}
 
-% However interesting these points are from programming language
-% research point of view, they are way beside the point for this
-% thesis. We approach the problem from particular, existing grammar
-% formalisms that already have millions of lines of code written in
-% them. Thus, we want to develop methods that help finding bugs in
-% existing software. 
+% Ammann and Offutt \todo{cite \url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}}
+% define different levels of enlightment for software engineers.
 
-\subsection{Purpose of testing}
+% \begin{quote}
+% Level 0:  There is no difference between testing and debugging. \\
+% Level 1: The purpose of testing is to show correctness. \\
+% Level 2: The purpose of testing is to show that the software does not work. \\
+% Level 3: The purpose of testing is not to prove anything specific, but to reduce the risk of using the software. \\
+% Level 4: Testing is a mental discipline that helps all IT professionals develop higher-quality software.
+% \end{quote}
 
-Ammann and Offutt \todo{cite \url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}}
-define different levels of enlightment for software engineers.
+% \subsection{Testing}
 
-\begin{quote}
-Level 0:  There is no difference between testing and debugging. \\
-Level 1: The purpose of testing is to show correctness. \\
-Level 2: The purpose of testing is to show that the software does not work. \\
-Level 3: The purpose of testing is not to prove anything specific, but to reduce the risk of using the software. \\
-Level 4: Testing is a mental discipline that helps all IT professionals develop higher-quality software.
-\end{quote}
+% More quotes from the Intro to Software testing book:
 
+% \begin{quote}
+% Testing: Evaluating software by observing its execution \\
+% Test Failure: Execution of a test that results in a software failure \\
+% Debugging: The process of finding a fault given a failure \\
+% \\
+% Not all inputs will “trigger” a fault into causing a failure
+% \\
+% \\
+% Reachability :The location or locations in the program that contain the fault must be reached \\
+% Infection :The state of the program must be incorrect \\
+% Propagation :The infected state must cause some output or  final state of the program to be incorrect \\
+% Reveal :The tester must observe part of the incorrect portion of the program state \\
+% \end{quote}
 
+% http://twiki.di.uminho.pt/twiki/pub/Research/CROSS/Publications/techReport-ATGsurvey.pdf
 
-\subsection{Testing}
-
-More quotes from the Intro to Software testing book:
-
-\begin{quote}
-Testing: Evaluating software by observing its execution \\
-Test Failure: Execution of a test that results in a software failure \\
-Debugging: The process of finding a fault given a failure \\
-\\
-Not all inputs will “trigger” a fault into causing a failure
-\\
-\\
-Reachability :The location or locations in the program that contain the fault must be reached \\
-Infection :The state of the program must be incorrect \\
-Propagation :The infected state must cause some output or  final state of the program to be incorrect \\
-Reveal :The tester must observe part of the incorrect portion of the program state \\
-\end{quote}
-
-http://twiki.di.uminho.pt/twiki/pub/Research/CROSS/Publications/techReport-ATGsurvey.pdf
-
-You have a \emph{system}, you give it \emph{input} and 
-\emph{expected output}.
-Then you run the system with your input, and compare \emph{actual
-  output} to expected output.
+Testing a software involves a \emph{system} to test, an \emph{input}
+and an \emph{expected output}. We run the system with the given
+input, and compare \emph{actual output} to expected output.
 
 Some examples different types of tests:
 
@@ -94,8 +74,8 @@ that previously worked.
 
 \paragraph{Property-based testing}
 
-The weakness of unit testing is that it only tests cases that the
-developer has thought of adding. Another approach is to use
+The weakness of unit testing is that it only tests concrete values
+that the developer has thought of adding. Another approach is to use
 property-based testing: the developer defines abstract properties that
 should hold for all test cases, and uses random generation to supply
 values. If we want to test the (+) function again, we could write a
@@ -104,7 +84,7 @@ equal to $y+x$''.  A grammar-related property could be, for instance,
 ``a linearisation of a tree must contain strings from all of its
 subtrees''.  We formulate these properties, and generate a large
 number of data---pairs of integers in the first case, syntax trees in
-the second---and assert that all of them follow the property.
+the second---and assert that the property holds for all of them.
 
 % Of course, the single property of commutativity is not enough to
 % define that (+) works as intended: if that were the only test, it
@@ -117,22 +97,15 @@ the second---and assert that all of them follow the property.
 % properties of addition, or mix in some unit tests with specific
 % values.
 
-\paragraph{Symbolic evaluation}
-
-There are lots of things that can happen during the run of a
-program. What happens if we get a 3 from the user as an input? Does it
-crash if it's 29th of February and we get a 3 from the user?  Symbolic 
-evaluation simulates the run of a program with different inputs, using 
-a constraint solver to find out where certain combinations lead into.
 
 \paragraph{Deriving test cases}
 
-Unit tests, as well as properties, can be written by a human or derived
-automatically from some representation of the program. This can range
-from informal descriptions, such as specifications or user stories, to
-individual statements in the source code. Alternatively, tests can be
-generated from an abstract model of the program, such as a UML
-diagram.
+Unit tests, as well as properties, can be written by a human or
+derived automatically from some representation of the program. The
+sources of tests can range from informal descriptions, such as
+specifications or user stories, to individual statements in the source
+code. Alternatively, tests can be generated from an abstract model of
+the program, such as a UML diagram.
 
 In the context of grammar testing, the specification is the whole
 language of the grammar---hardly a formal and agreed-upon
@@ -147,7 +120,10 @@ through them to see if the property holds.
 If we have access to the grammar while designing tests
 (\emph{white-box testing}), we can take advantage of the
 structure---to start with, only test those features that are
-implemented in the grammar. 
+implemented in the grammar. Another example is, if we know that
+e.g. word order is a parameter with 3 values (statement, question and
+indirect question), we must create a test for each of parameters: ``I am
+old''; ``am I old''; ``I don't know if I am old''.
 
 % We can name
 % three levels of abstraction where to generate tests. \emph{Black-box
@@ -163,6 +139,9 @@ implemented in the grammar.
 
 \paragraph{Coverage criteria}
 
+Beizer \cite{beizer2003software} says: ``Testing is simple---all a
+tester needs to do is find a graph and cover it''.
+
 When have we tested enough? We need structured ways of covering the input
 space.
 
@@ -171,8 +150,14 @@ approximation of the language it is based on. Thus, even if the
 grammar generates an infinite amount of sentences, we still have only
 a finite set of constructions and grammatical functions to cover.
 
+\paragraph{Symbolic evaluation}
 
-
+There are lots of things that can happen during the run of a
+program. What happens if we get a 3 from the user as an input? Does
+the system crash crash if it is 29th of February and we get a 3 from
+the user?  Symbolic evaluation simulates the run of a program with
+different inputs, using a constraint solver to find out where certain
+combinations lead into.
 
 
 \input{chapters/sat-intro}

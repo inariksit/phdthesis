@@ -191,7 +191,6 @@
 \usepackage{appendix}
 \usepackage{chngcntr}
 \usepackage{etoolbox}
-\def\appendixname{Appendix: SAT-encoding}
 \AtBeginEnvironment{subappendices}{
   \chapter*{\appendixname}
   \addcontentsline{toc}{chapter}{\appendixname}
@@ -236,6 +235,8 @@
 
   %\include{chapters/cg-encoding-and-analysis}
   % attempt at squeezing encoding and analysis into one chapter
+
+\renewcommand{\appendixname}{Appendix: SAT-encoding}
 
   \include{chapters/cg-sat-encoding}
 \begin{subappendices}
