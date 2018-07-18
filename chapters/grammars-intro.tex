@@ -182,7 +182,164 @@ run the grammar with another implementation---if there are any conflicting rule 
 For that reason, we decided to apply software testing and verification methods to \cg{} grammars.
 
 
+\subsection{Ordering and execution of the rules}\label{sec:ordering}
 
+The previous properties of Constraint Grammar formalism and rules were
+specified by Karlsson \cite{karlsson1995constraint}, and retained in further
+implementations.  However, in the two decades following the initial
+specification, several independent implementations have experimented
+with different ordering schemes. In the present section, we describe
+the different parameters of ordering and execution: \emph{strict
+  vs. heuristic}, and \emph{sequential vs. parallel}.  Throughout the
+section, we will apply the rules to the following ambiguous passage,
+``{\em What question is that}'':
+
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l p{0.6cm} l}
+\t{"<what>"}     &                      &  \t{"<question>"}        &  & \t{"<is>"}         & & \t{"<that>"} \\
+                 & \t{"what" det}       & &      \t{"question" noun}  &  &    \t{"be" verb}  & &    \t{"that" det}  \\
+                 & \t{"what" pron}      & &      \t{"question" verb}  &  &                   & &    \t{"that" rel} \\
+\end{tabular}
+
+
+\def\satcgMax{SAT-CG\textsubscript{Max}}
+\def\satcgOrd{SAT-CG\textsubscript{Ord}}
+\def\noncg#1{{\em \color{gray} #1}}
+
+\begin{table}[h!]
+\centering
+
+  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
+           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
+\textbf{Sequential}
+           & CG-1 \cite{karlsson1990cgp}   
+                             & CG-2 \cite{tapanainen1996} % (Tapanainen1996, p. 34
+                                                  & --           \\ 
+           & VISL CG-3  \cite{vislcg3}      
+                             & Weighted CG-3 \cite{pirinen2015} & \\ 
+           & Peltonen 2011 \cite{peltonen2011}  &  &\\ %Peltonen2011, p. 80
+           & Yli-Jyrä 2011 \cite{yli-jyra2011cg_engine}  & & \\ 
+           & Huldén 2011 \cite{hulden2011cg_engine} & & \\ \hline
+\textbf{Parallel}
+           & \satcgOrd       & \satcgMax          & \noncg{Lager 1998 \cite{lager98}} \\ 
+           &                 & \noncg{FSIG (Voutilainen) \cite{voutilainen1994designing}} 
+                                                  & \noncg{FSIG (Koskenniemi) \cite{koskenniemi90}} \\
+           &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
+
+
+  \end{tabular}
+  \caption{Combinations of rule ordering and execution strategy.}
+  \label{table:nelikentta}
+\end{table}
+
+\paragraph{Strict vs. heuristic}
+
+aka. ``In which order are the rules applied to a single cohort?''
+
+An implementation with \emph{strict order} applies each rule in the
+order in which they appear in the file. If a grammar contains the
+rules \t{REMOVE v IF (-1 det)} and \t{REMOVE n IF (-1 pron)} in the
+given order, the rule that removes the verb reading in \emph{question}
+will be applied first. After it has finished, there are no verb
+readings available anymore for the second rule to fire.
+					
+How do we know which rule is the right one? There can be many rules
+that fit the context, but we choose the one that just happens to
+appear first in the rule file.  A common design pattern is to place
+rules with a long list of conditions first; only if they do not apply,
+then try a rule with less conditions. For a similar effect, a
+\emph{careful mode} may be used: ``remove verb after
+\emph{unambiguous} determiner'' would not fire on the first round, but
+it would wait for other rules to clarify the status of \emph{what}.
+					
+An alternative solution to a strict order is to use a \emph{heuristic
+  order}: when disambiguating a particular word, find the rule that
+has the longest and most detailed match. Now, assume that there is a
+rule with a longer context, such as \t{SELECT n IF (-1 det) (1 v)},
+even if this rule appears last in the file, it would be preferred to
+the shorter rules, because it is a more exact match.  There are also
+methods that use explicit weights to favour certain rules, such as
+\cite{pirinen2015} for CG, and
+\cite{voutilainen1994designing,oflazer97votingconstraints,silfverberg2009conflict}
+for related formalisms.
+					
+Both methods have their strengths and weaknesses. A strict order is
+more predictable, but it also means that the grammar writers need to
+pay more thought to rule interaction. A heuristic order frees the
+grammar writer from finding an optimal order, but it can give
+unexpected results, which are harder to debug.  As for major CG
+implementations, CG-1 \cite{karlsson1990cgp} and VISL CG-3
+\cite{vislcg3} follow the strict scheme, whereas CG-2
+\cite{tapanainen1996} is heuristic\footnote{Note that CG-2 is
+  heuristic \emph{within sections}: the rules in a given section are
+  executed heuristically, but all of them will be applied before any
+  rule in a later section.}.
+
+
+
+
+
+\paragraph{Sequential vs. parallel}
+
+aka. ``When does the rule application take effect?''
+%aka. ``Does the context change immediately after each rule is applied?''
+
+The input sentence can be processed in sequential or parallel manner.
+In \emph{sequential execution}, the rules are applied to one word at a
+time, starting from the beginning of the sentence. The sentence is
+updated after each application. If the word \emph{what} gets
+successfully disambiguated as a pronoun, then the word \emph{question}
+will not match the rule \t{REMOVE v IF (-1 det)}.
+
+
+In contrast, a \emph{parallel execution} strategy disambiguates all
+the words at the same time, using their initial, ambiguous context.
+To give a minimal example, assume we have a single rule,
+\texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{can can
+  can}, shown below.  In parallel execution, both \emph{can$_2$} and
+\emph{can$_3$} lose their verb tag; in sequential only \emph{can$_2$}.
+
+\begin{figure}[h]
+\begin{tabular}{p{0.5cm} l   p{0.5cm} l    p{0.5cm} l}
+\t{"<can$_1$>"}      &  & \t{"<can$_2$>"}  & & \t{"<can$_3$>"} & \\
+   & \t{"can" noun}  &  & \t{"can" noun} & & \t{"can" noun}   \\
+   & \t{"can" verb}  &  & \t{"can" verb} & & \t{"can" verb} 
+
+\end{tabular}
+\end{figure}
+
+The question of parallel execution becomes more complicated if there
+are multiple rules that apply for the same context.  Both \t{REMOVE v
+  IF (-1 det)} and \t{REMOVE n IF (-1 pron)} would match
+\emph{question}, because the original input from the morphological
+analyser contains both determiner and pronoun as the preceding word.
+The result depends on various details: shall all the rules also act in
+parallel?  If we allow rules to be ordered, then the result will not
+be any different from the same grammar in sequential execution; that
+is, the later rule (later by any metric) will not apply.  The only
+difference is the reason why not: ``context does not match'' in
+sequential, and ``do not remove the last reading'' in parallel.
+
+However, usually parallel execution is combined with \emph{unordered}
+rules.  In order to express the result of these two rules in an
+unordered scheme, we need a concept that has not been discussed so
+far, namely, disjunction: ``the allowed combinations are {\em
+  det}+{\em n} or {\em pron}+{\em v}''.  If we wanted to keep the
+purely list-based ontology of CG, but combine it with a parallel and
+unordered execution, then the result would have to inconclusive and
+keep both readings; both cannot be removed because that would leave
+{\em question} without any readings.  The difference between the
+list-based and disjunction-based ontologies, corresponding to CG and
+FSIG respectively, is explained with further detail in
+\cite{lager_nivre01}.
+
+Table~\ref{table:nelikentta} shows different systems of the constraint
+rule family, with rule order (strict vs. heuristic) on one axis, and
+execution strategy (sequential vs. parallel) on other.  Traditional CG
+implementations are shown in a normal font; other, related systems in
+cursive font and lighter colour.  \satcgMax and \satcgOrd refer to the
+systems by the author; they are presented in
+\cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} of
+this thesis.
 
 
 \section{Grammatical Framework}
