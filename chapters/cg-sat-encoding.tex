@@ -266,14 +266,20 @@ We can see another benefit in allowing connections between rules: none of the th
 \subsection{Solving conflicts in the parallel scheme}
 \label{sec:parallelScheme}
 
-As described in Section~\ref{sec:ordering}, PCG behaves differently from 
-SCG: the rules are dependent on each other, and the order does not matter.
-This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
-However, ignoring the order means that we miss significant information in the rule set. 
-The truth is that pure PCG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from a Dutch grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in an SCG with strict rule order.
-The grammar will behave as intended also in a heuristic variant of SCG,
-because the rules with a longer context are matched first.
-But in PCG, the rule set will definitely cause a conflict, rendering the whole grammar useless.
+As described in Section~\ref{sec:ordering}, PCG behaves differently
+from SCG: the rules are dependent on each other, and the order does
+not matter.  This prevents too hasty decisions, such as removing
+$\casaV$ before we know the status of \la{}.  However, ignoring the
+order means that we miss significant information in the rule set.  The
+truth is that pure PCG is very brittle: each and every rule in the set
+must fit together, without the notion of order. The rule sequence in
+Figure~\ref{fig:ruleOrder}, taken from a Dutch
+grammar\footnote{\url{https://github.com/apertium/apertium-nld/blob/master/apertium-nld.nld.rlx}, commit d13fdaa}, 
+will be well-behaved in an SCG with strict rule order.  The grammar
+will behave as intended also in a heuristic variant of SCG, because
+the rules with a longer context are matched first.  But in PCG, the
+rule set will definitely cause a conflict, rendering the whole grammar
+useless.
 
 
 
@@ -633,14 +639,23 @@ The results are presented in more detail in the following sections.
 
 We took a manually tagged
 corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-swpost/apertium-en-es/es-tagger-data/es.tagged}}
-containing approximately 22,000 words of Spanish news text, 
-and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}} from the Apertium repository.
-We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
-In order to test the grammars, we produced an ambiguous version of the tagged
-corpus: we discarded the tags, and analysed the text again with the Apertium morphological analyser and the morphological dictionary for Spanish. Ideally, we should have used the same analyser, but since the gold standard was produced, there have been some changes in the dictionary. Due to these differences, we had to discard some 2000 words from the gold standard---in most cases, there was a change of just one word, but we excluded the whole sentence nevertheless. 
-With this setup, we ran both SAT-CG and VISL CG-3 on the newly ambiguous corpus. 
-In addition, we wrote a small grammar of 19 rules, optimised to be very compact and disambiguate effectively, taking advantage of the parallel execution. 
-Some of the rules were selected from the original grammar, and some were written by the author.
+containing approximately 22,000 words of Spanish news text, and a
+small constraint
+grammar\footnote{\url{https://github.com/apertium/apertium-spa/blob/master/apertium-spa.spa.rlx}, commit 1d4f290d} from the Apertium repository.  We kept only
+\textsc{select} and \textsc{remove} rules, which left us 261 rules.
+In order to test the grammars, we produced an ambiguous version of the
+tagged corpus: we discarded the tags, and analysed the text again with
+the Apertium morphological analyser and the morphological dictionary
+for Spanish. Ideally, we should have used the same analyser, but since
+the gold standard was produced, there have been some changes in the
+dictionary. Due to these differences, we had to discard some 2000
+words from the gold standard---in most cases, there was a change of
+just one word, but we excluded the whole sentence nevertheless.  With
+this setup, we ran both SAT-CG and VISL CG-3 on the newly ambiguous
+corpus.  In addition, we wrote a small grammar of 19 rules, optimised
+to be very compact and disambiguate effectively, taking advantage of
+the parallel execution.  Some of the rules were selected from the
+original grammar, and some were written by the author.
 
 
 Table~\ref{table:fscore} shows F-scores and execution times for these two grammars. 
