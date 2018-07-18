@@ -1,14 +1,12 @@
 \section{Software testing and verification}
 \label{sec:testing-intro} 
 
-\todo{This whole section is just a draft.}
-
 \begin{itemize}
 \item All software has bugs.
 \item Grammars are software.
 \end{itemize}
 
-The intelligent reader may complete the syllogism.
+\noindent The intelligent reader may complete the syllogism.
 
 We can approach the elimination of bugs in two ways: reveal them
 by constructing tests, or build safeguards into the program that
@@ -56,8 +54,8 @@ to develop methods that help finding bugs in existing software.
 Testing a software involves a \emph{system} to test, an \emph{input}
 and an \emph{expected output}. We run the system with the given
 input, and compare \emph{actual output} to expected output.
-
-Some examples different types of tests:
+In the following, we introduce some key concepts from the field of
+software testing, as well as their applications to grammar testing.
 
 \paragraph{Unit testing}
 
@@ -136,14 +134,11 @@ old''; ``am I old''; ``I don't know if I am old''.
 % tests from some model of a program, such as a UML diagram.
 
 
-
 \paragraph{Coverage criteria}
 
-Beizer \cite{beizer2003software} says: ``Testing is simple---all a
-tester needs to do is find a graph and cover it''.
+Beizer \cite{beizer2003software} considers testing as a simple task: ``all a
+tester needs to do is find a graph and cover it''. In practical terms, 
 
-When have we tested enough? We need structured ways of covering the input
-space.
 
 We are testing a grammar, which is necessarily an imperfect
 approximation of the language it is based on. Thus, even if the
@@ -152,12 +147,18 @@ a finite set of constructions and grammatical functions to cover.
 
 \paragraph{Symbolic evaluation}
 
-There are lots of things that can happen during the run of a
-program. What happens if we get a 3 from the user as an input? Does
-the system crash crash if it is 29th of February and we get a 3 from
-the user?  Symbolic evaluation simulates the run of a program with
-different inputs, using a constraint solver to find out where certain
-combinations lead into.
+Given a representation of a program flow as a graph, symbolic
+evaluation simulates the run of the program with all feasible paths,
+using a constraint solver to find out where different inputs lead
+into. It is often not feasible to simulate all paths for a large and
+complex program; instead, several heuristics have been created for
+increasing code coverage.
+
+Symbolic evaluation works well for analysing (ordered) CG grammars, at
+least up to an input space of tens of thousands of different
+morphological analyses. The range of operations is fairly limited, and
+the program flow is straightforward: execute rule 1, then execute
+rule 2, and so on.
 
 
 \input{chapters/sat-intro}
