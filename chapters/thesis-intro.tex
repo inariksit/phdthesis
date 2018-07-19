@@ -1,5 +1,3 @@
-\def\t#1{\texttt{#1}}
-
 \chapter{Introduction to this thesis}
 
 There are many approaches to natural language processing (NLP). 
@@ -70,13 +68,13 @@ and debug. There is no internal mechanism that prevents rules from contradicting
 each other---the following is a syntactically valid CG grammar, and normal CG compilers will not detect anything strange.
 
 \begin{itemize}
-\item[] \t{SELECT noun IF (-1 article) ;} \\ \t{SELECT verb IF (-1 article) ;}
+\item[] \texttt{SELECT noun IF (-1 article) ;} \\ \texttt{SELECT verb IF (-1 article) ;}
 \end{itemize}
 
 Apart from obvious cases as above, with two rules saying contradicting truths about the language, there can be less direct conflicts between the rules. Take the following example:
 
 \begin{itemize}
-\item[] \t{REMOVE article ;} \\ \t{SELECT noun IF (-1 article) ;}
+\item[] \texttt{REMOVE article ;} \\ \texttt{SELECT noun IF (-1 article) ;}
 \end{itemize}
 
 \noindent The first rule removes all articles unconditionally, thus rendering the second rule invalid: it may never apply, because its condition is never matched.
@@ -103,7 +101,7 @@ The most typical example of a generative grammar is a context-free grammar. GF i
               Verb     ::= "eats" | "sleeps"
 \end{verbatim}
 
-We call \t{Sentence} as the start category: all valid constructions in the language $G$ are sentences. There are two ways of forming sentences: one is to combine a \t{Noun} and a \t{Verb}, which results in the finite set \{\emph{John eats, John sleeps, Mary eats, Mary sleeps}\}. However, the second way of constructing a sentence is recursive, resulting in an infinite amount of sentences: \emph{John says that Mary says that \dots Mary eats}.
+We call \texttt{Sentence} as the start category: all valid constructions in the language $G$ are sentences. There are two ways of forming sentences: one is to combine a \texttt{Noun} and a \texttt{Verb}, which results in the finite set \{\emph{John eats, John sleeps, Mary eats, Mary sleeps}\}. However, the second way of constructing a sentence is recursive, resulting in an infinite amount of sentences: \emph{John says that Mary says that \dots Mary eats}.
 
 Again, the grammars we are really interested in are much larger, and the GF formalism has more complex machinery in place, such as taking care of agreement, i.e. allowing \emph{John sleeps} and \emph{I sleep}, but rejecting \emph{*I sleeps} and \emph{*John sleep}. But the basic mechanism is the same: a formal, rather compact description that generates a potentially infinite set of sentences.
 

@@ -1,11 +1,3 @@
-% \def\pmcfg{\textsc{pmcfg}}
-% \def\gf{\textsc{gf}}
-% \def\cg{\textsc{cg}}
-% \def\fsig{\textsc{fsig}}
-\def\pmcfg{PMCFG}
-\def\gf{GF}
-\def\cg{CG}
-\def\fsig{FSIG}
 \newcommand{\quality}[1]{${\tt Quality_{#1}}$}
 \newcommand{\kind}[1]{${\tt Kind_{#1}}$}
 \newcommand{\very}[1]{${\tt Very_{#1}}$}
@@ -17,20 +9,21 @@
 \newcommand{\predFun}[3]{${\tt Pred_{#1,#2,#3}}$}
 \newcommand{\itemSpa}[2]{${\tt Item_{#1,#2}}$}
 \newcommand{\itemEng}[1]{${\tt Item_{#1}}$}
+\def\t#1{\texttt{#1}}
 
 \section{Constraint Grammar}
 \label{sec:cg-intro}
 
-Constraint Grammar (\cg{}) is a formalism for 
+Constraint Grammar (\onlycg{}) is a formalism for 
 disambiguating morphologically analyzed text. 
 It was first introduced by Fred Karlsson  
 \cite{karlsson1990cgp,karlsson1995constraint}, and has been used for
 many tasks in computational linguistics, such as part-of-speech
 tagging, surface syntax and machine translation \cite{bick2011}.
-\cg{}-based taggers are reported to achieve F-scores of over 99 \% for
+\onlycg{}-based taggers are reported to achieve F-scores of over 99 \% for
 morphological disambiguation, and around 95-97 \% for syntactic analysis
 \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}. 
-\cg{} disambiguates morphologically analyzed input by using constraint
+\onlycg{} disambiguates morphologically analyzed input by using constraint
 rules which can select or remove a potential analysis (called
 \emph{reading}) for a target word, depending on the context words
 around it.  Together these rules disambiguate the whole text.
@@ -88,7 +81,7 @@ reading. The finished analysis is shown below:
 \end{verbatim}
 \end{itemize}
 
-It is also possible to add syntactic tags and dependency structure within \cg{} \cite{vislcg3,bick2015}.
+It is also possible to add syntactic tags and dependency structure within \onlycg{} \cite{vislcg3,bick2015}.
 However, for the remainder of this introduction, we will illustrate the examples with the 
 most basic operations, that is, disambiguating morphological tags.
 The syntactic disambiguation and dependency features are not fundamentally
@@ -97,9 +90,9 @@ performed on a \emph{target}, conditional on a \emph{context}.
 
 \subsection{Related work}
 
-\cg{} is one in the family of shallow and reductionist grammar
+\onlycg{} is one in the family of shallow and reductionist grammar
 formalisms. Disambiguation using constraint rules dates back to 1960s
-and 1970s---the closest system to modern \cg{} was Taggit
+and 1970s---the closest system to modern \onlycg{} was Taggit
 \cite{taggit}, which was used to tag the Brown Corpus.  Karlsson
 \cite{karlsson1995constraint} lists various approaches to the
 disambiguation problem, including manual intervention, statistical
@@ -107,46 +100,46 @@ optimisation, unification and Lambek calculus.  For disambiguation
 rules based on local constraints, Karlsson mentions
 \cite{herz1991local,hindle1989disamrules}.
 
-\cg{} itself was introduced in 1990. Around the same time, a related
+\onlycg{} itself was introduced in 1990. Around the same time, a related
 formalism was proposed: finite-state parsing and disambiguation system
 using constraint rules \cite{koskenniemi90}, which was later named
 Finite-State Intersection Grammar (\fsig{}) \cite{piitulainen1995}.
-Like \cg{}, a \fsig{} grammar contains a set of rules which remove
+Like \onlycg{}, a \fsig{} grammar contains a set of rules which remove
 impossible readings based on contextual tests, in a parallel manner: a
 sentence must satisfy all individual rules in a given \fsig{}.  Due to
 these similarities, the name Parallel Constraint Grammar was also
 suggested \cite{koskenniemi97}.
-% However, \fsig{} rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than \cg{}. 
+% However, \fsig{} rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than \onlycg{}. 
 % In this thesis, we use the name \fsig{} to refer to the framework that is aimed at producing a full syntactic analysis with the more expressive rules, 
-% and PCG to describe any \cg{}-variant which happens to be parallel.
+% and PCG to describe any \onlycg{}-variant which happens to be parallel.
 % Thus, we will call implementations such as \cite{voutilainen1994designing} an \emph{\fsig{} grammar} and a program that parses it an \emph{\fsig{} parser}.
-% Conversely, the \cg{} parser in \cite{listenmaa_claessen2015} 
-% and the ``\cg{}-like'' system in \cite{lager98} are instances of PCG.
+% Conversely, the \onlycg{} parser in \cite{listenmaa_claessen2015} 
+% and the ``\onlycg{}-like'' system in \cite{lager98} are instances of PCG.
 %We return to the comparison with \fsig{} in Sections~\ref{sec:ordering}~and~\ref{sec:expressivity}.
 
 Brill tagging \cite{brill1995} is based on transformation rules: the
 starting point of an analysis is just one tag, the most common one,
 and subsequent rule applications transform one tag into another, based
-on contextual tests. Like \cg{}, Brill tagging is known to be efficient
+on contextual tests. Like \onlycg{}, Brill tagging is known to be efficient
 and accurate. The contextual tests are very similar: Lager
-\cite{lager01transformation} has automatically learned both Brill rules and \cg{} rules, using the same system.
+\cite{lager01transformation} has automatically learned both Brill rules and \onlycg{} rules, using the same system.
 
-Similar ideas to \cg{} have been also explored in other frameworks, such as finite-state automata \cite{gross1997local,grana2003fst},
+Similar ideas to \onlycg{} have been also explored in other frameworks, such as finite-state automata \cite{gross1997local,grana2003fst},
 %, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst},
 logic programming \cite{oflazer97votingconstraints,lager98}, 
 constraint satisfaction \cite{padro1996csp}, 
 and dependency syntax \cite{tapanainen97fdg}. 
- In addition, there are a number of reimplementations of \cg{} using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
+ In addition, there are a number of reimplementations of \onlycg{} using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
 
 \subsection{Properties of Constraint Grammar}\label{sec:properties}
 
 Karlsson \cite{karlsson1995constraint} lists 24 design principles and describes
 related work at the time of writing.
-Here we summarize a set of main features, and relate \cg{} to the developments in grammar formalism since the initial description.
+Here we summarize a set of main features, and relate \onlycg{} to the developments in grammar formalism since the initial description.
 
-\cg{} is a \emph{reductionistic} system: the analysis starts from a list of alternatives,
+\onlycg{} is a \emph{reductionistic} system: the analysis starts from a list of alternatives,
 and removes those which are impossible or improbable.
-\cg{} is designed primarily for analysis, not generation; its task is 
+\onlycg{} is designed primarily for analysis, not generation; its task is 
 to give correct analyses to the words in given sentences,
 not to describe a language as a collection of ``all and only the grammatical sentences''.
 
@@ -165,21 +158,21 @@ changing the more general rules.
 % Introducing a subset of verbs, even if they are used only in one rule,
 % is very cheap and does not create a complicated taxonomy of different verb types.
 
-% Most importantly, the independence of rules makes \cg{} highly robust.
+% Most importantly, the independence of rules makes \onlycg{} highly robust.
 % If one of the words is unknown or misspelt, a generative grammar would fail to produce any analysis. 
-% \cg{} would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
+% \onlycg{} would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
 
 
 There are different takes on how \emph{deterministic} the rules are.
-The current state-of-the-art \cg{} parser VISL CG-3 executes the rules strictly 
+The current state-of-the-art \onlycg{} parser VISL CG-3 executes the rules strictly 
 based on the order of appearance, but there are other implementations which 
 apply their own heuristics, or remove the ordering completely, 
 applying the rules in parallel. 
-%---furthermore, there are several implementations of \cg{} with different kind of application orders,
+%---furthermore, there are several implementations of \onlycg{} with different kind of application orders,
 %such as ``apply in the order introduced in the grammar file'' or ``apply in order of longer matching context''.
 A particular rule set may be written with one application order in mind, but another party may 
 run the grammar with another implementation---if there are any conflicting rule pairs, then the behaviour of the grammar is different.
-For that reason, we decided to apply software testing and verification methods to \cg{} grammars.
+For that reason, we decided to apply software testing and verification methods to \onlycg{} grammars.
 
 
 \subsection{Ordering and execution of the rules}\label{sec:ordering}
@@ -345,11 +338,11 @@ this thesis.
 \section{Grammatical Framework}
 \label{sec:gf-intro}
 
-Grammatical Framework (GF) \cite{ranta2011gfbook} is a framework for
+Grammatical Framework (\gf{}) \cite{ranta2011gfbook} is a framework for
 building multilingual grammar applications. Its main components are a
 functional programming language for writing grammars and a resource
 library that contains the linguistic details of many natural
-languages.  A GF program consists of an \emph{abstract syntax} (a set
+languages.  A \gf{} program consists of an \emph{abstract syntax} (a set
 of functions and their categories) and a set of one or more
 \emph{concrete syntaxes} which describe how the abstract functions and
 categories are linearised (turned into surface strings) in each
@@ -414,7 +407,7 @@ build smaller applications comes from  CLE (Core Language Engine)
     \DataTypeTok{Warm}\NormalTok{, }\DataTypeTok{Good}\NormalTok{, }\DataTypeTok{Italian}\NormalTok{, }\DataTypeTok{Vegan}\OtherTok{ :} \DataTypeTok{Quality} \NormalTok{;}
 \end{Highlighting}
 \end{Shaded}
-  \caption{Abstract syntax of a GF grammar about food}
+  \caption{Abstract syntax of a \gf{} grammar about food}
 \label{fig:foods}
 \end{figure}
 
@@ -423,7 +416,7 @@ build smaller applications comes from  CLE (Core Language Engine)
 
 Abstract syntax describes the constructions in our grammar without
 giving a concrete implementation. Figure~\ref{fig:foods}
-shows the abstract syntax of a small example grammar in GF, slightly
+shows the abstract syntax of a small example grammar in \gf{}, slightly
 modified from \cite{ranta2011gfbook}, and Figure~\ref{fig:spanish}
 shows a corresponding Spanish concrete syntax. We refer to this
 grammar throughout the thesis. 
@@ -482,7 +475,7 @@ and \t{Those} quantify a \t{Kind} into an \t{Item}, for instance,
     \NormalTok{preOrPost p x y }\FunctionTok{=} \KeywordTok{case} \NormalTok{p }\KeywordTok{of} \NormalTok{\{ }\DataTypeTok{Pre} \OtherTok{=>} \NormalTok{x }\FunctionTok{++} \NormalTok{y ; }\DataTypeTok{Post} \OtherTok{=>} \NormalTok{y }\FunctionTok{++} \NormalTok{x \} ;}
 \end{Highlighting}
 \end{Shaded}
-  \caption{Spanish concrete syntax of a GF grammar about food}
+  \caption{Spanish concrete syntax of a \gf{} grammar about food}
 \label{fig:spanish}
 \end{figure}
 
@@ -558,10 +551,10 @@ grammar turns into multiple syntactic functions into the
 
 \begin{itemize}
 \setlength\itemsep{0em}
-\item[--] \modFun{pre}{fem~~} \t{:} \quality{pre~} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
-\item[--]  \modFun{post}{fem~} \t{:} \quality{post} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
-\item[--]  \modFun{pre}{masc~~}\t{:} \quality{pre~} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
-\item[--] \modFun{post}{masc} \t{:} \quality{post} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
+\item \modFun{pre}{fem~~} \t{:} \quality{pre~} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
+\item  \modFun{post}{fem~} \t{:} \quality{post} $\rightarrow$ \kind{fem~} $\rightarrow$ \kind{fem}
+\item  \modFun{pre}{masc~~}\t{:} \quality{pre~} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
+\item \modFun{post}{masc} \t{:} \quality{post} $\rightarrow$ \kind{masc} $\rightarrow$ \kind{masc}
 \end{itemize}
 
 
@@ -582,118 +575,8 @@ expands only into 4 variants, despite there being 8 combinations of
 
 \begin{itemize}
 \setlength\itemsep{0em}
-\item[--] \predFun{sg}{fem}{*~} \t{:} \itemSpa{sg}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\item[--]  \predFun{pl}{fem}{*~} \t{:} \itemSpa{pl}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\item[--]  \predFun{sg}{masc}{*} \t{:} \itemSpa{sg}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
-\item[--] \predFun{pl}{masc}{*} \t{:} \itemSpa{pl}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item \predFun{sg}{fem}{*~} \t{:} \itemSpa{sg}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item  \predFun{pl}{fem}{*~} \t{:} \itemSpa{pl}{fem~} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item  \predFun{sg}{masc}{*} \t{:} \itemSpa{sg}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
+\item \predFun{pl}{masc}{*} \t{:} \itemSpa{pl}{masc} $\rightarrow$ \quality{*} $\rightarrow$ \comment
 \end{itemize}
-
-
-
-% \subsection{Abstract syntax}
-
-% Abstract syntax is a description of the things we can say in the
-% language: it doesn't tell how, but just
-% what. Figure~\ref{fig:abstract_syntax} shows a small example grammar
-% for greetings.
-% %: ``Hello world'' and ``Hello friends''.
-
-
-% \begin{figure}[h]
-%   \centering
-% \begin{verbatim}
-% abstract Hello = {
-%   flags startcat = Greeting ;
-
-%   cat 
-%     Greeting ; Recipient ;
-
-%   fun
-%     Hello : Recipient -> Greeting ;
-%     World : Recipient ;
-%     Friends : Recipient ; 
-% }
-
-% \end{verbatim}
-% \caption{Abstract syntax of a small GF grammar}
-% \label{fig:abstract_syntax}
-% \end{figure}
-
-% Section \t{cat} introduces the categories of the grammar:
-% \t{Greeting} and \t{Recipient}. 
-% Of the two categories, \t{Greeting} is the \emph{start category}.
-% This means that greetings are complete constructions in the language,
-% everything else (in this grammar, only \t{Recipient} is an
-% intermediate stage. However, it is perfectly fine to inspect any
-% category, and generate or parse examples in them. (As we will see later
-% in Chapter~\ref{chapterGFtest}, it makes sense to test grammars in
-% smaller pieces.)
-
-% The next section \t{fun} introduces functions: they are either lexical
-% items without arguments, or syntactic functions which manipulate their
-% arguments and build new terms. In this grammar, we have two lexical
-% items, \t{World} and \t{Friends}, both of type \t{Recipient}, and one
-% syntactic function, \t{Hello}, which takes a \t{Recipient} as an
-% argument and produces a \t{Greeting}. 
-
-% This grammar is very simple: the exhaustive list of abstract syntax
-% trees  is just \t{\{Hello World, Hello Friends\}}.
-
-
-% \subsection{Concrete syntax}
-
-% Concrete syntax is the implementation of the abstract syntax.
-
-% \begin{figure}[h]
-%   \centering
-% \begin{verbatim}
-% concrete HelloEng of Hello = {
-
-%  lincat 
-%    Greeting, Recipient = Str ;
-
-%  lin
-%    Hello rec = "hello" ++ rec ;
-%    World     = "world" ;
-%    Friends   = "friends" ;
-% }
-% \end{verbatim}
-% \caption{English concrete syntax of the GF grammar in Figure~\ref{fig:abstract_syntax}}
-% \label{fig:concrete_syntax_eng}
-% \end{figure}
-
-% The section \t{lincat} contains the concrete types of the categories. 
-% It corresponds to \t{cat} in the abstract syntax: for every abstract category
-% introduced in \t{cat}, we give a concrete implementation in \t{lincat}.
-% Figure~\ref{fig:concrete_syntax_eng} shows the English concrete
-% syntax, in which both \t{Greeting} and \t{Recipient} are just strings.
-
-% The section \t{lin} contains the concrete implementation of the
-% functions, introduced in \t{fun}. The lexical items \t{World} and
-% \t{Friends} are just strings, and \t{Hello} simply prefixes the word
-% ``hello'' to its argument, resulting in ``hello world'' and ``hello friends''.
-
-% However, the concrete syntax types can be more complex than just
-% strings. GF compiles into a formalism called \pmcfg{}
-% \cite{seki91pmcfg}, which is beyond context-free.
-
-% \begin{figure}[h]
-%   \centering
-% \begin{verbatim}
-% concrete HelloIce of Hello = {
-
-%  lincat 
-%    Greeting  = Str ;
-%    Recipient = { s : Str ; n : Number } ;
-
-%  lin
-%    Hello rec = case rec.n of {
-%                  Sg => "sæll" ;
-%                  Pl => "sælir" } ++ rec ;
-%    World     = {s = "heimur" ; n = Sg } ;
-%    Friends   = {s = "vinir"  ; n = Pl } ;
-% }
-% \end{verbatim}
-% \caption{Icelandic concrete syntax of the GF grammar in Figure~\ref{fig:abstract_syntax}}
-% \label{fig:concrete_syntax_ice}
-% \end{figure}

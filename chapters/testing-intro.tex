@@ -17,7 +17,8 @@ programmer, and thus make it harder to write buggy code. However, we
 approach the problem from particular, existing grammar formalisms that
 already have millions of lines of code written in them. Thus, we want
 to develop methods that help finding bugs in existing software.
-
+In the present section, we introduce some key concepts from the field of
+software testing, as well as their applications to grammar testing.
 % \subsection{Purpose of testing}
 
 % Ammann and Offutt \todo{cite \url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}}
@@ -51,11 +52,7 @@ to develop methods that help finding bugs in existing software.
 
 % http://twiki.di.uminho.pt/twiki/pub/Research/CROSS/Publications/techReport-ATGsurvey.pdf
 
-Testing a software involves a \emph{system} to test, an \emph{input}
-and an \emph{expected output}. We run the system with the given
-input, and compare \emph{actual output} to expected output.
-In the following, we introduce some key concepts from the field of
-software testing, as well as their applications to grammar testing.
+
 
 \paragraph{Unit testing}
 
@@ -106,22 +103,23 @@ code. Alternatively, tests can be generated from an abstract model of
 the program, such as a UML diagram.
 
 In the context of grammar testing, the specification is the whole
-language of the grammar---hardly a formal and agreed-upon
-document. Assuming no access to the computational grammar itself
-(sometimes called \emph{black-box testing}), we could treat
-traditional grammar books as an inspiration for properties and unit
-tests. For example, we can test a feature such as ``pronouns must be
-in an accusative case after a preposition'' by generating example
-sentences where pronouns occur after a preposition, and reading
-through them to see if the property holds.
+natural language that the grammar approximates---hardly a formal and
+agreed-upon document. Assuming no access to the computational grammar
+itself (generally called \emph{black-box testing}), we can treat traditional
+grammar books or speaker intuition as an inspiration for properties
+and unit tests. For example, we can test a feature such as ``pronouns
+must be in an accusative case after a preposition'' by generating
+example sentences where pronouns occur after a preposition, and
+reading through them to see if the rule holds.
 
 If we have access to the grammar while designing tests
 (\emph{white-box testing}), we can take advantage of the
 structure---to start with, only test those features that are
-implemented in the grammar. Another example is, if we know that
-e.g. word order is a parameter with 3 values (statement, question and
-indirect question), we must create a test for each of parameters: ``I am
-old''; ``am I old''; ``I don't know if I am old''.
+implemented in the grammar. For example, if we know that word order is
+a parameter with 2 values, direct statement and question,
+then we need to create 2 tests, e.g. ``I am old'' and ``am I
+old''. If the parameter had 3 values, say third for indirect question,
+then we need a third test as well, e.g. ``I don't know if I am old''.
 
 % We can name
 % three levels of abstraction where to generate tests. \emph{Black-box
@@ -136,29 +134,36 @@ old''; ``am I old''; ``I don't know if I am old''.
 
 \paragraph{Coverage criteria}
 
-Beizer \cite{beizer2003software} considers testing as a simple task: ``all a
-tester needs to do is find a graph and cover it''. In practical terms, 
+Beizer \cite{beizer2003software} describes testing as a
+simple task: ``all a tester needs to do is find a graph and cover
+it''. The flow of an imperative program can be modelled as a graph
+with start and end points; multiple branches at conditional statements
+and back edges at loops. Take a simple program that takes a number and
+outputs ``even'' for even numbers and ``odd'' for odd numbers; it has
+two branches, and to test it exhaustively, one needs to supply two
+inputs; one even and one odd number.
 
+Simulating the run of the program with all feasible paths is called
+\emph{symbolic evaluation}, and a constraint solver is often used to
+find out where different inputs lead into. It is often not feasible to
+simulate all paths for a large and complex program; instead, several
+heuristics have been created for increasing code coverage.
 
-We are testing a grammar, which is necessarily an imperfect
-approximation of the language it is based on. Thus, even if the
-grammar generates an infinite amount of sentences, we still have only
-a finite set of constructions and grammatical functions to cover.
-
-\paragraph{Symbolic evaluation}
-
-Given a representation of a program flow as a graph, symbolic
-evaluation simulates the run of the program with all feasible paths,
-using a constraint solver to find out where different inputs lead
-into. It is often not feasible to simulate all paths for a large and
-complex program; instead, several heuristics have been created for
-increasing code coverage.
-
-Symbolic evaluation works well for analysing (ordered) CG grammars, at
+Symbolic evaluation works well for analysing (ordered) \onlycg{} grammars, at
 least up to an input space of tens of thousands of different
 morphological analyses. The range of operations is fairly limited, and
 the program flow is straightforward: execute rule 1, then execute
 rule 2, and so on.
+
+For \gf{} grammars, the notion of code coverage is based on individual
+grammatical functions, rather than a program flow. We want to test
+linearisation, not parsing, and thus our ``inputs'' are just syntax
+trees.  We need to test all syntactic functions (e.g. putting an
+adjective and a noun together), with all the words that make a
+difference in the output (some adjectives come before the noun, others
+come after). Thus, even if the grammar generates an infinite amount of
+sentences, we still have only a finite set of constructions and
+grammatical functions to cover.
 
 
 \input{chapters/sat-intro}

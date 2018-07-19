@@ -110,8 +110,8 @@ just know if a given category has a member or no, so we can deal with
 Booleans. We give an initial value of False to all variables, meaning
 ``this category is empty'', and we mark that with red text.
 In fact, now that we are reduced to Booleans, we don’t even need to
-care about what the original GF functions do with their arguments. So
-we can replace the GF functions \t{AdvCN}, \t{DetCN} and \t{PrepNP}
+care about what the original \gf{} functions do with their arguments. So
+we can replace the \gf{} functions \t{AdvCN}, \t{DetCN} and \t{PrepNP}
 with just a conjunction ($\&\&$): both arguments to the function must
 be non-empty. In case of multiple functions that have the same
 concrete category as a result, we replace the $|$ with a disjunction
@@ -176,9 +176,9 @@ recompute. In other words, we have found a fixed point.
 
 % In the previous example, we found \emph{a} fixed point. But there are several of them---why is ours a good one?
 
-Assume for a moment that the set of variables  \t{Adv$_\text{0}$}--\t{Prep$_\text{7}$} has nothing to do with the original GF grammar. Then, we could easily conceive of other assignments to the variables that are also fixpoints: say, everything is False; only \t{Det$_\text{5}$} and \t{CN$_\text{2}$} are True; everything is True. (In contrast, “only \t{Det$_\text{5}$} and \t{CN$_\text{1}$} are True” is not a fixpoint, because if we iterated one more time, \t{NP$_\text{3}$} would change from False to True).
+Assume for a moment that the set of variables  \t{Adv$_\text{0}$}--\t{Prep$_\text{7}$} has nothing to do with the original \gf{} grammar. Then, we could easily conceive of other assignments to the variables that are also fixpoints: say, everything is False; only \t{Det$_\text{5}$} and \t{CN$_\text{2}$} are True; everything is True. (In contrast, “only \t{Det$_\text{5}$} and \t{CN$_\text{1}$} are True” is not a fixpoint, because if we iterated one more time, \t{NP$_\text{3}$} would change from False to True).
 
-Of course, given that these variables come from an actual GF grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. Likewise, we don’t want to be too pessimistic and claim that some non-empty category has no words in it. Instead, we want the most conservative solution that respects reality---the least fixpoint, given the actual GF grammar.
+Of course, given that these variables come from an actual \gf{} grammar, we don’t want to give an answer “everything is True” if some categories actually correspond to nonexisting combinations of parameters. Likewise, we don’t want to be too pessimistic and claim that some non-empty category has no words in it. Instead, we want the most conservative solution that respects reality---the least fixpoint, given the actual \gf{} grammar.
 
 To define \emph{least}, we need to define an ordering on the domain of possible solutions. In the case of Booleans, we just say False ≤ True, and hence a solution with more False is smaller. 
 We start the computation by giving the least value to all variables.
