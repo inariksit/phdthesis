@@ -11,7 +11,7 @@ research.
 
 We set out to test and verify natural language grammars. In this
 thesis, we have described two systems for two different grammar
-formalisms: GF and CG.
+formalisms: Grammatical Framework (GF) and Constraint Grammar (CG).
 
 When testing GF grammars, earlier we relied on an informant to
 remember and explain all important phenomena to test, and a
@@ -25,8 +25,8 @@ a function or category, and the system outputs a minimal and
 representative set of sentences that showcases all the variation in
 the given functions and categories. The informant only needs to read and
 evaluate the example sentences.
-Of course, humans are still needed to write the grammars in the
-first place, but we consider that a fun task.
+(Of course, humans are still needed to write the grammars in the
+first place, but we consider that a fun task.)
 
 For CG, previous evaluation methods relied on a gold standard corpus,
 or manual inspection if there was no corpus available. Our method
@@ -34,14 +34,9 @@ tests the internal consistency of a grammar, only relying on a
 morphological lexicon. The system explores all possibilities to see if
 a particular rule can apply: if there is no input that would trigger a
 rule $r$ after rule $s$, we know that rules $r$ and $s$ are in
-conflicting.  In addition, the mechanisms that we developed in order
+conflict.  In addition, the mechanisms that we developed in order
 to test CG have interesting side effects: namely, they let us model CG
 as a generative formalism.
-
-% Our method only tests the internal consistency of a grammar. It is a
-% separate question whether the CG grammar is also good for
-% disambiguating natural language. Such questions are better left for
-% corpus-based methods.
 
 
 % If we were sculpting a statue, generative formalism would start from an empty place and start splashing some clay around. In contrast, a reductionist formalism would start from a heavy stone block and carve away everything that is not part of the statue. In the end, both have formed an identical statue. An empty generative grammar would output just thin air, and empty reductionist grammar would output an intact stone block.
@@ -51,32 +46,72 @@ as a generative formalism.
 
 \section{Insights and future directions}
 
+\subsection{On completeness}
 
-\subsection{Completeness}
+Testing can only show the presence of bugs, not the absence. The tools
+introduced in this thesis are no exception: here we comment on the
+reliability and completeness of both systems.
 
-Let us start from CG, because it is easier to reason about. A CG
-grammar can be “good” or “bad” according to purely internal
-criteria. Good means just that the rules are internally consistent,
-and bad the opposite of that. The point of symbolic evaluation is to
-explore all possibilities: if there was a way in which some rule would
-apply (e.g. make another rule not apply and thus preserving a reading;
-or create a solution in which a particular reading was already false),
-the SAT-solver would have found it. So we can be confident that if the
-system reports no conflicts, there are no conflicts---``what if we
-just run a few more tests'' doesn’t make sense to worry about.
 
-It is a separate question (not my research question!) whether the CG
-grammar also does a good job at disambiguating natural language. Such
-questions are better left for corpus-based methods.
+\paragraph{CG}
 
-On the GF side, we actually are trying to answer the harder question:
-does this grammar do an adequate job at producing
-English/French/\dots? For that, we need a set of test sentences that
-covers all phenomena in the grammar. In the CG world, we had a natural
+The quality of a CG grammar can be judged according to purely internal
+criteria: either the rules are internally consistent or not. It is a
+separate question (not the research question in this thesis!) whether
+the CG grammar also does a good job at disambiguating natural
+language. Such questions are better left for corpus-based methods.
+
+To be more precise, a CG grammar is internally consistent given a
+certain tagset, rules to combine tags into readings, and ambiguity
+classes. % All of
+% this information comes from morphological lexica, which are not
+% guaranteed to be infallible.
+This means that our CG analysis is as reliable as is the morphological
+lexicon where the tags and the readings come from. Quite simply, if
+the morphological lexicon contains a word with the wrong tag, or the
+specifications for how tags can combine into readings are outdated,
+our tool may do the wrong thing: report a false conflict or fail to
+detect a real error.
+
+But if the lexicon and tag set are correct, then we can be fairly
+certain of the analysis. If the grammar is deemed conflict-free, it
+means that for each rule $r$ in the grammar, the program has found a
+sequence of words which can pass through all previous rules, and $r$
+can remove something from at least one word. In other words, the
+system has to \emph{generate} a positive example for all rules $r$ it
+judges conflict-free. %with all of the previous rules.
+This $r$ doesn't even need to do the right thing---it may as well be
+``\emph{wish} is a verb in the context \emph{the wish}''---but we can
+still count on it being conflict-free.
+
+% Contrast this with ``we tested 1+3 and got 4, thus we know that
+% addition is implemented correctly''.
+
+Can we trust the program when it finds $r$ being in conflict with some
+other rule? We use symbolic evaluation to explore all possibilities:
+if there was a way in which $r$ could apply (e.g. create a context
+which prevents a previous rule from matching), the SAT-solver would
+have found it. If we find $r$ impossible to apply, it has to be one of
+the following causes: (a) its conditions are inconsistent (e.g. ``-1
+has to be a noun and not be a noun'')\footnote{If we have ambiguity
+  classes in place, the inconsistency can also be e.g. ``-1 has to be
+  a noun and a verb'', assuming that there is no word form in the lexicon that
+  is ambiguous between noun and verb.}; (b) another rule or set of
+rules before it forces the symbolic sentence to be in a certain way.
+
+
+\todo{Something to finish up this}
+
+
+
+\paragraph{GF} On the GF side, we actually are trying to answer the
+harder question: does the grammar do an adequate job at producing
+some natural language? For that, we need a set of test sentences that
+cover all phenomena in the grammar. In the CG world, we had a natural
 restriction: there is only a few hundreds or thousands of different
 tags in the morphological lexicon, and there are restrictions in how
 they mix together into readings. So the language of the tags and
-readings is finite—sounds reasonable that we can do the job
+readings is finite---sounds reasonable that we can do the job
 thoroughly.
 
 But natural language is infinite. How does that work with a finite set
@@ -99,38 +134,14 @@ would cause different behaviour, then there would be a parameter that
 counts the applications, and the program would generate separate test
 cases for one relative clause, and $n$ nested relative clauses.
 
-
-% “How can we test a whole big infinite grammar?”
-
-% Easy: there’s a finite amount of functions, just test each function separately.
-
-% “How can we be sure to use one function in all the different ways?”
-
-% No problem: split it into several functions that can all be used in
-% only one way, then test each of them.
-
-\subsection{Failure modes}
-
-A given CG grammar is internally consistent given a certain tagset,
-rules to combine tags into readings, and ambiguity classes. % All of
-% this information comes from morphological lexica, which are not
-% guaranteed to be infallible.
-In other words, CG analysis is as reliable as is the morphological
-lexicon where the tags and the readings come from. Quite simply, if
-the morphological lexicon contains a word with the wrong tag, or the
-specifications for how tags can combine into readings are outdated,
-our tool may do the wrong thing:  or fail to
-detect a real error.
-
-How about GF test cases? We know that the system produces a test case
-for each combination of parameters---and the failure mode here is,
-simply, not enough parameters.  Consider the \t{AdjCN} function for
-Spanish again, and say that we don’t have the parameter for pre- and
-postmodifier at all, and \t{AdjCN} only comes in two variants, one for
-feminine and one for masculine. Suppose that all adjectives are,
-incorrectly, postmodifiers. Then we would notice the error only if the
-single \t{AP} argument for \t{AdjCN$_{\text{fem}}$} and
-\t{AdjCN$_{\text{masc}}$} happened to be a premodifier one.
+But we can still fail to generate a test that reveals the error---the
+failure mode is, simply, not enough parameters.  Consider the
+\t{AdjCN} function for Spanish again, and say that we don’t have the
+parameter for pre- and postmodifier at all, and \t{AdjCN} only comes
+in two variants, one for feminine and one for masculine. Suppose that
+all adjectives are, incorrectly, postmodifiers. Then we would notice
+the error only if the single \t{AP} argument for \t{AdjCN$_{\text{fem}}$} 
+and \t{AdjCN$_{\text{masc}}$} happened to be a premodifier one.
 
 If the missing parameter handles a common phenomenon, it is more
 likely that we catch the error even with missing parameters. This was
@@ -148,18 +159,53 @@ After two years of the initial publication
 \cite{listenmaa_claessen2016}, the CG analysis tool has, to our
 knowledge, never been used outside our research group. A natural
 explanation is that our research group has never developed CG
-grammars, and we did not make an effort to write a user-friendly tool
-that is easy to adopt into an existing workflow.  We still believe
-that the CG analysis tool has its merits, and even if our
-implementation doesn't catch on, we leave a description in this
-document.
+grammars, thus we have less clear idea about existing workflows and
+the concrete needs of CG grammarians, and less chances to attract
+users. % Even if we had gotten users at the beginning, our chances of
+% providing long-term maintenance would have been quite low.
+We still believe that the CG analysis tool has its merits, and
+even if our implementation doesn't catch on, we leave the idea
+documented in this thesis.
 
-In contrast, This time we had a better recipe for success: we were
-much more invested in making the tool user-friendly, integrating it to
-common workflows, and most importantly, using it ourselves.  The test
-suite generation tool for GF grammars is being adopted by the GF
-community: at the time of writing this page, we have 2 users outside
-the research group, and based on personal anecdotes, it is proving to
-be useful for grammar writing.
 
-\todo{Some actual future directions}
+% Writing a proof-of-concept program may not be simple, but at least the
+% work is over once the program is finished. In contrast, creating a
+% usable tool requires a lot of work after the initial implementation.
+% It would make more sense that this work is done by people already in
+% the community. 
+% There is a working implementation which anyone interested can
+% try, but at this point it seems that it is the idea, rather than the 
+% implementation, that we should pitch.
+
+
+With the tool for generating GF test suites
+\cite{listenmaa_claessen2018}, we had a better recipe for success: we
+were much more invested in making the tool user-friendly, integrating
+it to common workflows, and most importantly, using it ourselves. The
+tool is being adopted by the GF community: at the time of writing this
+page, we have 2 users outside the research group, and based on
+personal anecdotes, it is proving to be useful for grammar writing. We
+are also much more committed in long-term maintenance of the tool.
+
+There are many directions to develop the GF test suite tool further.
+As we mention in Section~\ref{gf-future}, there is no semantic
+coherence in the generated sentences---this is particularly important
+when working with non-linguist testers.  Another interesting feature
+is shrinking the test sentences. Especially for resource grammars, the
+generated examples are quite long: this is due to the preference for
+maximally unique fields, and ``always run with Mary'' is a more
+distinguishing example of a verb phrase than ``run''. However, if an
+error is found in a sentence with ``always run with Mary'', it would
+be desirable to generate another example with smaller examples, such
+as ``run'', ``always run'' and ``run with Mary'', to help narrow down
+which function introduces the error.
+
+In more philosophical terms, we would like the grammar writing
+community to view testing, in terms of \cite{beizer2003software}, as a
+``mental discipline that helps all IT professionals develop
+higher-quality software.'' \todo{this or something else more general
+  thing to finish this thing.}
+
+% What are some factors that would help a development organization move
+% from Beizer’s testing level 2 (testing is to show errors) to testing level 4
+% (a mental discipline that increases quality)?
