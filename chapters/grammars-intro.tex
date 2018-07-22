@@ -15,7 +15,7 @@
 \label{sec:cg-intro}
 
 Constraint Grammar (\onlycg{}) is a formalism for 
-disambiguating morphologically analyzed text. 
+disambiguating morphologically analysed text. 
 It was first introduced by Fred Karlsson  
 \cite{karlsson1990cgp,karlsson1995constraint}, and has been used for
 many tasks in computational linguistics, such as part-of-speech
@@ -23,7 +23,7 @@ tagging, surface syntax and machine translation \cite{bick2011}.
 \onlycg{}-based taggers are reported to achieve F-scores of over 99 \% for
 morphological disambiguation, and around 95-97 \% for syntactic analysis
 \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}. 
-\onlycg{} disambiguates morphologically analyzed input by using constraint
+\onlycg{} disambiguates morphologically analysed input by using constraint
 rules which can select or remove a potential analysis (called
 \emph{reading}) for a target word, depending on the context words
 around it.  Together these rules disambiguate the whole text.
@@ -135,7 +135,7 @@ and dependency syntax \cite{tapanainen97fdg}.
 
 Karlsson \cite{karlsson1995constraint} lists 24 design principles and describes
 related work at the time of writing.
-Here we summarize a set of main features, and relate \onlycg{} to the developments in grammar formalism since the initial description.
+Here we summarise a set of main features, and relate \onlycg{} to the developments in grammar formalism since the initial description.
 
 \onlycg{} is a \emph{reductionistic} system: the analysis starts from a list of alternatives,
 and removes those which are impossible or improbable.
@@ -498,7 +498,7 @@ say that \t{Kind} has \emph{inherent} gender, and \emph{variable} number.
 The section~\t{lin} contains the concrete implementation of the
 functions, introduced in \t{fun}. Here we handle
 language-specific details such as agreement: when \t{Pred (This Pizza)
-  Good} is linearized in Spanish, `esta pizza es buena', the copula must be singular
+  Good} is linearised in Spanish, `esta pizza es buena', the copula must be singular
 (\emph{es} instead of plural \emph{son}), and the adjective must be in singular
 feminine (\emph{buena} instead of masculine \emph{bueno} or plural
 \emph{buenas}), matching the gender of \t{Pizza} and the number of \t{This}. 
@@ -524,7 +524,7 @@ implementation details can be found in Angelov
 For each category in the original grammar, the \gf{} compiler
 introduces a new \emph{concrete category} in the \pmcfg{} for each combination of
 inherent parameters.  
-These concrete categories can be linearized to strings or vectors of
+These concrete categories can be linearised to strings or vectors of
 strings. The start category (\t{Comment} in the Foods grammar) is in
 general a single string, but intermediate categories may have to keep
 several options open. 
