@@ -513,11 +513,41 @@ relevant: this pizza/wine \emph{is} good, these pizzas/wines \emph{are} good.
 grammars (\pmcfg), introduced by Seki et al. \cite{seki91pmcfg}. The
 connection between \gf{} and \pmcfg{} was established by Peter
 Ljunglöf \cite{ljunglof2004}, and further developed by Krasimir
-Angelov \cite{angelov2010phd}.  Here we explain three key features,
-which will be used for the test suite generation; the concrete
-implementation details can be found in Angelov
-\cite{angelov2010phd}. We include also a more formal definition of
-\pmcfg{} in Appendix~\ref{pmcfg-formally}.
+Angelov \cite{angelov2010phd}. 
+After the definition, which follows Angelov \cite{angelov2010phd}, we
+explain three key features, which will be used for the test suite generation.
+
+\paragraph{Definition} A \pmcfg{} is a 5-tuple:
+$$
+ G = < N^C, F^C, T, P, L>
+$$
+
+\begin{itemize}
+\item $N^C$ is a finite set of concrete categories.
+
+\item $F^C$ is a finite set of concrete functions. % where the dimensions $r(f)$ and $d_i(f)$ $(1 \leq i \leq arity(f))$ are given for every $f \in F^C$.
+% We can access the argument categories of some function $f \in F^C$ by calling \t{args} :  $F^C \rightarrow [N^C]$.
+
+% \begin{EmptyItem}
+% \begin{HighlightingFancy}
+% args f = \{ [A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$] 
+%          | p $\leftarrow$ P
+%          , p \CommentTok{is the production} A $\rightarrow$ f[A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$] \}
+% \end{HighlightingFancy}
+% \end{EmptyItem}
+
+\item $T$ is a finite set of terminal symbols.
+
+\item $P$ is a finite set of productions of the form:
+$$
+A \rightarrow f[A_1,A_2,\dots,A_{a(f)}]
+$$
+where $a(f)$ is the arity of $f$, $A \in N^C$ is called result category, $A_1,A_2,\dots,A_{a(f)} \in N^C$ are called argument categories and $f \in F^C$ is a function symbol.
+\item $L \subset N^C \times F^C$ is a set which defines the default linearisation funtions for those concrete categories that have default linearisations. 
+\end{itemize}
+
+In addition to Angelov's definition, we use the notion of \t{Tree} as a generic type for any application of some $f \in F^C$ to all of its arguments $[A_1, \dots, A_{a(f)}]$. Thus, a single $f \in F^C$ is also a \t{Tree}, if $a(f) = 0$. For an $f$ with $a(f) > 0$, we need to apply $f$ to $a(f)$ argument \t{Tree}s.
+
 
 \paragraph{Concrete categories}
 
