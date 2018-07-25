@@ -373,6 +373,22 @@ where \emph{that} is referring to a house. So we do another round of
 modifications, compute the difference (to the original grammar or to
 the intermediate), and see if something else has changed.
 
+\paragraph{Additional analyses}
+Aside from concrete language-dependent phenomena, there are more
+general questions a grammar writer may ask. For instance, say that our
+concrete type for \t{CN} in some language is an inflection table from
+case to string, we would like to know if (a) a given string field is
+unreachable from the start category; (b) any two fields always contain
+the same string; or (c) some fields are always the empty string.  In
+addition, a whole argument may be erased by some function: say that
+\t{AdjCN~:~Adj~$\rightarrow$~CN~$\rightarrow$~CN} never adds the
+adjective to the new \t{CN}, in which case \t{AdjCN blue house} and
+\t{house} are linearised identically. Instead of testing every single
+function and finding out by accident, we can test the whole grammar to
+find out if there are any functions in the grammar that behave like
+this. \todo{Should these be explained too later?}
+
+
 %  We have seen that, in order to test
 % whether or not we have implemented a linguistic phenomenon correctly,
 % we take a single function as a base, and describe all combinations of
@@ -413,11 +429,7 @@ the intermediate), and see if something else has changed.
 \section{Generating the test suite}
 \label{sec:testing}
 
-In this section, we explain how the test suites are built. The
-explanation aims to be pedagogical and high-level, with Appendices
-\ref{general-algorithm-argument} and \ref{general-algorithm-context}
-serving as a reference.
-
+In this section, we explain how the test suites are built.
 Earlier in Section~\ref{sec:PMCFG}, we saw how a single abstract category
 compiles into multiple concrete categories, depending on the
 combinations of parameters. Instead of dealing with parameters
@@ -478,6 +490,72 @@ To continue with the example, if all pronouns behaved like {\em you}
 and {\em her}, we could still make do just by creating test cases with
 both of them, because their ambiguity manifests in different forms.
 
+\paragraph{Algorithm}
+For notation, we refer back to Section~\ref{sec:PMCFG} for the
+definition of \pmcfg{}.  
+
+The set of most unique argument trees for
+some $f \in F^C$ is computed by the function
+$\text{\tt bestTrees}:~F^C~\rightarrow~ [[\t{Tree}]]$.  We can access
+the argument categories $f$ by calling \t{args} :
+$F^C \rightarrow [N^C]$.
+
+For an $f$ with arguments $[A_1,A_2,\dots,A_{a(f)}]$, the Trees in the
+inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$. Instead of just
+one list of arguments, the function
+returns a list of lists: as explained before, sometimes multiple
+arguments are needed (like \emph{you} and \emph{she}) in order to ensure different strings in all fields of the argument tree.
+
+\begin{EmptyItem}
+\begin{HighlightingFancy}[]
+args f = \{ [A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$] 
+         | p $\leftarrow$ P
+         , p \CommentTok{is the production} A $\rightarrow$ f[A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$] \}
+
+bestTrees f =
+  let argCats = args f
+   in mostUniqueExamples f (generateAllTrees argCats)
+\end{HighlightingFancy}
+\end{EmptyItem}
+
+The function \t{generateAllTrees :} $[N^C] \rightarrow [[$\t{Tree}$]]$  is implemented using the \feat{} library \cite{feat}, and generates lazily all vectors of argument trees for the given concrete categories, starting from smallest size. 
+%For instance, if $[N^C]$ is $[$\t{Prep},\t{NP}$]$,
+The size of a tree is defined as the number of constructors; thus \t{DetNP this} is generated before \t{DetCN this house}. This ensures that we find the most minimal and the most unique examples.
+
+Before we get to \t{mostUniqueExamples}, we define two helper functions: \t{betterTest} and \t{allUnique}. \t{betterTest} decides among two lists of strings, which one of them is a better test: e.g. [{\em I},{\em me},{\em my}] is better than [{\em you},{\em you},{\em your}]. \t{allUnique} takes a list of such lists, and decides if it is enough: e.g. [[{\em I},{\em me},{\em my}]] fulfils the condition, as well as [[{\em you},{\em you},{\em your}], [{\em she},{\em her},{\em her}]].
+
+\todo{Improve the description of algorithms, as Koen suggested}
+
+\begin{EmptyItem}
+\begin{HighlightingFancy}[]
+betterTest : [String] $\rightarrow$ [String] $\rightarrow$ [String]
+betterTest xs ys =
+  let (x$_{\text{1}}$,y$_{\text{1}}$):xs-ys = zip xs ys
+  in  $\forall$ (x$_{\text{i}}$,y$_{\text{i}}$) $\in$ xs-ys where x$_{\text{1}}$ $=$ x$_{\text{i}}$:
+        if $\exists$ y$_{\text{i}}$ such that y$_{\text{1}}$ $\neq$ y$_{\text{i}}$,
+         then \CommentTok{ys are better tests}.
+         else \CommentTok{repeat for} \{ (x$_{\text{j}}$,y$_{\text{j}}$) | (x$_{\text{j}}$,y$_{\text{j}}$) $\leftarrow$ xs-ys, x$_{\text{j}}$ $\neq$ x$_{\text{1}}$ \}
+      if xs-ys \CommentTok{is empty},
+       then \CommentTok{xs are better tests}.
+
+allUnique : [[String]] $\rightarrow$ Bool
+allUnique $[[a_{1,1},a_{1,2}, \dots, a_{1,m}], \ldots, [a_{n,1},a_{n,2}, \dots, a_{n,m}]]$ =
+ \CommentTok{if} $\exists \{ a_{j_i,i} | i \in \{1..m\}, j_i \in \{1..n\} \}$ \CommentTok{which has} $m$ \CommentTok{unique elements}.
+\end{HighlightingFancy}
+\end{EmptyItem}
+
+Now we define \t{mostUniqueExamples} $: F^C \rightarrow [[$\t{Tree}$]] \rightarrow [[$\t{Tree}$]]$, which returns a minimal set of arguments that is needed to test the function $f$.
+
+\begin{EmptyItem}
+\begin{HighlightingFancy}[]
+mostUniqueExamples f vtrees =
+  let trees-lins = \{ (vtree, \CommentTok{strings of vtree} ++ \CommentTok{strings that f introduces})
+                   | vtree $\leftarrow$ vtrees \}
+  \CommentTok{apply} betterTest \CommentTok{to} lins \CommentTok{until} allUnique
+  \CommentTok{return} trees of trees-lins
+\end{HighlightingFancy}
+\end{EmptyItem}
+
 \paragraph{Number of arguments} In our implementation, we use the
 \feat{} framework \cite{feat} to enumerate possible combinations of
 argument trees, in size order. We stop when we have found a suitable
@@ -523,37 +601,52 @@ one premodifier and one postmodifier \t{AP} (\t{good} and
 \label{tab:adjAttr}
 \end{table}
 
-\subsection{Enumerate contexts} The third and last enumeration we
-perform when generating test cases is to generate all possible
-\emph{uses} of a function. After we provide a function with arguments,
-we need to put the resulting tree into a context, so that we can generate a
-single string from the result. By \emph{context}, we mean a tree in
-the start category (\t{S} in our example) with a \emph{hole} of the
-same type as the function under test (denoted by \char`_).
+
+\subsection{Enumerate contexts} 
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{img/kind-contexts-with-rabbits.png}
+\caption{\todo{Make better graphics} Left: Context for \t{A} in start
+  category \t{S} depends on a context for \t{B}. Right: Two contexts for the
+  category \t{CN}, which choose all forms from the inflection table.}
+
+\label{fig:context-general}
+\end{figure}
+
+The third and last enumeration we perform when generating test cases
+is to generate all possible \emph{uses} of a function. After we
+provide a function with arguments, we need to put the resulting tree
+into a context, so that we can generate a single string from the
+result. By \emph{context}, we mean a tree in the start category (\t{S}
+in our example) with a \emph{hole} of the same type as the function
+under test (denoted by \char`_). Figure~\ref{fig:context-general}
+shows an example of a context in general, as a tree with a hole of
+type \t{A}, and a concrete example for the category \t{CN} in our
+example grammar.
 
 The important thing here is that the generated set of contexts shows
 all the possible different ways the tree can be used. For example, for
 a test tree with an inflection table of 4 forms, we would generate 4
 different sentences in which each of the 4 inflections is used.
 
-As an example, consider generating contexts for a tree of category \t{CN}.
-Since \t{CN} is variable for number, we need two contexts: 
-one that chooses the singular form and other that chooses
-the plural form. 
-This suggests that we should apply two different
-\t{CN $\rightarrow$ NP} functions, for instance
-\t{DetCN this} and \t{DetCN these}, and
-give their results to the \t{UttNP} function, which constructs an \t{S}.
+As an example, consider generating contexts for a tree of category
+\t{CN}.  Since \t{CN} is variable for number, we need two contexts:
+one that chooses the singular form and other that chooses the plural
+form.  This suggests that we should apply two different \t{CN
+  $\rightarrow$ NP} functions, for instance \t{DetCN this} and
+\t{DetCN these}, and give their results to the \t{UttNP} function,
+which constructs an \t{S}.
 
 We could pick any of the \t{Pred*} functions, which also has the goal
 type \t{S}, but their second arguments don't make any difference as to
 which field we choose from the \t{NP}. In the name of minimalism, we
 choose \t{UttNP}, because it is the smallest tree. The concrete set of
-contexts is thus  \t{UttNP (DetCN this \char`_)}  and \t{UttNP (DetCN these \char`_)}.
-We insert the 4 test cases from Figure~\ref{tab:adjAttr} into the
-holes, and get 8 trees in total as shown in Figure~\ref{tab:testCases}.
+contexts is thus \t{UttNP (DetCN this \char`_)} and \t{UttNP (DetCN
+  these \char`_)}.  We insert the 4 test cases from
+Figure~\ref{tab:adjAttr} into the holes, and get 8 trees in total as
+shown in Figure~\ref{tab:testCases}.
 
-\begin{table}
+\begin{table}[h]
 \centering
 \begin{tabular}{| l | l |}
 \hline
@@ -578,12 +671,8 @@ estas casas peque\~{n}as      & estos cerros peque\~{n}os \\ \hline
 \label{tab:testCases}
 \end{table}
 
-\paragraph{Fixpoint iteration} 
-The contexts are generated using fixpoint iteration. We give a full
-explanation in Section~\ref{sec:moreFP} (which may be skipped by the
-uninterested reader), and just a quick intuition in the
-present section.
 
+\paragraph{Strings' path to the start category} 
 A subtree in any category \t{C} gets to show its strings to the world
 by one way: the strings need to end up in a tree of the start
 category.  If \t{C} is the start category, then the subtree of type
@@ -602,10 +691,10 @@ depends on the \emph{context of} \t{NP}. A tree of type \t{CN} would
 like to show its strings, but the function \t{UttNP}, which is the
 fastest way to the start category, only takes \t{NP}s. So it has to
 rely on applications of \t{DetCN this} and \t{DetCN these} to lift it
-up into an \t{NP}, and only then can \t{UttNP} get access to its
-strings.
+up into an \t{NP}, just like in Figure~\ref{fig:context-general}, and
+only then can \t{UttNP} get access to its strings.
 
-We model this as a top-down fixpoint computation, where in the beginning, only
+We model this in a top-down manner, where in the beginning, only
 the start category \t{S} has a context (some trivial context like the
 identity function, i.e. ``do nothing, you're already there!''). On the
 first round, we get to compute contexts for all categories \t{B} that
@@ -614,7 +703,28 @@ second round, we compute contexts for all categories \t{A} that are
 arguments to some function \t{f : A $\rightarrow$ B}. Each round
 unlocks more categories further down from the start category, so we
 get to compute more contexts for categories that depend on the newly
-unlocked ones, until all categories have their contexts.
+unlocked ones, until all categories have their
+contexts. Figure~\ref{fig:context-general} shows the general
+pattern for categories \t{A} and \t{B}.
+
+% \begin{figure}[h]
+% \includegraphics[width=0.5\textwidth]{img/contexts-dependence.png}
+% \caption{\todo{Make better graphics} Context for \t{A} in start
+%   category \t{S} depends on a context for \t{B}.}
+% \label{fig:context-dependence}
+% \end{figure}
+
+\paragraph{Algorithm}
+
+We want to find a minimal collection of sets of contexts (one set for
+each category), such that a given set of equations if fulfilled. 
+
+One way to compute that is to come up with a function $f$ such that if
+a set of contexts $X$ is a fixpoint of $f$, then $X$ is also a
+solution to the equations. We compute $X$ by fixpoint iteration.
+
+\input{chapters/gf-appendix.tex}
+
 
 \subsection{Pruning the trees within one set of test cases} 
 
@@ -797,8 +907,17 @@ make sense for a context to serve double purpose: show all of its
 strings and (try to) use all of its parameters.
 % Prefer contexts where there are no coercions
 
+%\input{chapters/gf-additional-analyses.tex}
 
-\input{chapters/gf-fixpoints.tex}
+% \section{General algorithm}
+% \label{sec:algorithm}
+
+%  Here we present the algorithm for test suite generation. We refer
+%  back to Section~\ref{sec:PMCFG} for the definition of \pmcfg{}.
+
+% \input{chapters/gf-appendix.tex}
+
+
 
 \section{Evaluation}
 \label{sec:evalGF}
