@@ -13,8 +13,7 @@
 Symbolic sentences have an attractive side effect: they let us model
 CG as a generative formalism. This section is a detour from the
 central theme of analysis and quality control of natural language
-grammars; the uninterested or time-constrained reader may well skip it
-and not miss anything crucial.
+grammars; the uninterested or time-constrained reader may well skip it.
 
 We view a constraint grammar CG as generating a formal language $\mathcal{L}$
 over an alphabet $\Sigma$ as follows.
@@ -364,9 +363,8 @@ there is one, arbitrary, reading left in the transition cohorts.
 \subsection{Discussion}
 
 %\paragraph{Limitations of the FSA$\rightarrow$CG conversion}
-Another question is, even if we had a working conversion system for
-CFGs, would the result be correct?
-As \newcite{lager_nivre01} point out, CG has no way of expressing disjunction.
+The FSA$\rightarrow$CG conversion is still only an approximation.
+As Lager and Nivre \cite{lager_nivre01} point out, CG has no way of expressing disjunction.
 Unlike its close cousin FSIG \cite{koskenniemi90}, which would represent a 
 language such as $\{ab,ba\}$ faithfully, CG substitutes uncertainty on the 
 sentence level (``either $ab$ or $ba$'') with uncertainty in the cohorts: 

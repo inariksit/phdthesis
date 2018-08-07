@@ -60,7 +60,7 @@ Unit tests are particular, concrete test cases: assume we want to test the
 addition function (+), we could write some facts we know, such as
 ``1+2 should be 3''. In the context of grammars and natural language,
 we could assert translation equivalence between a pair of strings,
-e.g. ``\emph{la casa grande} $\Leftrightarrow$ \emph{the big house}'',
+e.g. ``\emph{la casa grande}'' $\Leftrightarrow$ ``\emph{the big house}'',
 or between a tree and its linearisation, e.g. ``\t{DetCN the\_Det
   (AdjCN  big\_A house\_N)} $\Leftrightarrow$ \emph{the big house}''.
 Whenever a program is changed or updated, the collection of unit tests
@@ -78,7 +78,7 @@ property that says ``for all integers $x$ and $y$, $x+y$ should be
 equal to $y+x$''.  A grammar-related property could be, for instance,
 ``a linearisation of a tree must contain strings from all of its
 subtrees''.  We formulate these properties, and generate a large
-number of data---pairs of integers in the first case, syntax trees in
+amount of data---pairs of integers in the first case, syntax trees in
 the second---and assert that the property holds for all of them.
 
 % Of course, the single property of commutativity is not enough to
