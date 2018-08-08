@@ -419,7 +419,7 @@ giving a concrete implementation. Figure~\ref{fig:foods}
 shows the abstract syntax of a small example grammar in \gf{}, slightly
 modified from \cite{ranta2011gfbook}, and Figure~\ref{fig:spanish}
 shows a corresponding Spanish concrete syntax. We refer to this
-grammar throughout the thesis. 
+grammar throughout the chapter. 
 
 Section~\t{cat} introduces the categories of the grammar: \t{Comment},
 \t{Item},  \t{Quality}, and \t{Kind}.  \t{Comment} is the \emph{start
@@ -547,7 +547,6 @@ where $a(f)$ is the arity of $f$, $A \in N^C$ is called result category, $A_1,A_
 \item $L \subset N^C \times F^C$ is a set which defines the default linearisation funtions for those concrete categories that have default linearisations. 
 \end{itemize}
 
-In addition to Angelov's definition, we use the notion of \t{Tree} as a generic type for any application of some $f \in F^C$ to all of its arguments $[A_1, \dots, A_{a(f)}]$. Thus, a single $f \in F^C$ is also a \t{Tree}, if $a(f) = 0$. For an $f$ with $a(f) > 0$, we need to apply $f$ to $a(f)$ argument \t{Tree}s.
 
 
 \paragraph{Concrete categories}
