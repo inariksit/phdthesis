@@ -20,29 +20,6 @@
 
 \def\defRule{``do not remove the last reading''}
 
-\def\ventero{\emph{El ventero, que, como está dicho, 
-era un poco socarrón  y ya tenía algunos
-barruntos de la falta de juicio de su huésped, acabó de creerlo cuando
-acabó de oírle semejantes razones, y, por tener qué reír aquella noche,
-determinó de seguirle el humor; y así, le dijo que andaba muy acertado en
-lo que deseaba y pedía, y que tal prosupuesto era propio y natural de los
-caballeros tan principales como él parecía y como su gallarda presencia
-mostraba; y que él, ansimesmo, en los años de su mocedad, se había dado a
-aquel honroso ejercicio, andando por diversas partes del mundo buscando sus
-aventuras, sin que hubiese dejado los Percheles de Málaga, Islas de Riarán,
-Compás de Sevilla, Azoguejo de Segovia, la Olivera de Valencia, Rondilla de
-Granada, Playa de Sanlúcar, Potro de Córdoba y las Ventillas de Toledo y
-otras diversas partes, donde había ejercitado la ligereza de sus pies,
-sutileza de sus manos, haciendo muchos tuertos, recuestando muchas viudas,
-deshaciendo algunas doncellas y engañando a algunos pupilos, y, finalmente,
-dándose a conocer por cuantas audiencias y tribunales hay casi en toda
-España; y que, a lo último, se había venido a recoger a aquel su castillo,
-donde vivía con su hacienda y con las ajenas, recogiendo en él a todos los
-caballeros andantes, de cualquiera calidad y condición que fuesen, sólo por
-la mucha afición que les tenía y porque partiesen con él de sus haberes,
-en pago de su buen deseo.}}
-
-
 \chapter{CG as a SAT-problem}
 \label{chapterCGSAT}
 
@@ -65,31 +42,40 @@ dependencies between the tags than standard \onlycg{}.
 %But is there a reason to combine the two? 
 
 %\onlycg{} lends itself well to a logical representation. It's all about expressing what is true (`SELECT') and false (`REMOVE'), under certain conditions (`IF').
-Applying logic to reductionist grammars has been explored earlier by Torbjörn Lager and Joakim Nivre \cite{lager98,lager_nivre01}, but there has not been, to our knowledge, a full logic-based \onlycg{} implementation; at the time, logic programming was too slow to be used for tagging or parsing. 
+Applying logic to reductionist grammars has been explored earlier by
+\citet{lager98} and \citet{lager_nivre01}, but there has not been, to our knowledge, a full logic-based \onlycg{} implementation; at the time, logic programming was too slow to be used for tagging or parsing. 
 Since those works, SAT-solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
 biology---these problems easily match or exceed \onlycg{} in complexity. 
 In addition, SAT-solving brings us more practical tools, such as maximisation, which enables us to implement a novel conflict resolution method for parallel \onlycg{}.
 
 
-The content in this chapter is based on ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015}.
-As in the original paper, we present a translation of \onlycg{} rules into logical formulas, and show how to encode it into a SAT-problem.
-This work is implemented as an open-source software \satcg{}\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the high-level library SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is based on MiniSAT \cite{een04sat}.
-We evaluate \satcg{} against the state of the art, \vislcg3{}.
-The experimental setup is the same, but we ran the tests again for this thesis: since the writing of  \cite{listenmaa_claessen2015}, we have optimised our program and fixed some bugs; this 
-makes both execution time and F-scores better than we report in the earlier paper. 
+The content in this chapter is based on ``Constraint Grammar as a SAT
+problem'' \cite{listenmaa_claessen2015}.  As in the original paper, we
+present a translation of \onlycg{} rules into logical formulas, and
+show how to encode it into a SAT-problem.  This work is implemented as
+an open-source software
+\satcg{}\footnote{\url{https://github.com/inariksit/cgsat}}. It uses
+the high-level library
+SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is
+based on MiniSAT \cite{een04sat}.  We evaluate \satcg{} against the
+state of the art, \vislcg3{}.  The experimental setup is the same, but
+we ran the tests again for this thesis: since the writing of
+\citet{listenmaa_claessen2015}, we have optimised our program and
+fixed some bugs; this makes both execution time and F-scores better
+than we report in the earlier paper.
 %Likewise, \vislcg3{} has been updated, and executes faster.
 
 
 \section{Related work}\label{encoding-in-logic}
 
 Our work is inspired by previous approaches of encoding \onlycg{} in logic \cite{lager98, lager_nivre01}.
-Lager \cite{lager98} presents a ``CG-like, shallow and reductionist system'' translated into a disjunctive logic program.
-Lager and Nivre \cite{lager_nivre01} build on that in a study which reconstructs
+\citet{lager98} presents a ``CG-like, shallow and reductionist system'' translated into a disjunctive logic program.
+\citet{lager_nivre01} build on that in a study which reconstructs
 four different formalisms in first-order logic. 
 CG is contrasted with Finite-State Intersection Grammar (\fsig) \cite{koskenniemi90} 
 and Brill tagging \cite{brill1995}; all three work on a set of constraint rules 
 which modify the initially ambiguous input, but with some crucial differences.
-On a related note, Yli-Jyrä \cite{yli-jyra2001} explores the structural correspondence 
+On a related note, \citet{yli-jyra2001} explores the structural correspondence 
 between \fsig{} and constraint-solving problems.
 In addition, logic programming has been applied for automatically inducing \onlycg{} rules from tagged corpora \cite{lindberg_eineborg98ilp,asfrent14,lager01transformation}.
 
@@ -480,7 +466,7 @@ Conversely, if $v$ is true, then the SAT-solver must handle
 the original clause.
 Then, we ask for a solution where maximally many of these $v$s are true,
 and the question for improvement becomes ``can we make any more of the $v$s true''?
-The method of maximising the variables is described in \cite{een06minisatplus}.
+The method of maximising the variables is described in \citet{een06minisatplus}.
 
 As a alternative to creating a helper variable, we could also separate the variables into 
 contexts and targets, and maximise the set of contexts: for $\laDet \Rightarrow \neg \casaV$
@@ -628,7 +614,7 @@ the same Spanish grammars as in the previous experiment.
 %
 More importantly, we wanted to test a grammar of a realistic size, 
 so we took a Finnish grammar, originally written in 1995 for \onecg1{}, 
-and updated into \textsc{cg-{\small 3}} by Tommi Pirinen \cite{pirinen2015}.
+and updated into the \vislcg3{} standard by \citet{pirinen2015}.
 We discarded rules and constructions that \satcg{} does not support, and ended up with
 1185 rules. Then, we parsed around 19,000 words of text from FinnTreeBank \cite{voutilainen2011finntreebank}.
 Table~\ref{table:time} shows the results for both Finnish and Spanish tests.
@@ -642,7 +628,7 @@ maximisation is not needed, but the solve function is performed after
 each clause---this gets costlier after each rule.
 However, we believe that SAT is not necessary the bottleneck:
 \vislcg3{} is a product of years of engineering effort, whereas \satcg{}
-is still, despite the improvements from \cite{listenmaa_claessen2015},
+is still, despite the improvements from \citet{listenmaa_claessen2015},
 a rather naive implementation, written in Haskell and BNFC.
 
 % In any case, SAT does not seem to be the bottleneck: with 261 rules,
@@ -677,7 +663,7 @@ by pasting together 22 short sentences and replacing sentence boundaries with co
 
    \end{tabular}
   \caption{Experiments with sentence length. On the left, Spanish 261-rule grammar parsing the complete 283-token sentence, parsed as one unit vs. split at semicolons into four parts.
-  On the right, Finnish 1185-rule grammar parsing an articifially constructed 251-token sentence.}
+  On the right, Finnish 1185-rule grammar parsing an artificially constructed 251-token sentence.}
   \label{table:timeVentero}
 \end{table}
 
@@ -685,14 +671,14 @@ The results in Table~\ref{table:timeVentero} are promising: the execution time d
 unbearably, even with the unusually long sentence.
 To give some context, let us consider the performances of the sequential CG-2 and the parallel \fsig{} in 1998.
 %, which is another parallel system, 1998, compared to sequential \onlycg{} .
-Voutilainen \cite{voutilainen1998} reports the performance of a 3,500-rule \onlycg{}: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule \fsig{} grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
-As another \onlycg{} result from the late 1990s, \cite{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
+ \citet{voutilainen1998} reports the performance of a 3,500-rule \onlycg{}: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule \fsig{} grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
+As another \onlycg{} result from the late 1990s, \citet{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
 
 Compared to the parsing times of sequential \onlycg{} and \fsig{} nearly 20 years ago, 
 our results demonstrate a smaller difference, and much less steep curve in the execution time
 related to sentence length. 
 Of course, this remark should be taken with caution: to start with, the described experiments were conducted on different systems and different centuries\footnote{Eckhard Bick (personal communication) points out that CG-2 run on a modern system is around 6 times faster than \vislcg3{}.}.
-Importantly, the parallel participants in the experiments were using different grammars---the \fsig{} grammar used in \cite{voutilainen1998} 
+Importantly, the parallel participants in the experiments were using different grammars---the \fsig{} grammar used in \citet{voutilainen1998} 
 contains much more difficult operations, which makes the constraint problem larger. 
 Our experiments have just shown the lack of blowup for a small grammar. 
 Nevertheless, we feel that this experiment could be interesting to conduct properly: try a SAT-based approach for executing the \fsig{} grammars from the 1990s, and compare the results to the current state of the art.
@@ -740,10 +726,10 @@ Given the lack of other information, the SAT-solver is likely to just choose the
                      & \multicolumn{2}{c|}{\noAss} 
                                     & \multicolumn{2}{c|}{\noAff} 
                                                      & \multicolumn{2}{c}{\noTar} \\ 
-                     & Prec. & Rec.  & Prec. & Rec.  & Prec. & Rec. \\ \hline 
-\textbf{\satcgMax}   & 79.97 & 80.47 & 77.24 & 82.94 & 80.36 & 86.41 \\ 
-\textbf{\satcgOrd}   & 80.96 & 81.31 & 78.42 & 84.07 & 80.22 & 86.28 \\
-\textbf{\vislcg3{}}   & 78.29 & 85.02 & 78.29 & 85.02 & 78.29 & 85.02 \\
+                     & Prec. & Rec.        & Prec. & Rec.        & Prec. & Rec. \\ \hline 
+\textbf{\satcgMax}   & 79.97 & 80.47       & 77.24 & 82.94       & {\bf 80.36} & {\bf 86.41} \\ 
+\textbf{\satcgOrd}   & {\bf 80.96} & 81.31 & {\bf 78.42} & 84.07 & 80.22 & 86.28 \\
+\textbf{\vislcg3{}}  & 78.29 & {\bf 85.02} & 78.29 & {\bf 85.02} & 78.29 & 85.02 \\
 
   \end{tabular}
 
@@ -777,10 +763,10 @@ assigning more variables true just brings the performance closer to \vislcg3{}.
                      & \multicolumn{2}{c}{\noAss} 
                                     & \multicolumn{2}{c}{\noAff} 
                                                      & \multicolumn{2}{c}{\noTar} \\ 
-                     & Prec. & Rec.  & Prec. & Rec.  & Prec. & Rec. \\ \hline 
-\textbf{\satcgMax}   & 77.03 & 79.32 & 70.85 & 86.46 & 71.91 & 87.72  \\ 
-\textbf{\satcgOrd}   & 77.91 & 80.18 & 70.79 & 86.40 & 71.78 & 87.62  \\
-\textbf{\vislcg3{}}   & 71.17 & 88.34 & 71.17 & 88.34 & 71.17 & 88.34  \\
+                     & Prec. & Rec.        & Prec. & Rec.        & Prec. & Rec. \\ \hline 
+\textbf{\satcgMax}   & 77.03 & 79.32       & 70.85 & 86.46       & {\bf 71.91} & 87.72  \\ 
+\textbf{\satcgOrd}   & {\bf 77.91} & 80.18 & 70.79 & 86.40        & 71.78 & 87.62  \\
+\textbf{\vislcg3{}}  & 71.17 & {\bf 88.34} & {\bf 71.17} & {\bf 88.34} & 71.17 & {\bf 88.34}  \\
 
   \end{tabular}
 \caption{Evaluation of the three variants, for the original 261-rule grammar.}

@@ -14,19 +14,18 @@
 \section{Constraint Grammar}
 \label{sec:cg-intro}
 
-Constraint Grammar (\onlycg{}) is a formalism for 
-disambiguating morphologically analysed text. 
-It was first introduced by Fred Karlsson  
-\cite{karlsson1990cgp,karlsson1995constraint}, and has been used for
-many tasks in computational linguistics, such as part-of-speech
-tagging, surface syntax and machine translation \cite{bick2011}.
-\onlycg{}-based taggers are reported to achieve F-scores of over 99 \% for
-morphological disambiguation, and around 95-97 \% for syntactic analysis
-\cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}. 
-\onlycg{} disambiguates morphologically analysed input by using constraint
-rules which can select or remove a potential analysis (called
-\emph{reading}) for a target word, depending on the context words
-around it.  Together these rules disambiguate the whole text.
+Constraint Grammar (\onlycg{}) is a formalism for disambiguating
+morphologically analysed text.  It was first introduced by
+\citet{karlsson1990cgp}, and has been used for many tasks in
+computational linguistics, such as part-of-speech tagging, surface
+syntax and machine translation \cite{bick2011}.  \onlycg{}-based
+taggers are reported to achieve F-scores of over 99 \% for
+morphological disambiguation, and around 95-97 \% for syntactic
+analysis \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}.
+\onlycg{} disambiguates morphologically analysed input by using
+constraint rules which can select or remove a potential analysis
+(called \emph{reading}) for a target word, depending on the context
+words around it.  Together these rules disambiguate the whole text.
 
 
 In the example below, we show an initially ambiguous sentence ``the bear
@@ -93,8 +92,8 @@ performed on a \emph{target}, conditional on a \emph{context}.
 \onlycg{} is one in the family of shallow and reductionist grammar
 formalisms. Disambiguation using constraint rules dates back to 1960s
 and 1970s---the closest system to modern \onlycg{} was Taggit
-\cite{taggit}, which was used to tag the Brown Corpus.  Karlsson
-\cite{karlsson1995constraint} lists various approaches to the
+\cite{taggit}, which was used to tag the Brown Corpus.
+\citet{karlsson1995constraint} list various approaches to the
 disambiguation problem, including manual intervention, statistical
 optimisation, unification and Lambek calculus.  For disambiguation
 rules based on local constraints, Karlsson mentions
@@ -121,8 +120,8 @@ Brill tagging \cite{brill1995} is based on transformation rules: the
 starting point of an analysis is just one tag, the most common one,
 and subsequent rule applications transform one tag into another, based
 on contextual tests. Like \onlycg{}, Brill tagging is known to be efficient
-and accurate. The contextual tests are very similar: Lager
-\cite{lager01transformation} has automatically learned both Brill rules and \onlycg{} rules, using the same system.
+and accurate. The contextual tests are very similar: 
+\citet{lager01transformation} has automatically learned both Brill rules and \onlycg{} rules, using the same system.
 
 Similar ideas to \onlycg{} have been also explored in other frameworks, such as finite-state automata \cite{gross1997local,grana2003fst},
 %, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst},
@@ -133,7 +132,7 @@ and dependency syntax \cite{tapanainen97fdg}.
 
 \subsection{Properties of Constraint Grammar}\label{sec:properties}
 
-Karlsson \cite{karlsson1995constraint} lists 24 design principles and describes
+\citet{karlsson1995constraint} list 24 design principles and describes
 related work at the time of writing.
 Here we summarise a set of main features, and relate \onlycg{} to the developments in grammar formalism since the initial description.
 
@@ -178,7 +177,7 @@ For that reason, we decided to apply software testing and verification methods t
 \subsection{Ordering and execution of the rules}\label{sec:ordering}
 
 The previous properties of Constraint Grammar formalism and rules were
-specified by Karlsson \cite{karlsson1995constraint}, and retained in further
+specified by \citet{karlsson1995constraint}, and retained in further
 implementations.  However, in the two decades following the initial
 specification, several independent implementations have experimented
 with different ordering schemes. In the present section, we describe
@@ -200,8 +199,8 @@ section, we will apply the rules to the following ambiguous passage,
 
 \begin{table}[h!]
 \centering
-
-  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
+\resizebox{\textwidth}{!}{
+  \begin{tabular}{r | p{3.5cm} | p{3.5 cm} | p{3.5cm}}
            & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
 \textbf{Sequential}
            & CG-1 \cite{karlsson1990cgp}   
@@ -209,17 +208,17 @@ section, we will apply the rules to the following ambiguous passage,
                                                   & --           \\ 
            & VISL CG-3  \cite{vislcg3}      
                              & Weighted CG-3 \cite{pirinen2015} & \\ 
-           & Peltonen 2011 \cite{peltonen2011}  &  &\\ %Peltonen2011, p. 80
-           & Yli-Jyrä 2011 \cite{yli-jyra2011cg_engine}  & & \\ 
-           & Huldén 2011 \cite{hulden2011cg_engine} & & \\ \hline
+           & \citet{peltonen2011}  &  &\\ %Peltonen2011, p. 80
+           & \citet{yli-jyra2011cg_engine}  & & \\ 
+           & \citet{hulden2011cg_engine} & & \\ \hline
 \textbf{Parallel}
-           & \satcgOrd       & \satcgMax          & \noncg{Lager 1998 \cite{lager98}} \\ 
-           &                 & \noncg{FSIG (Voutilainen) \cite{voutilainen1994designing}} 
-                                                  & \noncg{FSIG (Koskenniemi) \cite{koskenniemi90}} \\
+           & \satcgOrd       & \satcgMax          & \noncg{\citet{lager98}} \\ 
+           &                 & \noncg{FSIG \cite{voutilainen1994designing}} 
+                                                  & \noncg{FSIG \cite{koskenniemi90}} \\
            &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
 
 
-  \end{tabular}
+  \end{tabular}}
   \caption{Combinations of rule ordering and execution strategy.}
   \label{table:nelikentta}
 \end{table}
@@ -251,8 +250,8 @@ rule with a longer context, such as \t{SELECT n IF (-1 det) (1 v)},
 even if this rule appears last in the file, it would be preferred to
 the shorter rules, because it is a more exact match.  There are also
 methods that use explicit weights to favour certain rules, such as
-\cite{pirinen2015} for CG, and
-\cite{voutilainen1994designing,oflazer97votingconstraints,silfverberg2009conflict}
+\citet{pirinen2015} for CG, and
+\citet{voutilainen1994designing,oflazer97votingconstraints,silfverberg2009conflict}
 for related formalisms.
 					
 Both methods have their strengths and weaknesses. A strict order is
@@ -323,7 +322,7 @@ keep both readings; both cannot be removed because that would leave
 {\em question} without any readings.  The difference between the
 list-based and disjunction-based ontologies, corresponding to CG and
 FSIG respectively, is explained with further detail in
-\cite{lager_nivre01}.
+\citet{lager_nivre01}.
 
 Table~\ref{table:nelikentta} shows different systems of the constraint
 rule family, with rule order (strict vs. heuristic) on one axis, and
@@ -331,7 +330,7 @@ execution strategy (sequential vs. parallel) on other.  Traditional CG
 implementations are shown in a normal font; other, related systems in
 cursive font and lighter colour.  \satcgMax and \satcgOrd refer to the
 systems by the author; they are presented in
-\cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} of
+\citet{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} of
 this thesis.
 
 
@@ -373,17 +372,17 @@ can be seen as a general framework for Montague-style grammars.
 
 The notion of abstract and concrete syntax appeared in both computer
 science, specifically compiler construction \cite{mccarthy62}, and
-linguistics, introduced by Haskell Curry \cite{curry1961} as
+linguistics, introduced by \citet{curry1961} as
 \emph{tectogrammatical} (abstract) and \emph{phenogrammatical}
 (concrete) structure.
 
 \gf{} is analogous to a multi-source multi-target compiler---a program
 in any programming language can be parsed into the common abstract
 syntax, and linearised into any of the other programming languages
-that the compiler supports.  In the domain of linguistics, Ranta
-\cite{ranta2011gfbook} mentions a few grammar formalisms that also
+that the compiler supports.  In the domain of linguistics,
+\citet{ranta2011gfbook} mentions a few grammar formalisms that also
 build upon abstract and concrete syntax, such as
-\cite{deGroote2001acg,pollard2004hog,muskens2001lambda}. However, none
+\citet{deGroote2001acg,pollard2004hog,muskens2001lambda}. However, none
 of these systems have focused on multilinguality.
 The inspiration for a large resource grammar used as a library to
 build smaller applications comes from  CLE (Core Language Engine)
@@ -417,7 +416,7 @@ build smaller applications comes from  CLE (Core Language Engine)
 Abstract syntax describes the constructions in our grammar without
 giving a concrete implementation. Figure~\ref{fig:foods}
 shows the abstract syntax of a small example grammar in \gf{}, slightly
-modified from \cite{ranta2011gfbook}, and Figure~\ref{fig:spanish}
+modified from \citet{ranta2011gfbook}, and Figure~\ref{fig:spanish}
 shows a corresponding Spanish concrete syntax. We refer to this
 grammar throughout the chapter. 
 
@@ -510,11 +509,9 @@ relevant: this pizza/wine \emph{is} good, these pizzas/wines \emph{are} good.
 \label{sec:PMCFG}
 
 \gf{} grammars are compiled into parallel multiple context-free
-grammars (\pmcfg), introduced by Seki et al. \cite{seki91pmcfg}. The
-connection between \gf{} and \pmcfg{} was established by Peter
-Ljunglöf \cite{ljunglof2004}, and further developed by Krasimir
-Angelov \cite{angelov2010phd}. 
-After the definition, which follows Angelov \cite{angelov2010phd}, we
+grammars (\pmcfg), introduced by \citet{seki91pmcfg}. The
+connection between \gf{} and \pmcfg{} was established by \citet{ljunglof2004}, and further developed by \citet{angelov2010phd}. 
+After the definition, which follows \citet{angelov2010phd}, we
 explain three key features, which will be used for the test suite generation.
 
 \paragraph{Definition} A \pmcfg{} is a 5-tuple:
@@ -544,7 +541,7 @@ $$
 A \rightarrow f[A_1,A_2,\dots,A_{a(f)}]
 $$
 where $a(f)$ is the arity of $f$, $A \in N^C$ is called result category, $A_1,A_2,\dots,A_{a(f)} \in N^C$ are called argument categories and $f \in F^C$ is a function symbol.
-\item $L \subset N^C \times F^C$ is a set which defines the default linearisation funtions for those concrete categories that have default linearisations. 
+\item $L \subset N^C \times F^C$ is a set which defines the default linearisation functions for those concrete categories that have default linearisations. 
 \end{itemize}
 
 

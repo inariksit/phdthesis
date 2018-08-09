@@ -72,15 +72,15 @@ translation of a \gf{} grammar into \pmcfg{}.
 
 Traditionally, \gf{} grammars are tested by the grammarians themselves,
 much in the way described in the introduction of this article. An example
-human-written treebank can be found in Khegai's work \cite[p.~136--142]{khegai2006phd}.
+human-written treebank can be found in \citet[p.~136--142]{khegai2006phd}.
 For testing the coverage of the grammars, grammarians have used
 treebanks such as the UD treebank \cite{nivre2016ud} and Penn treebank
 \cite{marcus1993penntreebank}, and for testing morphology, various open-source resources
 have been used, such as morphological lexica from the Apertium
 project \cite{forcada2011apertium}.
 
-As an example of other grammar formalisms, Butt et al.
-\cite[pp.~212--213]{butt1999lfg} describe common methods of testing
+As an example of other grammar formalisms, 
+\citet[pp.~212--213]{butt1999lfg} describe common methods of testing
 the \lfg{} formalism: similarly to \gf, they use a combination of
 human-written test suites meant to cover particular phenomena, and
 external larger corpora to test the coverage. As a difference from \gf{}
@@ -92,8 +92,8 @@ stored as trees. In other words, \gf{} tests only what the grammar
 outputs, not what it parses.
 
 Other related work in computational linguistics includes error mining
-for parsing grammars, such as Gardent
-\cite{gardent2012errormining}. The setup includes triples of dependency
+for parsing grammars, such as 
+\citet{gardent2012errormining}. The setup includes triples of dependency
 tree, generated sentence and the gold standard sentence. For every triple
 where the generated sentence and the gold standard sentence are different, their algorithm
 finds the smallest subtrees that cause the problems. Gardent's
@@ -103,7 +103,7 @@ generate trees whose linearisations are then read by humans. On the
 other hand, Gardent's method would prove very useful once an error is
 found---it can be tricky to determine which function exactly caused
 the error.
-Further away from our approach, van Noord \cite{vanNoord2004}
+Further away from our approach, \citet{vanNoord2004}
 works on parsing grammars rather than generation, with the goal of
 detecting strings that cause parsing errors.
 
@@ -118,7 +118,7 @@ detecting strings that cause parsing errors.
 
 However, our biggest source of inspiration is automatic test case
 generation for general software, such as \todo{Find more stuff!}
-\cite{hamon2004testgen}. Software testing and grammar testing both
+\citet{hamon2004testgen}. Software testing and grammar testing both
 deal with notions of coverage and compactness.
 
 \todo{``I suggest that the authors connect their work with generating test for software and automata and also to computational linguistic work on correcting grammars conceived for parsing to turn them into grammars for generation.''}
@@ -181,9 +181,9 @@ of our small grammar: preposition contraction in Dutch, adjective
 agreement in Estonian, adjective placement and agreement in Spanish
 and determiner placement in Basque. Concrete syntaxes for all four
 languages are found in
-\url{https://github.com/inariksit/GF-testing/data/grammars/}; however,
-the chapter can be read without understanding the details of the
-concrete syntaxes.
+\url{https://github.com/inariksit/GF-testing/tree/master/data/grammars};
+however, the chapter can be read without understanding the details of
+the concrete syntaxes.
 
 \paragraph{Preposition contraction in Dutch} In Dutch, some prepositions should
 merge with a single determiner or pronoun, e.g. \emph{met~dit} `with
@@ -455,7 +455,7 @@ requirement is that the start category is linearised as one string only.
 \subsection{Enumerate functions} As we explained before, each syntactic
 function turns into multiple versions, one for each combination of
 parameters of its arguments. We test each of these versions
-seperately. Each concrete syntactic function may produce one or several trees.
+separately. Each concrete syntactic function may produce one or several trees.
 
 In order to construct trees that use the syntactic function, we need
 to supply the function with \emph{arguments}, as well as put the resulting tree
@@ -552,8 +552,8 @@ Before we get to \textsf{mostUniqueExamples}, we define two helper functions: \t
 \begin{EmptyItem}
 \begin{array}{p{0.25cm} l}
 \multicolumn{2}{l}{\textsf{betterTest : }[a] \rightarrow [a] \rightarrow [a]} \\
-\multicolumn{2}{l}{\textsf{betterTest } xs \; ys =} \\
- & xs \textbf{ is a better test than } ys , \textbf{if whenever } x_i
+\multicolumn{2}{l}{\textsf{betterTest xs ys} =} \\
+ & \textsf{xs} \textbf{ is a better test than } \textsf{ys}, \textbf{ if whenever } x_i
    = x_j, \textbf{ then also } y_i = y_j. \\
 \\
 \multicolumn{2}{l}{\textsf{allUnique : } [[a]] \rightarrow \textsf{Bool}} \\
@@ -565,16 +565,21 @@ Before we get to \textsf{mostUniqueExamples}, we define two helper functions: \t
 \end{array}
 \end{EmptyItem}
 
-Now we define $\textsf{mostUniqueExamples : } F^C \rightarrow [[\textsf{Tree}]] \rightarrow [[\textsf{Tree}]]$, which returns a minimal set of arguments that is needed to test the function $f$.
+Now we define $\textsf{mostUniqueExamples}$, which returns a minimal set of arguments that is needed to test the function $f$.
 
 \begin{EmptyItem}
-\begin{HighlightingFancy}[]
-mostUniqueExamples f vtrees =
-  let trees-lins = \{ (vtree, \CommentTok{strings of vtree} ++ \CommentTok{strings that f introduces})
-                   | vtree $\leftarrow$ vtrees \}
-  \CommentTok{apply} betterTest \CommentTok{to} lins \CommentTok{until} allUnique
-  \CommentTok{return} trees of trees-lins
-\end{HighlightingFancy}
+\begin{array}{p{0.25cm} p{0.2cm} p{1.4cm} l}
+\multicolumn{4}{l}{\textsf{mostUniqueExamples : } F^C \rightarrow
+  [[\textsf{Tree}]] \rightarrow [[\textsf{Tree}]]} \\
+\multicolumn{4}{l}{\textsf{mostUniqueExamples } f \textsf{ vtrees} =} \\
+   & \textbf{let} & \multicolumn{2}{l}{\textsf{trees-lins} = \{ \; (\textsf{vtree}\textbf{, strings of}
+    \textsf{ vtree}\text{ ++ }\textbf{strings that } f \textbf{ introduces})} \\
+  &     &        & | \textsf{ vtree} \in \textsf{vtrees} \} \\
+  & \textbf{in}  & \multicolumn{2}{l}{\textbf{apply}  \textsf{ betterTest } \textbf{to}
+                   \textsf{ lins } \textbf{of} \textsf{ trees-lins } \textbf{until}  \textsf{ allUnique}} \\
+  & & \multicolumn{2}{l}{\textbf{return} \textsf{ trees } \textbf{of} \textsf{
+      trees-lins}}  \\
+\end{array}
 \end{EmptyItem}
 
 \paragraph{Number of arguments} In our implementation, we use the
@@ -717,10 +722,10 @@ We model this in a top-down manner, where in the beginning, only the
 start category \t{S} has a context, albeit a trivial one: ``do
 nothing, you're already there!''. On the first round, we get to
 compute contexts for all categories \t{B} that are arguments to some
-function \t{G : B $\rightarrow$ S}: these contexts are simply the
-function \t{G} itself. On the second round, we compute contexts for
-all categories \t{A} that are arguments to some function \t{F : A
-  $\rightarrow$ B}; The context for \t{A} is \t{G~$\circ$~F}. Each
+function \t{g : B $\rightarrow$ S}: these contexts are simply the
+function \t{g} itself. On the second round, we compute contexts for
+all categories \t{A} that are arguments to some function \t{f : A
+  $\rightarrow$ B}; the context for such an \t{A} is \t{g~$\circ$~f}. Each
 round unlocks more categories further down from the start category, so
 we get to compute more contexts for categories that depend on the
 newly unlocked ones, until all categories have their
@@ -740,20 +745,20 @@ is
 
 The definition of contexts is mutually recursive, and can be seen as a
 system of equations. For instance, the simple example with
-\t{F~:~A~$\rightarrow$~B} and \t{G~:~B~$\rightarrow$~S} is expressed
+\t{f~:~A~$\rightarrow$~B} and \t{g~:~B~$\rightarrow$~S} is expressed
 as follows.
 
 
-%\begin{EmptyItem}
+\begin{EmptyItem}
 \begin{array}{l @{\hspace{0.1cm}} l}
 \textsf{contexts}(\t{S}) = & \{ \; id \; \} \\
-\textsf{contexts}(\t{B}) = &  \{ \; c \; (G \; •) \; | \; c \in
+\textsf{contexts}(\t{B}) = &  \{ \; C[g(\_)] \; | \; C \in
                              \textsf{contexts}(\t{S}) \} \\
-\textsf{contexts}(\t{A}) = &  \{ \; c \; (F \; •) \; | \; c \in
+\textsf{contexts}(\t{A}) = &  \{ \; C[f(\_)] \; | \; C \in
                              \textsf{contexts}(\t{B}) \} \\
 
 \end{array}
-%\end{EmptyItem}
+\end{EmptyItem}
 
 
 % \begin{table}[h]
@@ -806,15 +811,55 @@ of the category, and (b) which are of the smallest size
 %   \rightarrow C_i \rightarrow C_n \rightarrow R \}
 % $$
 
-Computing relevant contexts in a given start category \t{S} is done once, in advance, for all possible hole types $H$ at the same time, using a fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
-$$
-\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)
-$$
-In words, to generate contexts with holes of type $H$, we enumerate all functions $F$ that have a $H$ as an argument, and enumerate all contexts $C$ that have the result type $H'$ of $F$ as a hole type, and put $C$ and $F$ together to get a new context. Then, we apply a function $\textsf{filter}$ to the result in order to filter out redudant contexts, i.e. contexts whose uses of the strings of $H$ are already covered by other contexts in the same set.
-To compute relevant contexts with the start category \t{S} as a hole, we use the following definition $\textsf{contexts}(\t{S}) = \{ \; id \; \}$.
+Computing relevant contexts in a given start category \t{S} is done once, in advance, for all possible hole types $H$ at the same time, using fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
 
-Now, in order to compute all sets of contexts for all possible hole categories $H$, we set up a system of equations (as specified above). In general, this system of equations is recursive, and we use a fixpoint iteration to solve it, starting with the empty set $\varnothing$ for each set of contexts. There is a guaranteed minimal solution, because the RHSs are monotonic in $H'$.
+\begin{EmptyItem}
+$\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H
+\rightarrow H', \; C \in \textsf{contexts}(H') \}\;)$
+\end{EmptyItem}
 
+In words, to generate contexts with holes of type $H$, we enumerate
+all functions $F$ that have a $H$ as an argument, and enumerate all
+contexts $C$ that have the result type $H'$ of $F$ as a hole type, and
+put $C$ and $F$ together to get a new context. Then, we apply a
+function $\textsf{filter}$ to the result in order to filter out
+redundant contexts, i.e. contexts whose uses of the strings of $H$ are
+already covered by other contexts in the same set.
+
+To compute relevant contexts with the start category \t{S} as a hole,
+we use the following definition $\textsf{contexts}(\t{S}) = \{ \; id
+\; \}$. In order to compute all sets of contexts for all possible hole
+categories $H$, we set up a system of equations (as specified
+above). In general, this system of equations is recursive, and we use
+a fixpoint iteration to solve it, starting with
+$\textsf{contexts}(H)~=~\varnothing$ for each category $H$ that is
+not the start category.
+% the empty set $\varnothing$ for each set.
+There is a guaranteed minimal solution, because the RHSs are monotonic
+in $H'$. \todo{Do I need to cite something? Expand on this?}
+
+It is important that we do not change the contexts for anything that
+uses fewer or the same amount of fields. In the English example, it
+would not serve any purpose to swap \t{PredAdj} for \t{AdjCN} in the
+context of \t{AP}, because both choose the same (the only)
+field. Furthermore, if we did that on an arbitrary basis, the sets
+would not converge, and we wouldn't find a fixpoint.
+
+However, the functions can be replaced in the case that we find a
+function that covers strictly more fields than any of the previously found.
+Assume that we added a whole new abstract syntax construction of type
+\t{CN $\rightarrow$ NP}, which uses both singular and plural in one
+sentence. Then we get just one context which covers two fields, and
+thus we can throw away both \t{DetCN this} and \t{DetCN these} in
+favour of the new construction.
+
+So, the set of contexts for a category $H$ may change during the
+fixpoint computation. It grows as we unlock contexts for more
+categories, further down from the start category. It may also shrink,
+if we find a single context that covers the fields from multiple,
+previously computed, contexts. But most importantly, the list of
+fields from $H$ that make it into the start category is growing
+throughout the fixpoint computation. 
 
 
 
@@ -1188,7 +1233,7 @@ different \t{VPSlash}es. The inflection tables
 In general, we believe the number of test cases has both language
 typological and grammar engineering reasons. Other resource
 grammarians have reported significant differences in complexity
-between implementations: Enache et al. \cite{enache2010} report a
+between implementations: \citet{enache2010} report a
 200-time reduction in the number of concrete rules after changing the
 implementation of clitics in verb phrases.
 
