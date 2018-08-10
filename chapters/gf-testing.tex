@@ -437,12 +437,12 @@ this. \todo{Should these be explained too later?}
 
 In this section, we explain how the test suites are built.
 Earlier in Section~\ref{sec:PMCFG}, we saw how a single abstract category
-compiles into multiple concrete categories, depending on the
+compiles into multiple concrete categories $N^C$, depending on the
 combinations of parameters. Instead of dealing with parameters
 directly, we now have a set of new \emph{types}, which is helpful for
 generating test cases.
 
-We use one syntactic function as the base for one set of test
+We use one syntactic function $f \in F^C$ as the base for one set of test
 cases. For lexical categories, it also makes sense to test the whole
 category, i.e. generate all trees that show that \t{AP} is defined and
 handled correctly in the functions. However, we only explain in detail
@@ -452,10 +452,22 @@ We assume that all test cases are trees with the same start
 (top-level) category, such as \t{S} in our example grammar. The
 requirement is that the start category is linearised as one string only. 
 
+\paragraph{Notation}
+For notation, we refer back to Section~\ref{sec:PMCFG} for the
+definition of \pmcfg{}. 
+In addition to \citet{angelov2010phd}'s definition, we use the notion of
+$\textsf{Tree}$ as a generic type for any application of some
+$f \in F^C$ to all of its arguments $[A_1, \dots, A_{a(f)}]$.  Thus, a
+single $f \in F^C$ is also a $\textsf{Tree}$, if $a(f) = 0$. For an
+$f$ with $a(f) > 0$, we need to apply $f$ to $a(f)$ argument
+$\textsf{Tree}$s. 
+
 \subsection{Enumerate functions} As we explained before, each syntactic
 function turns into multiple versions, one for each combination of
 parameters of its arguments. We test each of these versions
 separately. Each concrete syntactic function may produce one or several trees.
+
+\todo{something more formal here?}
 
 In order to construct trees that use the syntactic function, we need
 to supply the function with \emph{arguments}, as well as put the resulting tree
@@ -476,127 +488,171 @@ right information from its arguments, in the right way. The
 information that a syntactic function uses is any of the strings that
 come from linearising its arguments. In order to be able to see which
 string in the result comes from which field from which argument, we
-want to generate test cases that only contain unique strings.
-For example, the English pronouns {\em you} and {\em she} are worse
-test cases than other English pronouns, because all forms are not
-identical: {\em you} is both nominative and accusative (I saw {\em
-  you} vs. {\em you} sleep), and {\em her} is both accusative and
-genitive (I saw {\em her} vs. {\em her} house). 
-If we only needed some pronoun for our test case, we would be better
-off with e.g. {\em they, them, their}, which has three different forms. 
+want to generate test cases that only contain unique strings.  For
+example, the English pronoun {\em you} is a worse test case than {\em
+  they}, because all forms are not unique: {\em you} is both
+nominative and accusative ({\em you} sleep vs. I saw {\em you}),
+whereas {\em they} has a different form for both ({\em they} sleep
+vs. I saw {\em them}).
 
-It is often possible to generate one combination of arguments where
-all strings in the linearisations are different. However, it is not
-always possible to do this, which is why we in general aim to generate
-a set of combinations of arguments, where for each pair of strings
-from the arguments, there is always one test case where those strings
-are different. In this way, if the syntactic function contains a
-mistake, there is always one test case that reveals it.
-To continue with the example, if all pronouns behaved like {\em you}
-and {\em her}, we could still make do just by creating test cases with
-both of them, because their ambiguity manifests in different forms.
-
-\paragraph{Algorithm}
-For notation, we refer back to Section~\ref{sec:PMCFG} for the
-definition of \pmcfg{}.  In addition to Angelov's definition, we use
-the notion of $\textsf{Tree}$ as a generic type for any application of some
-$f \in F^C$ to all of its arguments $[A_1, \dots, A_{a(f)}]$. Thus, a
-single $f \in F^C$ is also a $\textsf{Tree}$, if $a(f) = 0$. For an $f$ with
-$a(f) > 0$, we need to apply $f$ to $a(f)$ argument $\textsf{Tree}$s.
-We can access the argument categories $f$ by calling the function
-$\textsf{args}$.
-
-\begin{EmptyItem}
-\begin{array}{p{1.01cm} l}
-\multicolumn{2}{l}{\textsf{args : } F^C \rightarrow [N^C]} \\
-\multicolumn{2}{l}{\textsf{args} \; f = \{ \; [A_1,A_2,\dots,A_{a(f)}]}  \\
-      &| \; p \in P  \textbf{ where } p \textbf{ is the production } A \rightarrow
-        f[A_1,A_2,\dots,A_{a(f)}] \; \} \\
-\end{array}
-\end{EmptyItem}
-
-The set of most unique argument trees for some $f \in F^C$ is computed
-by the function $\textsf{bestTrees}$. %~:~}F^C~\rightarrow~[[\textsf{Tree}]]$.
-For an $f$ with arguments $[A_1,A_2,\dots,A_{a(f)}]$, the $\textsf{Tree}$s in
-the inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$. Instead of
-just one list of arguments, the function returns a list of lists: as
-explained before, sometimes multiple arguments are needed (like
-\emph{you} and \emph{she}) in order to ensure different strings in all
-fields of the argument tree.
-
-
-\begin{EmptyItem}
-\begin{array}{p{0.25cm} p{0.2cm} l}
-\multicolumn{3}{l}{\textsf{bestTrees : } F^C \rightarrow [[\textsf{Tree}]]} \\
-\multicolumn{3}{l}{\textsf{bestTrees} \; f =} \\
- & {\bf let} & \textsf{argCats} = \textsf{args} \; f \\
- &  {\bf in} & \textsf{mostUniqueExamples } f 
-                   \textsf{ (generateAllTrees argCats)}
-\end{array}
-\end{EmptyItem}
-
-The function $\textsf{generateAllTrees : } [N^C] \rightarrow [[\textsf{Tree}]]$  is implemented using the \feat{} library \cite{feat}, and generates lazily all vectors of argument trees for the given concrete categories, starting from smallest size. 
-%For instance, if $[N^C]$ is $[$\t{Prep},\t{NP}$]$,
-The size of a tree is defined as the number of constructors; thus \t{DetNP~this} is generated before \t{DetCN this house}. This ensures that we find the most minimal and the most unique examples.
-
-Before we get to \textsf{mostUniqueExamples}, we define two helper functions: \textsf{betterTest} and \textsf{allUnique}. \textsf{betterTest} decides among two lists which one of them is a better test: e.g. [{\em I},{\em me},{\em my}] is better than [{\em you},{\em you},{\em your}]. \textsf{allUnique} takes a list of such lists, and decides if it is enough: e.g. [[{\em I},{\em me},{\em my}]] fulfils the condition, as well as [[{\em you},{\em you},{\em your}], [{\em she},{\em her},{\em her}]].
-
-  % let (x$_{\text{1}}$,y$_{\text{1}}$):xs-ys = zip xs ys
-  % in  $\forall$ (x$_{\text{i}}$,y$_{\text{i}}$) $\in$ xs-ys where x$_{\text{1}}$ $=$ x$_{\text{i}}$:
-  %       if $\exists$ y$_{\text{i}}$ such that y$_{\text{1}}$ $\neq$ y$_{\text{i}}$,
-  %        then \CommentTok{ys are better tests}.
-  %        else \CommentTok{repeat for} \{ (x$_{\text{j}}$,y$_{\text{j}}$) | (x$_{\text{j}}$,y$_{\text{j}}$) $\leftarrow$ xs-ys, x$_{\text{j}}$ $\neq$ x$_{\text{1}}$ \}
-  %     if xs-ys \CommentTok{is empty},
-  %      then \CommentTok{xs are better tests}.
-
-\begin{EmptyItem}
-\begin{array}{p{0.25cm} l}
-\multicolumn{2}{l}{\textsf{betterTest : }[a] \rightarrow [a] \rightarrow [a]} \\
-\multicolumn{2}{l}{\textsf{betterTest xs ys} =} \\
- & \textsf{xs} \textbf{ is a better test than } \textsf{ys}, \textbf{ if whenever } x_i
-   = x_j, \textbf{ then also } y_i = y_j. \\
-\\
-\multicolumn{2}{l}{\textsf{allUnique : } [[a]] \rightarrow \textsf{Bool}} \\
-\multicolumn{2}{l}{\textsf{allUnique } [[a_{1,1},a_{1,2}, \dots,
-  a_{1,m}], \dots, [a_{n,1},a_{n,2}, \dots, a_{n,m}]] =} \\
- & \textbf{if } \exists \; \{ \, a_{j_i,i} \; | \; i \in \{1..m\},
-   \; j_i \in \{1..n\}
-   \} \textbf{ which has } m \textbf{ unique elements }. \\
-\end{array}
-\end{EmptyItem}
-
-Now we define $\textsf{mostUniqueExamples}$, which returns a minimal set of arguments that is needed to test the function $f$.
-
-\begin{EmptyItem}
-\begin{array}{p{0.25cm} p{0.2cm} p{1.4cm} l}
-\multicolumn{4}{l}{\textsf{mostUniqueExamples : } F^C \rightarrow
-  [[\textsf{Tree}]] \rightarrow [[\textsf{Tree}]]} \\
-\multicolumn{4}{l}{\textsf{mostUniqueExamples } f \textsf{ vtrees} =} \\
-   & \textbf{let} & \multicolumn{2}{l}{\textsf{trees-lins} = \{ \; (\textsf{vtree}\textbf{, strings of}
-    \textsf{ vtree}\text{ ++ }\textbf{strings that } f \textbf{ introduces})} \\
-  &     &        & | \textsf{ vtree} \in \textsf{vtrees} \} \\
-  & \textbf{in}  & \multicolumn{2}{l}{\textbf{apply}  \textsf{ betterTest } \textbf{to}
-                   \textsf{ lins } \textbf{of} \textsf{ trees-lins } \textbf{until}  \textsf{ allUnique}} \\
-  & & \multicolumn{2}{l}{\textbf{return} \textsf{ trees } \textbf{of} \textsf{
-      trees-lins}}  \\
-\end{array}
-\end{EmptyItem}
-
-\paragraph{Number of arguments} In our implementation, we use the
-\feat{} framework \cite{feat} to enumerate possible combinations of
-argument trees, in size order. We stop when we have found a suitable
-set of combinations of arguments, according to the requirement
-above. The majority of all functions in all tested languages need 1 or
+The majority of all functions in all tested languages need 1 or
 2 argument trees, and there are only a handful of cases that need more
 than 3. The highest number we encountered was 8 trees for the Basque
 function which handles conjunctions of the category \t{DAP}
 (determiner with an adjective, e.g. ``three small'').
 
-We also stop (give up) when too many tries have been made (currently
-10.000). When creating test cases for the resource grammar, this has
-only happened to 2 functions in all of the tested languages: \t{ConjS}
-and \t{ConjRS}, which handle conjunctions of sentences and relative
-sentences.
+\paragraph{Subsumption} For our testing purposes, any other pronoun
+with all unique forms \emph{subsumes} the pronoun {\em you}: if we can
+construct a test with \{{\em they},{\em them},{\em their}\}, we don't
+need the inferior \{{\em you},{\em you},{\em your}\} in addition. In
+general, we would like to find just one combination of arguments where
+all strings in the linearisations are different. However, it is not
+always possible to do this, which is why we in general aim to generate
+a set of combinations of arguments, where for each pair of strings
+from the arguments, there is always one test case where those strings
+are different. If all pronouns in English were non-unique, we could
+still get the effect by using both \{{\em you},{\em you},{\em your}\}
+and \{{\em she},{\em her},{\em her}\}, because their ambiguity
+manifests in different forms.
+
+We define the function $\textsf{subsumes}$ for a given function $f$
+and two candidate lists of argument trees. It is important to include
+the function $f$ and not just its arguments, because any \gf{}
+function may introduce new strings to the linearisation. If $f$
+introduces some string $s$, then any argument that contains $s$ is
+worse than an otherwise identical argument without $s$.
+
+\begin{EmptyItem}
+\begin{array}{p{0.25cm} p{0.2cm} l}
+% \multicolumn{3}{l}{\textsf{subsumesString : [String]} \rightarrow
+%   \textsf{[String]}\rightarrow \textsf{Bool}} \\
+% \multicolumn{3}{l}{\textsf{subsumesString xs ys} =} \\
+%  & \multicolumn{2}{l}{\forall i,j : \textbf{ if } \textsf{xs } ! \, i =
+%    \textsf{xs } ! \, j,
+%    \textbf{ then also } \textsf{ys } ! \, i = \textsf{ys } ! \, j.} \\
+% \\
+\multicolumn{3}{l}{\textsf{subsumes : }F^C \rightarrow \textsf{[Tree]} \rightarrow \textsf{[Tree]} \rightarrow \textsf{Bool}} \\
+\multicolumn{3}{l}{\textsf{subsumes } f \textsf{ xtrees ytrees} =} \\
+ & \textbf{let} & \textsf{xlins} = \textbf{strings of}
+    \textsf{ xtrees}\text{ ++ }\textbf{strings that } f \textbf{
+                  introduces} \\
+ &              & \textsf{ylins} = \textbf{strings of}
+    \textsf{ ytrees}\text{ ++ }\textbf{strings that } f \textbf{
+                  introduces} \\
+ & \textbf{in}  & \forall i,j : \textbf{ if } \textsf{xlins } ! \, i =
+   \textsf{xlins } ! \, j,
+   \textbf{ then also } \textsf{ylins } ! \, i = \textsf{ylins } ! \,
+                  j. \\
+%\textsf{subsumesString xlins ylins} \\
+\end{array}
+\end{EmptyItem}
+
+\paragraph{Argument generation and filtering}
+For a given $f \in F^C$, we generate all lists of argument trees
+$[A_1, \dots, A_{a(f)}]$.  We keep the ones we need to test $f$, such
+that all forms have a unique string, using the previously defined
+function $\textsf{subsumes}$.
+
+The function $\textsf{generateAllTrees}$ is implemented using the
+\feat{} library \cite{feat}, and generates lazily all vectors of
+argument trees for the given concrete categories, starting from
+smallest size.  The size of a tree is defined as the number of
+constructors; thus \t{DetNP~this} is generated before \t{DetCN this
+  house}. This ensures that we find the most minimal and the most
+unique examples.
+
+
+\begin{EmptyItem}
+\begin{array}{p{0.25cm} p{0.2cm} l}
+\multicolumn{3}{l}{\textsf{generateAllTrees :: [}N^C\textsf{]} \rightarrow
+  \textsf{[[Tree]]}} \\
+\multicolumn{3}{l}{\textsf{generateAllTrees
+  (a}_1:\ldots:\textsf{a}_n\textsf{) = } \textbf{defined in FEAT}}
+\end{array}
+\end{EmptyItem}
+
+The main logic is implemented as a fold over the lazily generated list
+of all lists of argument trees. First we define the function
+\todo{better name for $\textsf{f}$} that the fold takes as its first
+argument: it takes a new tentative test case ($\textsf{t}$), a list of
+already good test cases ($\textsf{ts}$), and checks whether any of the
+test cases in $\textsf{ts}$ subsumes $\textsf{t}$. If yes, we can
+ignore $\textsf{t}$ and keep $\textsf{ts}$ intact; if no, we add
+$\textsf{t}$ to the list and remove from $\textsf{ts}$ any test cases
+that $\textsf{t}$ subsumes.
+
+% In practice, we stop after examining
+% 10.000 trees, or whenever we have found a desired combination of
+% trees.
+
+\begin{EmptyItem}
+\begin{array}{p{0.25cm} p{0.2cm} l}
+\multicolumn{3}{l}{\textsf{f :: } F^C  \rightarrow \textsf{[Tree]} \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]}} \\
+\multicolumn{3}{l}{\textsf{f } f \textsf{ t ts } = \textbf{if } \textsf{any } (\lambda x. \textsf{ subsumes } f \; x \textsf{ t) ts}} \\
+  & \multicolumn{2}{l}{\textbf{~~~~~~~~~~~~~~~then} \textsf{ ts}} \\
+  & \multicolumn{2}{l}{\textbf{~~~~~~~~~~~~~~~else} \textsf{ t : filter (not }
+    \circ \textsf{ subsumes } f \textsf{ t) ts}} \\
+\end{array}
+\end{EmptyItem}
+
+Finally, we define the function $\textsf{mostUniqueExamples}$, which
+returns a minimal set of arguments that is needed to test the function
+$f$, as a fold over all examples.
+
+\begin{EmptyItem}
+\begin{array}{l}
+\textsf{mostUniqueExamples :: } F^C \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]} \\
+\textsf{mostUniqueExamples } f \textsf{ vtrees} = \textsf{foldr (f } f \textsf{) [] vtrees} \\
+\end{array}
+\end{EmptyItem}
+
+\paragraph{Putting it all together}
+The set of most unique argument trees for some $f \in F^C$ is computed
+by the function $\textsf{bestTrees}$.
+For an $f$ with arguments $[A_1,A_2,\dots,A_{a(f)}]$, the $\textsf{Tree}$s in
+the inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$. 
+
+% We can access the argument categories of $f$ by
+% calling the function $\textsf{args}$.
+
+% \begin{EmptyItem}
+% \begin{array}{p{1.01cm} l}
+% \multicolumn{2}{l}{\textsf{args : } F^C \rightarrow [N^C]} \\
+% \multicolumn{2}{l}{\textsf{args} \; f = \{ \; [A_1,A_2,\dots,A_{a(f)}]}  \\
+%       &| \; p \in P  \textbf{ where } p \textbf{ is the production } A \rightarrow
+%         f[A_1,A_2,\dots,A_{a(f)}] \; \} \\
+% \end{array}
+% \end{EmptyItem}
+
+
+\begin{EmptyItem}
+\begin{array}{p{0.25cm} p{0.2cm} p{0.8cm} l}
+\multicolumn{4}{l}{\textsf{bestTrees :: } F^C \rightarrow \textsf{[[Tree]]}} \\
+\multicolumn{4}{l}{\textsf{bestTrees} \; f =} \\
+ & {\bf let} & \multicolumn{2}{l}{\textsf{args} = \{ \; [A_1,A_2,\dots,A_{a(f)}]}  \\
+ &    & &                             | \; p \in P  \textbf{ where } p \textbf{ is the production } A \rightarrow f[A_1,A_2,\dots,A_{a(f)}] \; \} \\
+ &  {\bf in} & \multicolumn{2}{l}{\textsf{mostUniqueExamples } f 
+                   \textsf{ (generateAllTrees args)}}
+\end{array}
+\end{EmptyItem}
+
+
+
+
+
+
+% \paragraph{Number of arguments} In our implementation, we use the
+% \feat{} framework \cite{feat} to enumerate possible combinations of
+% argument trees, in size order. We stop when we have found a suitable
+% set of combinations of arguments, according to the requirement
+% above. 
+
+
+
+% When creating test cases for the resource grammar, this has
+% only happened to 2 functions in all of the tested languages: \t{ConjS}
+% and \t{ConjRS}, which handle conjunctions of sentences and relative
+% sentences.
 
 
 \paragraph{Example: Test cases using \t{AdjCN}} Let us test the function
@@ -631,7 +687,7 @@ one premodifier and one postmodifier \t{AP} (\t{good} and
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{img/contexts-example.png}
+\includegraphics[width=0.85\textwidth]{img/contexts-example.png}
 \caption{Two contexts for the category \t{CN}, which choose all forms from the inflection table.}
 \label{fig:context-general}
 \end{figure}
@@ -644,17 +700,17 @@ provide a function with arguments, we need to put the resulting tree
 into a context, so that we can generate a single string from the
 result. By \emph{context}, we mean a tree in the start category (\t{S}
 in our example) with a \emph{hole} of the same type as the function
-under test (denoted by \char`_). Figure~\ref{fig:context-general}
-shows a concrete example for the category \t{CN} in our
-example grammar.
+under test (denoted by \char`_). 
 
-The important thing here is that the generated set of contexts shows
-all the possible different ways the tree can be used. For example, for
-a test tree with an inflection table of 4 forms, we would generate 4
-different sentences in which each of the 4 inflections is used.
-
-As an example, consider generating contexts for a tree of category
-\t{CN}.  Since \t{CN} is variable for number, we need two contexts:
+Figure~\ref{fig:context-general} shows a concrete example for the
+category \t{CN} in our example grammar.
+% The important thing here is that the generated set of contexts shows
+% all the possible different ways the tree can be used. For example, for
+% a test tree with an inflection table of 4 forms, we would generate 4
+% different sentences in which each of the 4 inflections is used.
+% As an example, consider generating contexts for a tree of category
+% \t{CN}. 
+Since \t{CN} is variable for number, we need two contexts:
 one that chooses the singular form and other that chooses the plural
 form.  This suggests that we should apply two different \t{CN
   $\rightarrow$ NP} functions (Figure~\ref{fig:context-general} shows
@@ -718,21 +774,8 @@ rely on applications of \t{DetCN this} and \t{DetCN these} to lift it
 up into an \t{NP}, as shown in Figure~\ref{fig:context-general}, and
 only then can \t{UttNP} get access to its strings.
 
-We model this in a top-down manner, where in the beginning, only the
-start category \t{S} has a context, albeit a trivial one: ``do
-nothing, you're already there!''. On the first round, we get to
-compute contexts for all categories \t{B} that are arguments to some
-function \t{g : B $\rightarrow$ S}: these contexts are simply the
-function \t{g} itself. On the second round, we compute contexts for
-all categories \t{A} that are arguments to some function \t{f : A
-  $\rightarrow$ B}; the context for such an \t{A} is \t{g~$\circ$~f}. Each
-round unlocks more categories further down from the start category, so
-we get to compute more contexts for categories that depend on the
-newly unlocked ones, until all categories have their
-contexts. Figure~\ref{fig:context-dependence} shows the general
-pattern for categories \t{A} and \t{B} in start category \t{S}.
-is
- 
+\paragraph{Top-down computation}
+
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.45\textwidth]{img/contexts-dependence.png}
@@ -741,12 +784,29 @@ is
 \label{fig:context-dependence}
 \end{figure}
 
-\paragraph{Algorithm}
+Computing relevant contexts in a given start category \t{S} is done
+once, in advance, for all possible hole types $H$ at the same time,
+using fixpoint iteration. \todo{would be inefficient to do it bottom-up.}
+We model this in a top-down manner, where in the beginning, only the
+start category \t{S} has a context, albeit a trivial one: ``do
+nothing, you're already there!''. The other categories don't have a
+context yet.
 
+On the first round, we get to compute contexts for all categories
+\t{B} that are arguments to some function \t{g : B $\rightarrow$ S}:
+these contexts are simply the function \t{g} itself. On the second
+round, we compute contexts for all categories \t{A} that are arguments
+to some function \t{f~:~A~$\rightarrow$~B}; the context for such an
+\t{A} is \t{g~$\circ$~f}. Each round unlocks more categories further
+down from the start category, so we get to compute more contexts for
+categories that depend on the newly unlocked ones, until all
+categories have their contexts. Figure~\ref{fig:context-dependence}
+shows the general pattern for categories \t{A} and \t{B} in start
+category \t{S}.
+ 
 The definition of contexts is mutually recursive, and can be seen as a
-system of equations. For instance, the simple example with
-\t{f~:~A~$\rightarrow$~B} and \t{g~:~B~$\rightarrow$~S} is expressed
-as follows.
+system of equations.The simple example with \t{f~:~A~$\rightarrow$~B}
+and \t{g~:~B~$\rightarrow$~S} is expressed as follows.
 
 
 \begin{EmptyItem}
@@ -770,8 +830,15 @@ as follows.
 % \end{tabular}
 % \end{table}
 
-\noindent In the general case, we want to find the {\em least}
-solution to the system of equations. The word \emph{least} means, in
+\noindent In the general case, these sets can be infinite: think of
+functions of type \t{A~$\rightarrow$~A} and loops of \t{A~$\rightarrow$~B} and \t{B~$\rightarrow$~A}.  We want to find the
+{\em least} solution to such systems of equations. 
+
+The least set,
+i.e. no junk--we don't want infinite sets. We are only interested in
+those contexts that cover all.
+
+ The word \emph{least} means, in
 this case, two things: (a) the fewest trees that still use all the fields
 of the category, and (b) which are of the smallest size
 (e.g. choosing \t{UttNP} over \t{PredAdj} for the context of \t{NP}).
@@ -811,7 +878,7 @@ of the category, and (b) which are of the smallest size
 %   \rightarrow C_i \rightarrow C_n \rightarrow R \}
 % $$
 
-Computing relevant contexts in a given start category \t{S} is done once, in advance, for all possible hole types $H$ at the same time, using fixpoint iteration. It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
+It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
 
 \begin{EmptyItem}
 $\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H
@@ -836,7 +903,7 @@ $\textsf{contexts}(H)~=~\varnothing$ for each category $H$ that is
 not the start category.
 % the empty set $\varnothing$ for each set.
 There is a guaranteed minimal solution, because the RHSs are monotonic
-in $H'$. \todo{Do I need to cite something? Expand on this?}
+in $H'$. \todo{Kleene's or Tarski's fixpoint theorem + read Koen's slides}
 
 It is important that we do not change the contexts for anything that
 uses fewer or the same amount of fields. In the English example, it
