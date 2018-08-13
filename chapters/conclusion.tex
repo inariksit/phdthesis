@@ -11,35 +11,68 @@ research.
 
 We set out to test and verify natural language grammars. In this
 thesis, we have described two systems for two different grammar
-formalisms: Grammatical Framework (GF) and Constraint Grammar (CG).
+formalisms: Constraint Grammar (CG) and Grammatical Framework (GF).
+
+For CG, previous evaluation methods relied on a gold standard corpus,
+or manual inspection if there was no corpus available. Our work
+started with the observation that CG rules resemble logical formulas;
+{\sc remove} and {\sc if} can be expressed as negations and
+implications respectively. As noted by \citet{lager98}, a
+straight-forward implementation in a logical framework results in a
+parallel and unordered CG.
+
+Our implementation of the sequential CG is very similar to the
+encoding by \citet{lager_nivre01}.  However, we modified the setup in
+a crucial detail: instead of an actual sentence, we applied the rules
+to a {\em symbolic sentence}, where every word contains every possible
+reading.  Then, instead of the original question ``Which readings are
+true after all rule applications?'', we found a meaningful
+SAT-problem, with the question ``Which readings were originally
+true?''
+
+We exploited this newly found property for grammar analysis.
+%  for each
+% rule $r$, we tried to create a sentence which has passed through all
+% previous rules $R$, and could still trigger $r$.  If such sentence
+% could not be found, this means that some of the rules in $R$ made $r$
+% impossible to apply: for instance, by removing the same target with
+% less conditions, or removing something from the context of $r$.  This
+% method was successful in finding such conflicts, when tested with
+% grammars between 60--1200 rules.
+Our method tests the internal consistency of a grammar, only relying
+on a morphological lexicon. The system explores all possibilities to
+see if a particular rule can apply: if there is no input that would
+trigger a rule $r$ after rule $r'$, we know that rules $r$ and $r'$
+are in conflict. This method was successful in finding such conflicts,
+when tested with grammars between 60--1200 rules.  In addition, the
+mechanisms that we developed in order to test CG have interesting side
+effects: namely, they let us model CG as a generative formalism, which
+opens potential for deriving CG grammars from other grammar formalisms.
 
 When testing GF grammars, earlier we relied on an informant to
-remember and explain all important phenomena to test, and a
-grammarian to form all relevant trees that showcase these phenomena. 
+remember and explain all important phenomena to test, and a grammarian
+to form all relevant trees that showcase these phenomena.  This time,
+our inspiration was all the work done for automatic test case
+generation for general software, such as
+\citet{celentano1980compiler,Geist1996,QuickCheck}. Software testing
+deals with notions of coverage and compactness, and deriving test
+cases from a formal specification; this proved to be a useful approach
+for grammar testing as well.
+
 % Now, we have a system that takes a GF grammar, a concrete language and a
 % list of functions and/or categories. Then the system generates a
 % representative and minimal set of example sentences that showcases all
 % important variation in the given functions and categories.
-Now both steps are fully automated: the grammarian only needs to input
-a function or category, and the system outputs a minimal and
-representative set of sentences that showcases all the variation in
-the given functions and categories. The informant only needs to read and
-evaluate the example sentences.
-(Of course, humans are still needed to write the grammars in the
-first place, but we consider that a fun task.)
+In this thesis, we have presented a tool that automates the two steps:
+identifying the grammatical phenomena to test and formulating them as
+trees. Now, the grammarian only needs to input a function or category,
+and the system outputs a minimal and representative set of sentences
+that showcases all the variation in the given function or
+category. The informant only needs to read and evaluate the example
+sentences.  (Of course, humans are still needed to write the grammars
+in the first place, but we consider that a fun task!)
 
-For CG, previous evaluation methods relied on a gold standard corpus,
-or manual inspection if there was no corpus available. Our method
-tests the internal consistency of a grammar, only relying on a
-morphological lexicon. The system explores all possibilities to see if
-a particular rule can apply: if there is no input that would trigger a
-rule $r$ after rule $s$, we know that rules $r$ and $s$ are in
-conflict.  In addition, the mechanisms that we developed in order
-to test CG have interesting side effects: namely, they let us model CG
-as a generative formalism.
-
-\todo{Can put more stuff here---even copy stuff from elsewhere in thesis}
-
+%
 % If we were sculpting a statue, generative formalism would start from an empty place and start splashing some clay around. In contrast, a reductionist formalism would start from a heavy stone block and carve away everything that is not part of the statue. In the end, both have formed an identical statue. An empty generative grammar would output just thin air, and empty reductionist grammar would output an intact stone block.
 
 % We can see symbolic sentences as these stone blocks. To give a classic example, say we have the alphabet {a,b} and the language aⁿbⁿ. Then we can construct a CG grammar, apply it to an even-length symbolic sentence consisting of as and bs, and have it output a string where the first half is as, followed by a second half of bs. This language is context-free, and we have only found a method to write such a grammar manually, but we have a method that can translate any regular language into a corresponding CG automatically, and apply it to a symbolic sentence.
@@ -83,10 +116,10 @@ system has to \emph{generate} a positive example for all rules $r$ it
 judges conflict-free. %with all of the previous rules.
 This $r$ doesn't even need to do the right thing---it may as well be
 ``\emph{wish} is a verb in the context \emph{the wish}''---but we can
-still count on it being conflict-free.
+still trust that $r$ doesn't conflict with any of the previous rules
+in the grammar.
 
-% Contrast this with ``we tested 1+3 and got 4, thus we know that
-% addition is implemented correctly''.
+
 
 Can we trust the program when it finds $r$ being in conflict with some
 other rule? We use symbolic evaluation to explore all possibilities:
@@ -95,15 +128,19 @@ which prevents a previous rule from matching), the SAT-solver would
 have found it. If we find $r$ impossible to apply, it has to be one of
 the following causes: (a) its conditions are inconsistent (e.g. ``-1
 has to be a noun and not be a noun'')\footnote{If we have ambiguity
-  classes in place, the inconsistency can also be e.g. ``-1 has to be
-  a noun and a verb'', assuming that there is no word form in the lexicon that
-  is ambiguous between noun and verb.}; (b) another rule or set of
-rules before it forces the symbolic sentence to be in a certain way.
+  classes in place, the inconsistency can also be more subtle,
+  e.g. ``-1 has to be noun and punctuation'', assuming that there is
+  no word form in the lexicon that has such an ambiguity.}, or (b)
+another rule $r'$ or set of rules $R'$ before it forces the symbolic
+sentence to be in a certain way. In the case of (a), the human
+grammarian would hopefully see the error when it is pointed out. In
+the case of (b), even if the conflict is not clear by just looking at
+the grammar, the SAT-solver can help by generating a positive example,
+i.e. a sequence that triggers $r$ when it goes through all the
+previous rules except $r'$.
 
-
-\todo{Something to finish up this}
-
-
+% Contrast this with ``we tested 1+3 and got 4, thus we know that
+% addition is implemented correctly''.
 
 \paragraph{GF} On the GF side, we actually are trying to answer the
 harder question: does the grammar do an adequate job at producing
@@ -202,10 +239,18 @@ as ``run'', ``always run'' and ``run with Mary'', to help narrow down
 which function introduces the error.
 
 In more philosophical terms, we would like the grammar writing
-community to view testing, in terms of \citet{beizer2003software}, as a
-``mental discipline that helps all IT professionals develop
-higher-quality software.'' \todo{this or something else more general
-  thing to finish this thing.}
+community to view testing, in terms of \citet{beizer2003software}, as
+a ``mental discipline that helps all IT professionals develop
+higher-quality software.''  Our work is by no means the first approach
+to grammar testing: for instance, \citet{butt1999lfg} recommend
+frequent use of test suites, as well as extensive documentation of
+grammars. We argue that generating test suites automatically from the
+grammar itself, combined with treebanks for coverage testing, is an
+even better way to test grammars. It is always a risk that a test
+suite is deprecated when the grammar is changed; with automatic
+generation, the test suite is updated along with the grammar.
+
+
 
 % What are some factors that would help a development organization move
 % from Beizer’s testing level 2 (testing is to show errors) to testing level 4
