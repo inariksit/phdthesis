@@ -53,14 +53,14 @@ single transitive verb.
 We present a method that, given a grammar (that in general encompasses
 an infinite set of sentences), generates a finite set of sentences
 that can be used as test cases for the correctness of the grammar. Our
-concrete implementation is for a particular grammar formalism,
-namely parallel multiple context-free grammars (\pmcfg)
-\cite{seki91pmcfg}, which is the core formalism used by the
-Grammatical Framework (\gf) \cite{ranta2004gf}. However, the general
-method works for any formalism that is at most as expressive as
-\pmcfg{}, including context-free grammars, formalisms such as Tree-Adjoining Grammar (\tagGrammar)
-\cite{joshi1975tag}, and several variants of Categorial Grammar
-\cite{deGroote2004,steedman1988ccg}.
+concrete implementation is for a particular grammar formalism, namely
+parallel multiple context-free grammars (\pmcfg) \cite{seki91pmcfg},
+which is the core formalism used by the Grammatical Framework (\gf)
+\cite{ranta2004gf}. However, the general method works for any
+formalism that is at most as expressive as \pmcfg{}, including
+context-free grammars, formalisms such as Tree-Adjoining Grammar
+(\tagGrammar) \cite{joshi1975tag}, and several variants of Categorial
+Grammar \cite{deGroote2004,steedman1988ccg}.
 
 The following sections assume knowledge of \gf{} and \pmcfg{}
 formalisms; we direct the reader to Section~\ref{sec:gf-intro} for a
@@ -70,58 +70,51 @@ translation of a \gf{} grammar into \pmcfg{}.
 
 \section{Related work}
 
-Traditionally, \gf{} grammars are tested by the grammarians themselves,
-much in the way described in the introduction of this article. An example
-human-written treebank can be found in \citet[p.~136--142]{khegai2006phd}.
-For testing the coverage of the grammars, grammarians have used
-treebanks such as the UD treebank \cite{nivre2016ud} and Penn treebank
-\cite{marcus1993penntreebank}, and for testing morphology, various open-source resources
-have been used, such as morphological lexica from the Apertium
-project \cite{forcada2011apertium}.
+Traditionally, \gf{} grammars are tested by the grammarians
+themselves, much in the way described in the introduction of this
+article. An example human-written treebank can be found in
+\citet[p.~136--142]{khegai2006phd}.  For testing the coverage of the
+grammars, grammarians have used treebanks such as the UD treebank
+\cite{nivre2016ud} and Penn treebank \cite{marcus1993penntreebank},
+and for testing morphology, various open-source resources have been
+used, such as morphological lexica from the Apertium project
+\cite{forcada2011apertium}.
 
-As an example of other grammar formalisms, 
+As an example of other grammar formalisms,
 \citet[pp.~212--213]{butt1999lfg} describe common methods of testing
 the \lfg{} formalism: similarly to \gf, they use a combination of
 human-written test suites meant to cover particular phenomena, and
-external larger corpora to test the coverage. As a difference from \gf{}
-testing tradition, their human-written test suites include also
+external larger corpora to test the coverage. As a difference from
+\gf{} testing tradition, their human-written test suites include also
 ungrammatical sentences: those that the grammar should \emph{not} be
 able to parse. However, their tests are only meant for monolingual
-grammars, whereas \gf{} tests are for multilingual grammars, so they are
-stored as trees. In other words, \gf{} tests only what the grammar
+grammars, whereas \gf{} tests are for multilingual grammars, so they
+are stored as trees. In other words, \gf{} tests only what the grammar
 outputs, not what it parses.
 
 Other related work in computational linguistics includes error mining
-for parsing grammars, such as 
-\citet{gardent2012errormining}. The setup includes triples of dependency
-tree, generated sentence and the gold standard sentence. For every triple
-where the generated sentence and the gold standard sentence are different, their algorithm
-finds the smallest subtrees that cause the problems. Gardent's
-algorithm fills a slightly different need than ours: it relies on the
-correct linearisation so be known, which we don't. Instead, we want to
+for parsing grammars, such as \citet{gardent2012errormining}. The
+setup includes triples of dependency tree, generated sentence and the
+gold standard sentence. For every triple where the generated sentence
+and the gold standard sentence are different, their algorithm finds
+the smallest subtrees that cause the problems. Gardent's algorithm
+fills a slightly different need than ours: it relies on the correct
+linearisation so be known, which we don't. Instead, we want to
 generate trees whose linearisations are then read by humans. On the
 other hand, Gardent's method would prove very useful once an error is
 found---it can be tricky to determine which function exactly caused
-the error.
-Further away from our approach, \citet{vanNoord2004}
-works on parsing grammars rather than generation, with the goal of
-detecting strings that cause parsing errors.
-
-% Bender et al. \cite{bender2010} describe a system for creating and
-% testing \hpsg{} \cite{pollard1994hpsg} grammars, by using a detailed
-% questionnaire about the features of the given language. This system
-% achieves both generating the grammar rules and testing them
-% simultaneously, whereas our method relies on an existing grammar. On
-% the other hand, our system is more general to any kinds of grammars,
-% including application grammars where the distinctions are not
-% syntactic but semantic.
+the error.  Further away from our approach, \citet{vanNoord2004} works
+on parsing grammars rather than generation, with the goal of detecting
+strings that cause parsing errors.
 
 However, our biggest source of inspiration is automatic test case
-generation for general software, such as \todo{Find more stuff!}
-\citet{hamon2004testgen}. Software testing and grammar testing both
-deal with notions of coverage and compactness.
+generation for general software, such as
+\citet{celentano1980compiler,Geist1996,QuickCheck}. Software testing and
+grammar testing both deal with notions of coverage and compactness,
+and deriving test cases from a formal specification. Sometimes even
+software tests are generated with human oracles in mind, such as in 
+\citet{Matinnejad2016automated_testsuite_simulink}.
 
-\todo{``I suggest that the authors connect their work with generating test for software and automata and also to computational linguistic work on correcting grammars conceived for parsing to turn them into grammars for generation.''}
 
 \section{Grammar}
 
@@ -315,13 +308,14 @@ and agreement, we need the following 8 trees:
 different ways to place a determiner into a noun phrase. When a number
 (other than 1) or a possessive pronoun acts as a determiner in a
 complex noun phrase, it is placed between ``heavy'' modifiers, such as
-adverbials or relative clauses, and the rest of the noun
-phrase. Demonstrative pronouns, such as \emph{this}, are placed after
+adverbials or relative clauses, and the rest of the noun phrase. 
+Demonstrative pronouns, such as \emph{this}, are placed after
 all modifiers as an independent word. Number 1, which functions as an
 indefinite article, acts like demonstratives, but the definite article
 is a suffix. If there is a ``light'' modifier, such as an adjective,
 the definite article attaches to the modifier; otherwise it attaches
-to the noun. In order to test the implementation of this phenomenon,
+to the noun. 
+In order to test the implementation of this phenomenon,
 we need the following 12 trees: 
 
 \[
@@ -344,20 +338,20 @@ to yours'
 In Dutch, the words \emph{hill} and \emph{house} have different
 genders, and the word \emph{yours} has to agree in gender with the
 antecedent: \emph{(de) heuvel naast de jouwe} and \emph{(het) huis
-  naast het jouwe}. The test cases reveal a bug, where \t{DetNP your}
-picks a gender too soon (always neuter), instead of leaving it open in
-an inflection table. To fix the bug, we add gender as a parameter to
-the \t{Adv} type, and have \t{AdvCN} choose the correct form based on
-the gender of the \t{CN}.
+  naast het jouwe}. Say that the test cases reveal a bug, where
+\t{DetNP your} picks a gender too soon---always neuter, ``het jouwe'',
+instead of leaving it open in an inflection table. To fix the bug, we
+add gender as a parameter to the \t{Adv} type, and have \t{AdvCN}
+choose the correct form based on the gender of the \t{CN}.
 
 After implementing the fix, we run a second test case generation: this
 time, not meant for human eyes, but just to compare the old and new
-versions of the grammar. We want to make sure that our changes 
-to \t{Adv}, \t{AdvCN} and \t{DetNP} 
-have not caused new bugs in other categories and functions. The
-simplest strategy is to generate test cases for \emph{all} functions
-in both grammars, and only show those outputs that differ between the
-grammars. After our changes, we get the following differences: 
+versions of the grammar. We want to make sure that our changes to
+\t{Adv}, \t{AdvCN} and \t{DetNP} have not caused new bugs in other
+categories and functions. The simplest strategy is to generate test
+cases for \emph{all} functions in both grammars, and only show those
+outputs that differ between the grammars. After our changes, we get
+the following differences:
 \newpage
 \begin{itemize}
 \item[] \t{DetCN the (AdvCN (PrepNP next\_to (DetNP your)) hill)}
@@ -372,7 +366,7 @@ grammars. After our changes, we get the following differences:
   \end{itemize}
 \end{itemize}
 
-\noindent We notice a side effect that we may not have thought of: the
+We notice a side effect that we may not have thought of: the
 gender is retained in all adverbs made of NPs made of determiners, so
 now it has become impossible to say ``the hill next to \emph{that}'',
 where \emph{that} is referring to a house. So we do another round of
@@ -578,8 +572,7 @@ unique examples.
 \end{EmptyItem}
 
 The main logic is implemented as a fold over the lazily generated list
-of all lists of argument trees. First we define the function
-\todo{better name for $\textsf{f}$} that the fold takes as its first
+of all lists of argument trees. First we define the function $\textsf{keepIfRelevant}$ that the fold takes as its first
 argument: it takes a new tentative test case ($\textsf{t}$), a list of
 already good test cases ($\textsf{ts}$), and checks whether any of the
 test cases in $\textsf{ts}$ subsumes $\textsf{t}$. If yes, we can
@@ -593,8 +586,8 @@ that $\textsf{t}$ subsumes.
 
 \begin{EmptyItem}
 \begin{array}{p{0.25cm} p{0.2cm} l}
-\multicolumn{3}{l}{\textsf{f :: } F^C  \rightarrow \textsf{[Tree]} \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]}} \\
-\multicolumn{3}{l}{\textsf{f } f \textsf{ t ts } = \textbf{if } \textsf{any } (\lambda x. \textsf{ subsumes } f \; x \textsf{ t) ts}} \\
+\multicolumn{3}{l}{\textsf{keepIfRelevant :: } F^C  \rightarrow \textsf{[Tree]} \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]}} \\
+\multicolumn{3}{l}{\textsf{keepIfRelevant } f \textsf{ t ts } = \textbf{if } \textsf{any } (\lambda x. \textsf{ subsumes } f \; x \textsf{ t) ts}} \\
   & \multicolumn{2}{l}{\textbf{~~~~~~~~~~~~~~~then} \textsf{ ts}} \\
   & \multicolumn{2}{l}{\textbf{~~~~~~~~~~~~~~~else} \textsf{ t : filter (not }
     \circ \textsf{ subsumes } f \textsf{ t) ts}} \\
@@ -608,7 +601,7 @@ $f$, as a fold over all examples.
 \begin{EmptyItem}
 \begin{array}{l}
 \textsf{mostUniqueExamples :: } F^C \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]} \\
-\textsf{mostUniqueExamples } f \textsf{ vtrees} = \textsf{foldr (f } f \textsf{) [] vtrees} \\
+\textsf{mostUniqueExamples } f \textsf{ vtrees} = \textsf{foldr (keepIfRelevant } f \textsf{) [] vtrees} \\
 \end{array}
 \end{EmptyItem}
 
@@ -632,7 +625,7 @@ the inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$.
 
 
 \begin{EmptyItem}
-\begin{array}{p{0.25cm} p{0.2cm} p{0.8cm} l}
+\begin{array}{p{0.25cm} p{0.2cm} p{0.75cm} l}
 \multicolumn{4}{l}{\textsf{bestTrees :: } F^C \rightarrow \textsf{[[Tree]]}} \\
 \multicolumn{4}{l}{\textsf{bestTrees} \; f =} \\
  & {\bf let} & \multicolumn{2}{l}{\textsf{args} = \{ \; [A_1,A_2,\dots,A_{a(f)}]}  \\
@@ -812,7 +805,7 @@ shows the general pattern for categories \t{A} and \t{B} in start
 category \t{S}.
 
 The definition of contexts is mutually recursive, and can be seen as a
-system of equations.The simple example with \t{f~:~A~$\rightarrow$~B}
+system of equations. The simple example with \t{f~:~A~$\rightarrow$~B}
 and \t{g~:~B~$\rightarrow$~S} is expressed as follows.
 
 
@@ -839,17 +832,17 @@ and \t{g~:~B~$\rightarrow$~S} is expressed as follows.
 
 \paragraph{Least solution} In the general case, these sets can be
 infinite: think of functions of type \t{A~$\rightarrow$~A} and loops
-of \t{A~$\rightarrow$~B} and \t{B~$\rightarrow$~A}.  We want to find
-the {\em least} solution to such systems of equations.  The word
-\emph{least} means, in this case, two things: (a) the fewest trees
-that still use all the fields of the category, and (b) which are of
-the smallest size (e.g. choosing \t{UttNP} over \t{PredAdj} for the
+of \t{A~$\rightarrow$~B} and \t{B~$\rightarrow$~A}. In such a case, we
+want to find the {\em least} solution to such systems of equations.
+The word \emph{least} means two separate things: (a) the fewest
+trees that still use all the fields of the category, and (b) which are
+of the smallest size (e.g. choosing \t{UttNP} over \t{PredAdj} for the
 context of \t{NP}).
 
-In contrast to the more intuitive bottom-up approach, a top-down
+In contrast to the more intuitive bottom-up approach, top-down
 computation is more efficient: we retrieve the fastest way to the
 start category, because at each round, we consider contexts that we
-already know to lead into the start category. Thus we avoid functions
+already know to lead into the start category. We avoid functions
 of type \t{B~$\rightarrow$~A} when computing the context for \t{B},
 because we only consider functions whose goal type \emph{already has a
   context}; hence \t{g : B~$\rightarrow$~S} is the only candidate.
@@ -1110,12 +1103,12 @@ test different functions, but happen to be the same.
 
 \paragraph{Alternative priorities for context generation} The current
 implementation of context generation prioritises minimal trees, such
-as \t{UttNP} for \t{NP} instead of any other functions. An alternative
-method would be to choose contexts where the \t{NP} can also use its
+as \t{UttNP} for \t{NP} instead of any other functions. As an alternative,
+we could choose contexts where the \t{NP} can also use its
 parameters, in addition to just showing all of its strings. Arguably,
 it would tell more to the user to see a sentence like ``this house is
 big'', formed with \t{PredAdj}, rather than just ``this house'',
-formed by \t{UttNP}. 
+formed by \t{UttNP}.
 
 However, these alternative priorities are not implemented yet. With
 the current scheme, we have found it a useful practice to hide
@@ -1309,7 +1302,7 @@ phrases (for different reasons!) than Estonian, so they need more test
 cases to test \t{ReflVP}. This time it is not only about the contexts,
 but also the arguments: \t{ReflVP} takes a \t{VPSlash}, which has many
 parameters, so the tool needs to create many examples to cover all
-different \t{VPSlash}es. The inflection tables 
+different concrete categories for \t{VPSlash}.
 
 In general, we believe the number of test cases has both language
 typological and grammar engineering reasons. Other resource
@@ -1416,19 +1409,24 @@ context chooses different forms.
 In contrast, the stem-based grammar creates much more unwieldy
 arguments for \t{AdjCN}. We explained the choice of good and small
 already, due to phonetic features as inherent parameters, but the full
-trees are more complex: \t{AdjCN \{\stackanchor{\tt \small
+trees are more complex, as in the following: 
+
+\begin{EmptyItem}
+\t{AdjCN \{\stackanchor{\tt \small
     good}{\tt \small small}\} (AdvCN (PrepNP without (DetCN a house))
-  house)} `good/small house without a house'.  This is because in the full
-resource grammar, there is no parameter for the modifier and
-determiner placement, instead, each \t{CN} just includes fields for
-heavy and non-heavy modifier, and all determiners include the fields
-for pre- and postdeterminer. This way the functions don't need to
-include any pattern matching, just concatenate \t{det.pre ++
-  cn.heavyMod ++ cn.noun ++ cn.lightMod ++ det.post}, and any of these
-fields may be empty. The downside is that, in order to generate a
-minimal number of test cases, the best strategy is to generate a test
-case where the fewest possible of these strings are empty. This leads
-into fewer examples, but they are harder to read.
+  house)} \\ `good/small house without a house'.
+\end{EmptyItem}
+
+This is because in the full resource grammar, there is no parameter
+for the modifier and determiner placement, instead, each \t{CN} just
+includes fields for heavy and non-heavy modifier, and all determiners
+include the fields for pre- and postdeterminer. This way the functions
+don't need to include any pattern matching, just concatenate
+\t{det.pre ++ cn.heavyMod ++ cn.noun ++ cn.lightMod ++ det.post}, and
+any of these fields may be empty. The downside is that, in order to
+generate a minimal number of test cases, the best strategy is to
+generate a test case where the fewest possible of these strings are
+empty. This leads into fewer examples, but they are harder to read.
 
 The number of generated test cases doesn't differ much in this
 example. Furthermore, the version implemented with resource grammar
@@ -1437,7 +1435,7 @@ instance, each of the two trees generated for \t{AdjCN} are put in
 singular and plural contexts, which is completely irrelevant in the
 scope of our tiny grammar.  Thus we cannot draw any conclusions which
 strategy leads to more test cases. However, just reading the generated
-44 trees suggests that the full resource grammar generates less
+44 (20+24) trees suggests that the full resource grammar generates less
 readable test cases.
 
 % For
@@ -1467,15 +1465,16 @@ separately. Phrasebook was implemented using the resource grammar, so
 it was equally error-ridden.
 
 For Estonian, we read through all the Phrasebook test sentences. These
-505 sentences showed a handful of bugs, all coming from Phrasebook
-itself not the resource grammar. Most were individual words having the
-wrong inflection paradigm (the right one exists in the resource
-grammar, but wrong one was chosen by the application grammarian), but
-there were also some bugs in more general functions—for example, using
-a wrong form of nationality when applied to a human and when to an
-institution, along the lines of ``Spaniard restaurant''. As expected,
-Phrasebook sentences were easier to read, and made more sense
-semantically than sentences from the resource grammar.
+505 sentences showed a handful of bugs---all coming from Phrasebook
+itself, not from the resource grammar. Most were individual words
+having the wrong inflection paradigm (the right one exists in the
+resource grammar, but wrong one was chosen by the application
+grammarian), but there were also some bugs in more general
+functions: for example, using a wrong form of nationality when applied
+to a human and when to an institution, along the lines of ``Spaniard
+restaurant''. As expected, Phrasebook sentences were easier to read,
+and made more sense semantically than sentences from the resource
+grammar.
 
 We have been developing the tool by testing it on the Dutch resource
 grammar---this process is described in more detail in

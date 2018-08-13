@@ -58,7 +58,7 @@ second person pronoun should take the third person singular verb form,
 but was mistakenly taking second person forms.
 
 Typically, bugs that are due to an almost complete implementation are
-easy to fix``. For instance, particle verbs were missing the particle in
+easy to fix. For instance, particle verbs were missing the particle in
 future tense. Looking at the generated sentences, we could see the
 particle being in the right place in all other tenses, except for the
 future. There was a single function that constructed all the tenses, and
@@ -70,7 +70,7 @@ a case, fixing the bug is fairly trivial.
 fix}\label{easy-to-understand-hard-to-fix}
 Dutch negation uses two strategies: the clausal negation particle
 \emph{niet} `not', and the noun phrase negation \emph{geen} `no'. There
-are some subtleties in their usage--the following quote comes from the
+are some subtleties in their usage---the following quote comes from the
 tester:
 
 \begin{quote}
@@ -126,16 +126,15 @@ This small example gave at least three different ways of using these
 complements: for numerals, no article and -e at the end (\emph{tiende}
 `tenth'); for superlative adjectives, the article \emph{het} and no -e
 at the end of the adjective (\emph{het roodst} `the reddest'), and for
-a class of adjectives like \emph{left} and \emph{right} \todo{or is it
-  only those?}, the article \emph{de} (\emph{de linker} `the left
-one').
+a class of adjectives like \emph{left} and \emph{right}, the article
+\emph{de} (\emph{de linker} `the left one').
 
 In addition, the grammar has a separate construction for combining a
 numeral and a superlative adjective, e.g. ``tenth best''. Since the
 tests were generated per function, the main tester didn't read those
 sentences at the same time. After noticing the additional function, we
 asked another informant how to say \emph{Nth best}, and got an
-alternative construction \emph{op (N-1) na best}. Eventually, we got an
+alternative construction \mbox{\emph{op~(N-1)~na~best}}. Eventually, we got an
 answer that the strategy used for superlative adjectives, i.e.~with the
 article \emph{het} and no -e in the number, is acceptable.
 
@@ -155,7 +154,7 @@ goed}).
 
 If there hadn't been already a parameter for different adjective forms,
 or if the classes of words with different behaviours hadn't corresponded
-to the RGL categories, then this bug would've required more work to fix.
+to the RGL categories, then this bug would have required more work to fix.
 
 \subsubsection{Hard to understand, hard to
 fix}\label{hard-to-understand-hard-to-fix}
@@ -176,7 +175,7 @@ These seem like reasonable choices: if the object of liking was \emph{I}
 in the second example, the pronoun wouldn't be \emph{myself} but \emph{me}: ``I
 help you like me''.
 In the \gf{} grammar, these sentences are constructed in a series of steps:
-
+\newpage
 \begin{EmptyItem}
 \begin{Highlighting}[]
 \DataTypeTok{PredVP} \NormalTok{(}\DataTypeTok{UsePron} \NormalTok{i_Pron)}
@@ -232,9 +231,8 @@ object and the \texttt{vcomp} with the reflexive that was already in the
 \texttt{ncomp} table. But the scope of the reflexive was wrong: when
 adding an object to a \texttt{VPSlash} that has a verbal complement
 clause, the object should complete the verbal complement and pick the
-agreement. It is not in the scope for the subject.
-
-This was the old behaviour:
+agreement. It is not in the scope for the subject.\\
+The old behaviour was as follows:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -244,7 +242,7 @@ This was the old behaviour:
 \end{Highlighting}
 \end{EmptyItem}
 
-And this is after fixing the bug:
+After fixing the bug, the table was as follows:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -266,7 +264,7 @@ the constructors is as follows:
 
 \begin{itemize}
 \item
-  \texttt{ReflVP like}
+  \t{ReflVP like}
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -274,8 +272,9 @@ the constructors is as follows:
 \NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{I} \OtherTok{=>} \StringTok{"myself"} \NormalTok{; }\DataTypeTok{You} \OtherTok{=>} \StringTok{"yourself"} \NormalTok{; … \} ;}
 \end{Highlighting}
 \end{EmptyItem}
+
 \item
-  \texttt{VPSlashPrep (ReflVP like) without}
+  \t{VPSlashPrep (ReflVP like) without}
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -284,8 +283,8 @@ the constructors is as follows:
  \NormalTok{prep }\FunctionTok{=} \StringTok{"without"}
 \end{Highlighting}
 \end{EmptyItem}
-\item
-  \texttt{ComplSlash (VPSlashPrep (ReflVP like) without) we\_Pron)}
+
+\item \t{ComplSlash (VPSlashPrep (ReflVP like) without) we\_Pron)}
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -295,10 +294,12 @@ the constructors is as follows:
 \end{Highlighting}
 \end{EmptyItem}
 
-  The desired behaviour is to put the complement into an adverbial slot
-  and keeping the agreement in \texttt{ncomp} open to wait for the
-  subject. But the following happened after our initial changes in
-  \texttt{ComplSlash}:
+\end{itemize}
+
+The desired behaviour is to put the complement into an adverbial slot
+and keeping the agreement in \texttt{ncomp} open to wait for the
+subject. But the following happened after our initial changes in
+\texttt{ComplSlash}:
 
 \begin{EmptyItem}
 \begin{Highlighting}[]
@@ -306,7 +307,6 @@ the constructors is as follows:
 \NormalTok{ncomp }\FunctionTok{=} \NormalTok{table \{ _ }\OtherTok{=>} \AlertTok{"ourselves without us"} \NormalTok{\} ; }
 \end{Highlighting}
 \end{EmptyItem}
-\end{itemize}
 
 To fix this problem, we added another parameter to the category
 \texttt{VPSlash}. All \texttt{VPSlash}es constructed by
@@ -316,8 +316,11 @@ shouldn't affect the agreement. With the new parameter,
 \texttt{ComplSlash} can now distinguish when to choose the agreement
 from the \texttt{NP} argument and when to leave it open for the subject.
 
-The same bug was found in other languages as well. We fixed it for
-Dutch, English and German, using the same strategy.
+All in all, this was a complex phenomenon, and there were different
+interpretations in the RGL. For the Scandinavian languages, the
+behaviour was as we expected, but for English and German, it was
+similar to Dutch. We fixed the grammar for all three languages (Dutch,
+English and German), using the same strategy.
 
 \subsection{Numbers}\label{numbers}
 
