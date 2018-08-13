@@ -358,7 +358,7 @@ have not caused new bugs in other categories and functions. The
 simplest strategy is to generate test cases for \emph{all} functions
 in both grammars, and only show those outputs that differ between the
 grammars. After our changes, we get the following differences: 
-
+\newpage
 \begin{itemize}
 \item[] \t{DetCN the (AdvCN (PrepNP next\_to (DetNP your)) hill)}
   \begin{itemize}
@@ -392,7 +392,7 @@ adjective to the new \t{CN}, in which case \t{AdjCN blue house} and
 \t{house} are linearised identically. Instead of testing every single
 function and finding out by accident, we can test the whole grammar to
 find out if there are any functions in the grammar that behave like
-this. \todo{Should these be explained too later?}
+this. %\todo{Should these be explained too later?}
 
 
 %  We have seen that, in order to test
@@ -442,7 +442,7 @@ combinations of parameters. Instead of dealing with parameters
 directly, we now have a set of new \emph{types}, which is helpful for
 generating test cases.
 
-We use one syntactic function $f \in F^C$ as the base for one set of test
+We use one syntactic function as the base for one set of test
 cases. For lexical categories, it also makes sense to test the whole
 category, i.e. generate all trees that show that \t{AP} is defined and
 handled correctly in the functions. However, we only explain in detail
@@ -452,27 +452,24 @@ We assume that all test cases are trees with the same start
 (top-level) category, such as \t{S} in our example grammar. The
 requirement is that the start category is linearised as one string only. 
 
-\paragraph{Notation}
-For notation, we refer back to Section~\ref{sec:PMCFG} for the
-definition of \pmcfg{}. 
-In addition to \citet{angelov2010phd}'s definition, we use the notion of
-$\textsf{Tree}$ as a generic type for any application of some
-$f \in F^C$ to all of its arguments $[A_1, \dots, A_{a(f)}]$.  Thus, a
-single $f \in F^C$ is also a $\textsf{Tree}$, if $a(f) = 0$. For an
-$f$ with $a(f) > 0$, we need to apply $f$ to $a(f)$ argument
-$\textsf{Tree}$s. 
+%\paragraph{Notation}
 
-\subsection{Enumerate functions} As we explained before, each syntactic
-function turns into multiple versions, one for each combination of
-parameters of its arguments. We test each of these versions
-separately. Each concrete syntactic function may produce one or several trees.
 
-\todo{something more formal here?}
+\subsection{Enumerate functions} As we explained before, each
+syntactic function in the abstract syntax turns into multiple
+versions, one for each combination of parameters of its arguments.  In
+the notation by \citet{angelov2010phd}, presented in
+Section~\ref{sec:PMCFG}, these concrete functions are the set $F^C$.
 
-In order to construct trees that use the syntactic function, we need
-to supply the function with \emph{arguments}, as well as put the resulting tree
-into a \emph{context} that produces a tree in the correct start
-category.
+In order to construct trees that use the concrete syntactic function
+$f$, we need to supply the function with \emph{arguments}, as well as
+put the resulting tree into a \emph{context} that produces a tree in
+the correct start category.  In the best case, each $f$ produces only
+one tree, but as we will explain in the following section, sometimes
+we need more than one tree for a single concrete function; this
+happens if there are no arguments with unique string fields.
+
+
 
 \subsection{Enumerate arguments} 
 \label{enumerate-arguments}
@@ -495,11 +492,6 @@ nominative and accusative ({\em you} sleep vs. I saw {\em you}),
 whereas {\em they} has a different form for both ({\em they} sleep
 vs. I saw {\em them}).
 
-The majority of all functions in all tested languages need 1 or
-2 argument trees, and there are only a handful of cases that need more
-than 3. The highest number we encountered was 8 trees for the Basque
-function which handles conjunctions of the category \t{DAP}
-(determiner with an adjective, e.g. ``three small'').
 
 \paragraph{Subsumption} For our testing purposes, any other pronoun
 with all unique forms \emph{subsumes} the pronoun {\em you}: if we can
@@ -513,7 +505,13 @@ from the arguments, there is always one test case where those strings
 are different. If all pronouns in English were non-unique, we could
 still get the effect by using both \{{\em you},{\em you},{\em your}\}
 and \{{\em she},{\em her},{\em her}\}, because their ambiguity
-manifests in different forms.
+manifests in different forms\footnote{The majority of all functions in all tested languages need 1 or
+2 argument trees, and there are only a handful of cases that need more
+than 3. The highest number we encountered was 8 trees, for a single
+function in the Basque resource grammar.}.
+% for the Basque
+% function which handles conjunctions of the category \t{DAP}
+% (determiner with an adjective, e.g. ``three small'').
 
 We define the function $\textsf{subsumes}$ for a given function $f$
 and two candidate lists of argument trees. It is important to include
@@ -521,6 +519,14 @@ the function $f$ and not just its arguments, because any \gf{}
 function may introduce new strings to the linearisation. If $f$
 introduces some string $s$, then any argument that contains $s$ is
 worse than an otherwise identical argument without $s$.
+
+In addition to \citet{angelov2010phd}'s definition, we use the notion of
+$\textsf{Tree}$ as a generic type for any application of some
+$f \in F^C$ to all of its arguments $[A_1, \dots, A_{a(f)}]$.  Thus, a
+single $f \in F^C$ is also a $\textsf{Tree}$, if $a(f) = 0$. For an
+$f$ with $a(f) > 0$, we need to apply $f$ to $a(f)$ argument
+$\textsf{Tree}$s.
+
 
 \begin{EmptyItem}
 \begin{array}{p{0.25cm} p{0.2cm} l}
@@ -712,7 +718,7 @@ category \t{CN} in our example grammar.
 % \t{CN}. 
 Since \t{CN} is variable for number, we need two contexts:
 one that chooses the singular form and other that chooses the plural
-form.  This suggests that we should apply two different \t{CN
+form.  This means we should apply two different \t{CN
   $\rightarrow$ NP} functions (Figure~\ref{fig:context-general} shows
 \t{DetCN this} and \t{DetCN these}), and give their results to the
 \t{UttNP} function, which constructs an \t{S}.
@@ -774,7 +780,7 @@ rely on applications of \t{DetCN this} and \t{DetCN these} to lift it
 up into an \t{NP}, as shown in Figure~\ref{fig:context-general}, and
 only then can \t{UttNP} get access to its strings.
 
-\paragraph{Top-down computation}
+\paragraph{Contexts as systems of equations}
 
 \begin{figure}[h]
 \centering
@@ -786,11 +792,12 @@ only then can \t{UttNP} get access to its strings.
 
 Computing relevant contexts in a given start category \t{S} is done
 once, in advance, for all possible hole types $H$ at the same time,
-using fixpoint iteration. \todo{would be inefficient to do it bottom-up.}
+using fixpoint iteration. 
 We model this in a top-down manner, where in the beginning, only the
 start category \t{S} has a context, albeit a trivial one: ``do
 nothing, you're already there!''. The other categories don't have a
-context yet.
+context yet, but will get them during the process in the following
+manner, referencing Figure~\ref{fig:context-dependence}. 
 
 On the first round, we get to compute contexts for all categories
 \t{B} that are arguments to some function \t{g : B $\rightarrow$ S}:
@@ -803,7 +810,7 @@ categories that depend on the newly unlocked ones, until all
 categories have their contexts. Figure~\ref{fig:context-dependence}
 shows the general pattern for categories \t{A} and \t{B} in start
 category \t{S}.
- 
+
 The definition of contexts is mutually recursive, and can be seen as a
 system of equations.The simple example with \t{f~:~A~$\rightarrow$~B}
 and \t{g~:~B~$\rightarrow$~S} is expressed as follows.
@@ -830,18 +837,25 @@ and \t{g~:~B~$\rightarrow$~S} is expressed as follows.
 % \end{tabular}
 % \end{table}
 
-\noindent In the general case, these sets can be infinite: think of
-functions of type \t{A~$\rightarrow$~A} and loops of \t{A~$\rightarrow$~B} and \t{B~$\rightarrow$~A}.  We want to find the
-{\em least} solution to such systems of equations. 
+\paragraph{Least solution} In the general case, these sets can be
+infinite: think of functions of type \t{A~$\rightarrow$~A} and loops
+of \t{A~$\rightarrow$~B} and \t{B~$\rightarrow$~A}.  We want to find
+the {\em least} solution to such systems of equations.  The word
+\emph{least} means, in this case, two things: (a) the fewest trees
+that still use all the fields of the category, and (b) which are of
+the smallest size (e.g. choosing \t{UttNP} over \t{PredAdj} for the
+context of \t{NP}).
 
-The least set,
-i.e. no junk--we don't want infinite sets. We are only interested in
-those contexts that cover all.
+In contrast to the more intuitive bottom-up approach, a top-down
+computation is more efficient: we retrieve the fastest way to the
+start category, because at each round, we consider contexts that we
+already know to lead into the start category. Thus we avoid functions
+of type \t{B~$\rightarrow$~A} when computing the context for \t{B},
+because we only consider functions whose goal type \emph{already has a
+  context}; hence \t{g : B~$\rightarrow$~S} is the only candidate.
 
- The word \emph{least} means, in
-this case, two things: (a) the fewest trees that still use all the fields
-of the category, and (b) which are of the smallest size
-(e.g. choosing \t{UttNP} over \t{PredAdj} for the context of \t{NP}).
+
+
 % To give an example, consider the context of \t{AP} in Spanish. \t{AdjCN : Adj
 %   $\rightarrow$ CN $\rightarrow$ CN} would
 % be a better local strategy than \t{PredAdj : NP $\rightarrow$ AP
@@ -861,24 +875,20 @@ of the category, and (b) which are of the smallest size
 %%%% EITHER this
 % \input{chapters/gf-appendix.tex}
 
-%%%% OR all of the following
+\paragraph{Algorithm}
 
-% Let us start by listing some information we have on the grammar.  For
-% every category \t{C}, we know which functions take it as an argument,
-% and which position \t{C} is. For instance, the category \t{AP} is
-% consumed as the first argument (position 0) of \t{AdjCN}, and second
-% argument (position 1) of \t{PredAdj}.  In addition, we know which
-% fields from its argument the function uses (i.e. sends upwards):
-% nominative for \t{PredAdj}, \t{PredAdv} and \t{UttNP}, and accusative
-% for \t{PrepNP}. 
-% Table~\ref{info-on-grammar} is defined as follows for every concrete category \t{C} in the \pmcfg{}.
+% To compute relevant contexts with the start category \t{S} as a hole,
+% we initialise the contexts as follows:
 
-% $$
-% C \mapsto \{ f, i, \text{\it fields}(C), R \;|\; \forall f \in F^C, f : C_1 \rightarrow \dots
-%   \rightarrow C_i \rightarrow C_n \rightarrow R \}
-% $$
 
-It is possible to express the set of relevant contexts for one hole type $H$ in terms of the sets of relevant contexts for other hole types $H'$:
+% \begin{EmptyItem}
+% $\textsf{contexts}(S) = \{ \; id \; \}$ \\
+% $\textsf{contexts}(H) = \{ \; \} \;\;\; : \; \forall H \neq S$
+% \end{EmptyItem}
+
+\noindent We express the set of relevant contexts for one hole type
+$H$ in terms of the sets of relevant contexts for other hole types
+$H'$, using the following definition:
 
 \begin{EmptyItem}
 $\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H
@@ -893,17 +903,21 @@ function $\textsf{filter}$ to the result in order to filter out
 redundant contexts, i.e. contexts whose uses of the strings of $H$ are
 already covered by other contexts in the same set.
 
-To compute relevant contexts with the start category \t{S} as a hole,
-we use the following definition $\textsf{contexts}(\t{S}) = \{ \; id
-\; \}$. In order to compute all sets of contexts for all possible hole
-categories $H$, we set up a system of equations (as specified
-above). In general, this system of equations is recursive, and we use
-a fixpoint iteration to solve it, starting with
-$\textsf{contexts}(H)~=~\varnothing$ for each category $H$ that is
-not the start category.
-% the empty set $\varnothing$ for each set.
-There is a guaranteed minimal solution, because the RHSs are monotonic
-in $H'$. \todo{Kleene's or Tarski's fixpoint theorem + read Koen's slides}
+In order to compute all sets of contexts for all possible hole
+categories $H$, we set up a system of equations. In general, this
+system of equations is recursive, and we use a fixpoint iteration to
+solve it, initialising the contexts as follows: $id$ for the start
+category, and an empty set for all other categories. There is a guaranteed minimal solution, because the RHSs are monotonic
+in $H'$. \todo{Kleene's fixed point theorem}
+
+\begin{EmptyItem}
+$\textsf{contexts}(S) = \{ \; id \; \}$ \\
+$\textsf{contexts}(H) = \{ \; \} \;\;\; : \; \forall H \neq S$
+\end{EmptyItem}
+%  starting with $\textsf{contexts}(S) = \{ \; id \; \}$ for
+% the start category, and $\textsf{contexts}(H)~=~\varnothing$ for
+% each category $H$ that is not the start category.
+
 
 It is important that we do not change the contexts for anything that
 uses fewer or the same amount of fields. In the English example, it
