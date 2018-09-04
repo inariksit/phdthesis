@@ -193,10 +193,10 @@ happy with just finding the right arguments to \t{PrepNP}, no need for contexts.
 In order to catch a bug in the function, or confirm there is none, we
 need the following 4 trees: 
 
-\[
+\begin{EmptyItem}
 \t{PrepNP}\; \{ \stackanchor{\tt with}{\tt without} \} 
            \{ \stackanchor{\tt DetNP this}{\tt DetCN this house} \}. 
-\]
+\end{EmptyItem}
 
 \paragraph{Adjective agreement in Estonian} In Estonian,
 most adjectives agree with nouns in case and number in an attributive
@@ -456,12 +456,13 @@ the notation by \citet{angelov2010phd}, presented in
 Section~\ref{sec:PMCFG}, these concrete functions are the set $F^C$.
 
 In order to construct trees that use the concrete syntactic function
-$f$, we need to supply the function with \emph{arguments}, as well as
-put the resulting tree into a \emph{context} that produces a tree in
-the correct start category.  In the best case, each $f$ produces only
-one tree, but as we will explain in the following section, sometimes
-we need more than one tree for a single concrete function; this
-happens if there are no arguments with unique string fields.
+$f \in F^C$, we need to supply the function with \emph{arguments}, as
+well as put the resulting tree into a \emph{context} that produces a
+tree in the correct start category.  In the best case, each $f$
+produces only one tree, but as we will explain in the following
+section, sometimes we need more than one tree for a single concrete
+function; this happens if there are no arguments with unique string
+fields.
 
 
 
@@ -522,30 +523,38 @@ $f$ with $a(f) > 0$, we need to apply $f$ to $a(f)$ argument
 $\textsf{Tree}$s.
 
 
+%\begin{figure}[h]
 \begin{EmptyItem}
 \begin{array}{p{0.25cm} p{0.2cm} l}
-% \multicolumn{3}{l}{\textsf{subsumesString : [String]} \rightarrow
-%   \textsf{[String]}\rightarrow \textsf{Bool}} \\
-% \multicolumn{3}{l}{\textsf{subsumesString xs ys} =} \\
-%  & \multicolumn{2}{l}{\forall i,j : \textbf{ if } \textsf{xs } ! \, i =
-%    \textsf{xs } ! \, j,
-%    \textbf{ then also } \textsf{ys } ! \, i = \textsf{ys } ! \, j.} \\
-% \\
+\multicolumn{3}{l}{\textsf{linAll :: Tree } \rightarrow \textsf{ [String]}} \\
+\multicolumn{3}{l}{\textsf{linAll t} = \textbf{return all string
+  fields of }\textsf{t}} \\
+\\
 \multicolumn{3}{l}{\textsf{subsumes : }F^C \rightarrow \textsf{[Tree]} \rightarrow \textsf{[Tree]} \rightarrow \textsf{Bool}} \\
 \multicolumn{3}{l}{\textsf{subsumes } f \textsf{ xtrees ytrees} =} \\
- & \textbf{let} & \textsf{xlins} = \textbf{strings of}
-    \textsf{ xtrees}\text{ ++ }\textbf{strings that } f \textbf{
-                  introduces} \\
- &              & \textsf{ylins} = \textbf{strings of}
-    \textsf{ ytrees}\text{ ++ }\textbf{strings that } f \textbf{
-                  introduces} \\
- & \textbf{in}  & \forall i,j : \textbf{ if } \textsf{xlins } ! \, i =
-   \textsf{xlins } ! \, j,
-   \textbf{ then also } \textsf{ylins } ! \, i = \textsf{ylins } ! \,
-                  j. \\
+ & \textbf{let} & \textsf{syncats = } \textbf{strings introduced by } f \\
+ &              & \textsf{xlins} = \textsf{syncats} \text{ ++ } \textsf{concatMap linAll
+                  xtrees} \\
+ &              & \textsf{ylins} =  \textsf{syncats} \text{ ++ } \textsf{concatMap linAll
+                  ytrees} \\
+ & \textbf{in}  & \textsf{and [ ys !! } i  \text{ ==} \textsf{ ys !! } j \\
+ &              & \textsf{| } i \leftarrow \textsf{[0..length xs-1], } j \leftarrow \textsf{[0..length xs-1]} \\
+ &              & \textsf{, xs !! } i == \textsf{ xs !! } j \textsf{ ]} \\
+% \forall i,j : \textbf{ if } \textsf{xlins } ! \, i =
+%    \textsf{xlins } ! \, j,
+%    \textbf{ then also } \textsf{ylins } ! \, i = \textsf{ylins } ! \,
+%                   j. \\
 %\textsf{subsumesString xlins ylins} \\
 \end{array}
 \end{EmptyItem}
+%\end{figure}
+
+In words, we gather all strings from the function $f$ and its
+arguments, and check that for all indices $i$ and $j$, if the $i^{th}$
+element of $\textsf{xs}$ ($x_i$) is the same as the $j^{th}$ element
+($x_j$), then also the corresponding elements from $\textsf{ys}$
+($y_i$ and $y_j$) must be the same. If this property holds, then
+$\textsf{xs}$ subsumes $\textsf{ys}$.
 
 \paragraph{Argument generation and filtering}
 For a given $f \in F^C$, we generate all lists of argument trees
@@ -562,67 +571,58 @@ constructors; thus \t{DetNP~this} is generated before \t{DetCN this
 unique examples.
 
 
+\begin{figure}[h]
 \begin{EmptyItem}
 \begin{array}{p{0.25cm} p{0.2cm} l}
 \multicolumn{3}{l}{\textsf{generateAllTrees :: [}N^C\textsf{]} \rightarrow
   \textsf{[[Tree]]}} \\
 \multicolumn{3}{l}{\textsf{generateAllTrees
-  (a}_1:\ldots:\textsf{a}_n\textsf{) = } \textbf{defined in FEAT}}
+  [a}_1,\ldots,\textsf{a}_n\textsf{] = } \textbf{defined in FEAT}}
 \end{array}
 \end{EmptyItem}
+\end{figure}
 
 The main logic is implemented as a fold over the lazily generated list
-of all lists of argument trees. First we define the function $\textsf{keepIfRelevant}$ that the fold takes as its first
-argument: it takes a new tentative test case ($\textsf{t}$), a list of
-already good test cases ($\textsf{ts}$), and checks whether any of the
-test cases in $\textsf{ts}$ subsumes $\textsf{t}$. If yes, we can
-ignore $\textsf{t}$ and keep $\textsf{ts}$ intact; if no, we add
-$\textsf{t}$ to the list and remove from $\textsf{ts}$ any test cases
-that $\textsf{t}$ subsumes.
+of all lists of argument trees. First we define the function
+$\textsf{keepIfRelevant}$ that the fold takes as its first argument:
+it takes a new tentative test case ($\textsf{t}$), a list of already
+good test cases ($\textsf{ts}$), and checks whether any of the test
+cases in $\textsf{ts}$ subsumes $\textsf{t}$. If yes, we can ignore
+$\textsf{t}$ and keep $\textsf{ts}$ intact; if no, we add $\textsf{t}$
+to the list and remove from $\textsf{ts}$ any test cases that
+$\textsf{t}$ subsumes.  In practice, we stop after examining 10.000
+trees, or whenever we have found a desired combination of trees.
 
-% In practice, we stop after examining
-% 10.000 trees, or whenever we have found a desired combination of
-% trees.
-
+\begin{figure}[h]
 \begin{EmptyItem}
-\begin{array}{p{0.25cm} p{0.2cm} l}
-\multicolumn{3}{l}{\textsf{keepIfRelevant :: } F^C  \rightarrow \textsf{[Tree]} \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]}} \\
-\multicolumn{3}{l}{\textsf{keepIfRelevant } f \textsf{ t ts } = \textbf{if } \textsf{any } (\lambda x. \textsf{ subsumes } f \; x \textsf{ t) ts}} \\
-  & \multicolumn{2}{l}{\textbf{~~~~~~~~~~~~~~~then} \textsf{ ts}} \\
-  & \multicolumn{2}{l}{\textbf{~~~~~~~~~~~~~~~else} \textsf{ t : filter (not }
-    \circ \textsf{ subsumes } f \textsf{ t) ts}} \\
+\begin{array}{p{3.45cm} l}
+\multicolumn{2}{l}{\textsf{keepIfRelevant :: } F^C  \rightarrow \textsf{[Tree]} \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]}} \\
+\multicolumn{2}{l}{\textsf{keepIfRelevant } f \textsf{ t ts } = \textbf{if } \textsf{any } (\lambda x. \textsf{ subsumes } f \; x \textsf{ t) ts}} \\
+  & \textbf{then} \textsf{ ts} \\
+  & \textbf{else} \textsf{~~t : filter (not }
+    \circ \textsf{ subsumes } f \textsf{ t) ts} \\
 \end{array}
 \end{EmptyItem}
+\end{figure}
 
 Finally, we define the function $\textsf{mostUniqueExamples}$, which
 returns a minimal set of arguments that is needed to test the function
 $f$, as a fold over all examples.
 
+\begin{figure}[h]
 \begin{EmptyItem}
 \begin{array}{l}
 \textsf{mostUniqueExamples :: } F^C \rightarrow \textsf{[[Tree]]} \rightarrow \textsf{[[Tree]]} \\
 \textsf{mostUniqueExamples } f \textsf{ vtrees} = \textsf{foldr (keepIfRelevant } f \textsf{) [] vtrees} \\
 \end{array}
 \end{EmptyItem}
+\end{figure}
 
 \paragraph{Putting it all together}
 The set of most unique argument trees for some $f \in F^C$ is computed
 by the function $\textsf{bestTrees}$.
 For an $f$ with arguments $[A_1,A_2,\dots,A_{a(f)}]$, the $\textsf{Tree}$s in
 the inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$. 
-
-% We can access the argument categories of $f$ by
-% calling the function $\textsf{args}$.
-
-% \begin{EmptyItem}
-% \begin{array}{p{1.01cm} l}
-% \multicolumn{2}{l}{\textsf{args : } F^C \rightarrow [N^C]} \\
-% \multicolumn{2}{l}{\textsf{args} \; f = \{ \; [A_1,A_2,\dots,A_{a(f)}]}  \\
-%       &| \; p \in P  \textbf{ where } p \textbf{ is the production } A \rightarrow
-%         f[A_1,A_2,\dots,A_{a(f)}] \; \} \\
-% \end{array}
-% \end{EmptyItem}
-
 
 \begin{EmptyItem}
 \begin{array}{p{0.25cm} p{0.2cm} p{0.75cm} l}
@@ -638,32 +638,6 @@ the inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$.
 
 
 
-
-
-% \paragraph{Number of arguments} In our implementation, we use the
-% \feat{} framework \cite{feat} to enumerate possible combinations of
-% argument trees, in size order. We stop when we have found a suitable
-% set of combinations of arguments, according to the requirement
-% above. 
-
-
-
-% When creating test cases for the resource grammar, this has
-% only happened to 2 functions in all of the tested languages: \t{ConjS}
-% and \t{ConjRS}, which handle conjunctions of sentences and relative
-% sentences.
-
-
-\paragraph{Example: Test cases using \t{AdjCN}} Let us test the function
-\t{AdjCN : Adj $\rightarrow$ CN $\rightarrow$ CN} in Spanish
-concrete syntax. 
-Firstly, we need a minimal and representative set of arguments:
-one premodifier and one postmodifier \t{AP} (\t{good} and
-\t{small}), as well as one feminine and one masculine
-\t{CN} (\t{house} and \t{hill}). Now, our full set of test cases are
-\t{AdjCN} applied to the cross product of \{\stackanchor{\tt \small
-  good}{\tt \small small}\} $\times$ \{\stackanchor{\tt \small
-  house}{\tt \small hill}\}, as seen in Table~\ref{tab:adjAttr}.
 
 \begin{table}[h]
 \centering
@@ -683,13 +657,43 @@ one premodifier and one postmodifier \t{AP} (\t{good} and
 \end{table}
 
 
+\paragraph{Example: Test cases using \t{AdjCN}} Let us test the function
+\t{AdjCN : Adj $\rightarrow$ CN $\rightarrow$ CN} in Spanish
+concrete syntax. 
+Firstly, we need a minimal and representative set of arguments:
+one premodifier and one postmodifier \t{AP} (\t{good} and
+\t{small}), as well as one feminine and one masculine
+\t{CN} (\t{house} and \t{hill}). Now, our full set of test cases are
+\t{AdjCN} applied to the cross product of \{\stackanchor{\tt \small
+  good}{\tt \small small}\} $\times$ \{\stackanchor{\tt \small
+  house}{\tt \small hill}\}, as seen in Table~\ref{tab:adjAttr}.
 
-\begin{figure}[h]
+
+\begin{table}[b]
 \centering
-\includegraphics[width=0.85\textwidth]{img/context-example.png}
-\caption{Two contexts for the category \t{CN}, which choose all forms from the inflection table.}
-\label{fig:context-general}
-\end{figure}
+\begin{tabular}{| l | l |}
+\hline
+\t{UttNP (DetCN this
+    (\underline{AdjCN good house}))} & \t{UttNP (DetCN this
+                                            (\underline{AdjCN good hill}))} \\
+esta buena casa          & este buen cerro \\ \hline
+\t{UttNP (DetCN these
+    (\underline{AdjCN good house}))} & \t{UttNP (DetCN these
+                                            (\underline{AdjCN good hill}))} \\
+estas buenas casas       & estos buenos cerros \\ \hline
+\t{UttNP (DetCN this
+    (\underline{AdjCN small house}))} & \t{UttNP (DetCN this
+                                            (\underline{AdjCN small hill}))} \\
+esta casa peque\~{n}a          & este cerro peque\~{n}o \\ \hline
+\t{UttNP (DetCN these
+    (\underline{AdjCN small house}))} & \t{UttNP (DetCN these
+                                            (\underline{AdjCN small hill}))} \\
+estas casas peque\~{n}as      & estos cerros peque\~{n}os \\ \hline
+\end{tabular}
+\caption{Complete test cases to test \t{AdjCN}}
+\label{tab:testCases}
+\end{table}
+
 
 \subsection{Enumerate contexts} 
 
@@ -725,30 +729,13 @@ contexts is thus \t{UttNP (DetCN this \char`_)} and \t{UttNP (DetCN
 Table~\ref{tab:adjAttr} into the holes, and get 8 trees in total as
 shown in Table~\ref{tab:testCases}.
 
-\begin{table}[h]
+\begin{figure}[t]
 \centering
-\begin{tabular}{| l | l |}
-\hline
-\t{UttNP (DetCN this
-    (\underline{AdjCN good house}))} & \t{UttNP (DetCN this
-                                            (\underline{AdjCN good hill}))} \\
-esta buena casa          & este buen cerro \\ \hline
-\t{UttNP (DetCN these
-    (\underline{AdjCN good house}))} & \t{UttNP (DetCN these
-                                            (\underline{AdjCN good hill}))} \\
-estas buenas casas       & estos buenos cerros \\ \hline
-\t{UttNP (DetCN this
-    (\underline{AdjCN small house}))} & \t{UttNP (DetCN this
-                                            (\underline{AdjCN small hill}))} \\
-esta casa peque\~{n}a          & este cerro peque\~{n}o \\ \hline
-\t{UttNP (DetCN these
-    (\underline{AdjCN small house}))} & \t{UttNP (DetCN these
-                                            (\underline{AdjCN small hill}))} \\
-estas casas peque\~{n}as      & estos cerros peque\~{n}os \\ \hline
-\end{tabular}
-\caption{Complete test cases to test \t{AdjCN}}
-\label{tab:testCases}
-\end{table}
+\includegraphics[width=0.85\textwidth]{img/context-example.png}
+\caption{Two contexts for the category \t{CN}, which choose all forms from the inflection table.}
+\label{fig:context-general}
+\end{figure}
+
 
 
 \paragraph{Strings' path to the start category} 
@@ -901,7 +888,7 @@ categories $H$, we set up a system of equations. In general, this
 system of equations is recursive, and we use a fixpoint iteration to
 solve it, initialising the contexts as follows: $id$ for the start
 category, and an empty set for all other categories. There is a guaranteed minimal solution, because the RHSs are monotonic
-in $H'$. \todo{Kleene's fixed point theorem}
+in $H'$ \cite{lassez1982fixed}.
 
 \begin{EmptyItem}
 $\textsf{contexts}(S) = \{ \; id \; \}$ \\
@@ -1068,10 +1055,12 @@ So far we have completely ignored that one tree can showcase more than
 one function. In the Estonian example, we start
 by testing \t{AdjCN} and end up with the following 8 trees, where
 \t{PrepNP} is in the context: 
+\[
 \t{PrepNP} \{ \stackanchor{\tt in}{\tt with} \}
-             {\tt (DetCN} \{ \stackanchor{\tt this}{\tt these} \} 
-             {\tt AdjCN}  \{\stackanchor{\tt blue}{\tt ready} \} 
-             {\tt house)}.
+             { \t{(DetCN}} \{ \stackanchor{\tt this}{\tt these} \} 
+             {\t{AdjCN}}  \{\stackanchor{\tt blue}{\tt ready} \} 
+             { \t{house)}}.
+\]
 In fact, these 8 trees cover all tests we would've needed for
 \t{PrepNP} itself. Thus, it is possible to shrink the test cases
 effectively, if one wants to test the whole grammar at one go.
@@ -1417,7 +1406,7 @@ trees are more complex, as in the following:
   house)} \\ `good/small house without a house'.
 \end{EmptyItem}
 
-This is because in the full resource grammar, there is no parameter
+\noindent This is because in the full resource grammar, there is no parameter
 for the modifier and determiner placement, instead, each \t{CN} just
 includes fields for heavy and non-heavy modifier, and all determiners
 include the fields for pre- and postdeterminer. This way the functions
