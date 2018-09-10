@@ -1,39 +1,50 @@
 \chapter{Introduction to this thesis}
 
-There are many approaches to natural language processing (NLP). 
-\todo{More setup, explanation what are data-driven and rule-based, make forward reference to Chapter 2}
-\todo{Put something like this already here: ``Our work is by no means the first approach
-to grammar testing: for instance, \citet{butt1999lfg} recommend
-frequent use of test suites, as well as extensive documentation of
-grammars.''}
+There are many approaches to natural language processing (NLP).
+Broadly divided, we can contrast data-driven and rule-based approach,
+which in turn contain more subdivisions.
 
 %Nowadays, many well-known end-user applications are based on machine learning.
-A data-driven approach is appropriate, when the target language is well-resourced (and grammatically simple), the domain is unlimited and correctness is not crucial.
-For example, a monolingual English speaker who wants to get the gist of any non-English web page will be happy with a free, wide-coverage online service, even if it makes some mistakes.
+Data-driven NLP is based on learning from examples, rather than
+explicit rules. Consider how would a system learn that the English
+string \emph{cat} corresponds to the German string \emph{Katze}: we
+feed it millions of parallel sentences, and it learns that whenever
+\emph{cat} appears in one, \emph{Katze} appears in another with a high
+probability. This approach is appropriate, when the target language is
+well-resourced (and grammatically simple), the domain is unlimited and
+correctness is not crucial. For example, a monolingual English speaker
+who wants to get the gist of any non-English web page will be happy
+with a fast, wide-coverage translation system, even if it makes some
+mistakes.
 
-Rule-based NLP has a different set of use cases. Writing grammar rules takes more human effort than training a machine learning model, but in many cases, it is the more feasible approach:
-%but the results are more general, predictable and adaptable. 
-
-
-
+Rule-based NLP has a different set of use cases. Writing grammar rules
+takes more human effort than training a machine learning model, but in
+many cases, it is the more feasible approach:
 \begin{itemize}
-\setlength\itemsep{0.0em}
-\item \textbf{Quality over coverage.} 
-Think of producers instead of consumers of information: the producer needs high guarantees of correctness,
-but often there is only a limited domain to cover. %Grammars are ideal for such use cases.
+  \setlength\itemsep{0.0em} \item \textbf{Quality over coverage.}
+  Think of producers instead of consumers of information: the producer
+  needs high guarantees of correctness, but often there is only a
+  limited domain to cover. %Grammars are ideal for such use cases.
 %In such a case, a domain-specific grammar %for translation or natural language generation
 %is much more feasible than a general-purpose tool, with wide coverage but limited quality.
 %A user 
 %In contrast, producers of information need strong guarantees that the information they provide is correct in all languages. 
 
-\item \textbf{Less language resources needed}. Most of the 6000+ languages of the world do not have the abundance of data needed for machine learning, making rule-based approach the only feasible one.
+\item \textbf{Less language resources needed}. Most of the 6000+
+  languages of the world do not have the abundance of data needed for
+  machine learning, making rule-based approach the only feasible one.
 
-\item \textbf{Grammatically complex languages} benefit proportionately more from a grammar-based approach. 
-Think of a grammar as a compression method: a compact set of rules generates infinitely many sentences. 
-Grammars can also be used in conjunction with machine learning, e.g. creating new training data to prevent data sparsity.
+\item \textbf{Grammatically complex languages} benefit proportionately
+  more from a grammar-based approach. Think of a grammar as a
+  compression method: a compact set of rules generates infinitely many
+  sentences. Grammars can also be used in conjunction with machine
+  learning, e.g. creating new training data to prevent data sparsity.
 
-\item \textbf{Grammars are explainable}, and hence, testable. If there is a bug in a particular sentence, we can find the reason for it and fix it. In contrast, machine learning models are much more opaque, and the user can just tweak some parameters, without guarantees how it affects the model.
-
+\item \textbf{Grammars are explainable}, and hence, testable. If there
+  is a bug in a particular sentence, we can find the reason for it and
+  fix it. In contrast, machine learning models are much more opaque,
+  and the user can just tweak some parameters, without guarantees how
+  it affects the model.
 \end{itemize}
 
 %Rule-based and data-driven NLP have different trade-offs: the first prioritizes quality over coverage, and vice versa. It is especially applicable for producers of information, as opposed to consumers: a user who just wants to get the gist of a web page in a foreign language benefits from a wide-coverage system, even if it makes mistakes. In contrast, producers of information need strong guarantees that the information they provide is correct in all languages.
@@ -43,23 +54,38 @@ Grammars can also be used in conjunction with machine learning, e.g. creating ne
 %In addition, more complex languages benefit proportionately more from rule-based approach. If a single noun or verb can have hundreds of inflection forms (as opposed to English, think \emph{dog} and \emph{dogs}), we would need much more training data in order to cover all of them. A grammar-based approach can be used to synthesize data, in conjunction with a data-driven approach such as deep learning.
 %This benefits even languages that are relatively well-off, such as Finnish.
 
-Testing grammars has one big difference from testing software: natural language has no formal specification, 
-so ultimately we must involve a human oracle. However, we can automate many useful subtasks: detect \emph{ambiguous constructions} and \emph{contradictory grammar rules}, as well as generate \emph{minimal and representative} set of examples that cover all the constructions. 
-Think of the whole grammar as a haystack, and we suspect there are a few needles---we cannot promise automatic needle-removal, but instead we help the human oracle to narrow down the search.
+\todo{Put something like this already here: ``Our work is by no means the first approach to 
+
+grammar testing: for instance, \citet{butt1999lfg} recommend
+frequent use of test suites, as well as extensive documentation of
+grammars.''}
+
+Testing grammars has one big difference from testing software: natural
+language has no formal specification, so ultimately we must involve a
+human oracle. However, we can automate many useful subtasks: detect
+\emph{ambiguous constructions} and \emph{contradictory grammar rules},
+as well as generate \emph{minimal and representative} set of examples
+that cover all the constructions. Think of the whole grammar as a
+haystack, and we suspect there are a few needles---we cannot promise
+automatic needle-removal, but instead we help the human oracle to
+narrow down the search.
 % In the end, we need a human to confirm and decide what to do with the needles.
 
-In the following sections, we present our research on testing computational natural language grammars, showcasing two different types of grammar formalisms and testing methods.
+In the following sections, we present our research on testing
+computational natural language grammars, showcasing two different
+types of grammar formalisms and testing methods.
 
 \section{Symbolic evaluation of a reductionistic formalism}
 
-Constraint Grammar (CG) \cite{karlsson1995constraint} is a robust and language-independent formalism 
-for part-of-speech tagging and shallow parsing. 
-A grammar consists of disambiguation rules for initially ambiguous, 
-morphologically analysed text: the correct analysis for the sentence 
-is attained by removing improper readings from ambiguous words.
-Consider the word \emph{wish}: without context, it could be a noun or a verb.
-But any English speaker can easily tell that ``a wish'' is a noun.
-In CG, we can generalise the observation and write the following rule:
+Constraint Grammar (CG) \cite{karlsson1995constraint} is a robust and
+language-independent formalism for part-of-speech tagging and shallow
+parsing. A grammar consists of disambiguation rules for initially
+ambiguous, morphologically analysed text: the correct analysis for the
+sentence is attained by removing improper readings from ambiguous
+words. Consider the word \emph{wish}: without context, it could be a
+noun or a verb. But any English speaker can easily tell that ``a
+wish'' is a noun. In CG, we can generalise the observation and write
+the following rule:
 
 \begin{itemize}
 \item[] \texttt{SELECT noun IF (0 noun/verb) (-1 article) ;}

@@ -1,9 +1,9 @@
-\section{Fixing the Dutch grammar}
+\section{Case study: Fixing the Dutch grammar}
 \label{dutch-experiment}
 
 In this section, we describe the long-term project of fixing bugs in
-the Dutch resource grammar. The reader uninterested in details of
-grammar writing may well skip the section and go to conclusions.
+the Dutch resource grammar. \todo{Recommend to read even if you don't
+  know Dutch}.
 
 
 \subsection{Experimental setup}\label{experimental-setup}
@@ -19,7 +19,8 @@ We generated a set of test sentences for each function in Dutch, with
 English translations, and gave them to the native tester to read. The
 tester replied with a list of sentences that were wrong, along with
 suggestions for improvement. Communication between the grammarian and
-the tester was conducted via email.
+the tester was conducted via email. In the future, \todo{less
+  primitive process management might make the process more efficient}.
 
 \subsection{Types of bugs}\label{types-of-bugs}
 
@@ -35,7 +36,7 @@ terrible spaghetti code in a Dutch grammar, but very elegantly in a
 German grammar, and both have a bug that results in a similar
 ungrammatical sentences. In such a case, the problem would be equally
 easy to understand in both languages, but fixing the bug would be easier
-in the German grammar.
+in the German grammar. \todo{does it break more easily for german?}
 
 In more concrete terms, \emph{easy to fix} means just some local changes
 in a single function. In contrast, bugs that are \emph{hard to fix}
@@ -371,7 +372,8 @@ ease of understanding, and just classify the bugs by how easy they were to fix.
   Add missing inflected forms for past participles + add missing
   linearisation for the function \texttt{PastPartAP}
 \item
-  Preposition contraction
+  Preposition contraction (\emph{met dit huis} `with this house' and
+  \emph{hiermee} `with this')
 \item
   Negation patterns (\emph{niet} and \emph{geen})
 \item

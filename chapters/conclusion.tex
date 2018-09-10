@@ -100,12 +100,12 @@ certain tagset, rules to combine tags into readings, and ambiguity
 classes. % All of
 % this information comes from morphological lexica, which are not
 % guaranteed to be infallible.
-This means that our CG analysis is as reliable as is the morphological
-lexicon where the tags and the readings come from. Quite simply, if
-the morphological lexicon contains a word with the wrong tag, or the
-specifications for how tags can combine into readings are outdated,
-our tool may do the wrong thing: report a false conflict or fail to
-detect a real error.
+This means that reliability of our CG analysis tool depends on the
+consistency of the CG grammar and the morphological lexicon where the
+tags and the readings come from. Quite simply, if the morphological
+lexicon contains a word with the wrong tag, or the specifications for
+how tags can combine into readings are outdated, our tool may do the
+wrong thing: report a false conflict or fail to detect a real error.
 
 But if the lexicon and tag set are correct, then we can be fairly
 certain of the analysis. If the grammar is deemed conflict-free, it
@@ -156,7 +156,7 @@ But natural language is infinite. How does that work with a finite set
 of test cases? First of all, we are testing a \pmcfg{} representation
 of natural language. This representation may still define an infinite
 language: for example, the grammar can parse and produce a sentence
-with arbitrarily many relative clauses (\emph{I know that you think
+with arbitrarily many subordinate clauses (\emph{I know that you think
   that she disagrees that \dots this example is contrived}), only
 limited by physical constraints such as memory or having a source of
 power after all humans die. But importantly, the grammar still has a
@@ -170,7 +170,7 @@ we can answer this definitely.  In the \pmcfg{} format, all variation
 is encoded as parameters: if the $n^{th}$ repetition of some function
 would cause different behaviour, then there would be a parameter that
 counts the applications, and the program would generate separate test
-cases for one relative clause, and $n$ nested relative clauses.
+cases for one subordinate clause, and $n$ nested subordinate clauses.
 
 But we can still fail to generate a test that reveals the error---the
 failure mode is, simply, not enough parameters.  Consider the
@@ -193,19 +193,17 @@ non-contracting prepositions.
 
 \subsection{Future directions}
 
-After two years of the initial publication
-\cite{listenmaa_claessen2016}, the CG analysis tool has, to our
-knowledge, never been used outside our research group. A natural
-explanation is that our research group has never developed CG
-grammars, thus we have less clear idea about existing workflows and
-the concrete needs of CG grammarians, and less chances to attract
-users. % Even if we had gotten users at the beginning, our chances of
-% providing long-term maintenance would have been quite low.
-We still believe that the CG analysis tool has its merits, and
-even if our implementation doesn't catch on, we leave the idea
-documented in this thesis.
-
-
+% After two years of the initial publication
+% \cite{listenmaa_claessen2016}, the CG analysis tool has, to our
+% knowledge, never been used outside our research group. % A natural
+% explanation is that our research group has never developed CG
+% grammars, thus we have less clear idea about existing workflows and
+% the concrete needs of CG grammarians, and less chances to attract
+% users. % Even if we had gotten users at the beginning, our chances of
+% % providing long-term maintenance would have been quite low.
+% We still believe that the CG analysis tool has its merits, and
+% even if our implementation doesn't catch on, we leave the idea
+% documented in this thesis.
 % Writing a proof-of-concept program may not be simple, but at least the
 % work is over once the program is finished. In contrast, creating a
 % usable tool requires a lot of work after the initial implementation.
@@ -214,29 +212,38 @@ documented in this thesis.
 % There is a working implementation which anyone interested can
 % try, but at this point it seems that it is the idea, rather than the 
 % implementation, that we should pitch.
+% However, the tool for generating GF test suites
+% \cite{listenmaa_claessen2018}, we had a better recipe for success: we
+% were much more invested in making the tool user-friendly, integrating
+% it to common workflows, and most importantly, using it ourselves. The
+% tool is being adopted by the GF community: at the time of writing this
+% page, we have 3 known users outside the research group, and based on
+% personal anecdotes, it is proving to be useful for grammar writing. We
+% are also much more committed in long-term maintenance of the tool.
 
-
-With the tool for generating GF test suites
-\cite{listenmaa_claessen2018}, we had a better recipe for success: we
-were much more invested in making the tool user-friendly, integrating
-it to common workflows, and most importantly, using it ourselves. The
-tool is being adopted by the GF community: at the time of writing this
-page, we have 3 known users outside the research group, and based on
-personal anecdotes, it is proving to be useful for grammar writing. We
-are also much more committed in long-term maintenance of the tool.
+The tools are available, and have had already some usage outside the
+research group. Out of the two tools, the GF test suite generation
+shows more potential for wider adoption and becoming a standard
+practice of GF grammar engineering.
 
 There are many directions to develop the GF test suite tool further.
 As we mention in Section~\ref{gf-future}, there is no semantic
 coherence in the generated sentences---this is particularly important
-when working with non-linguist testers.  Another interesting feature
-is shrinking the test sentences. Especially for resource grammars, the
-generated examples are quite long: this is due to the preference for
-maximally unique fields, and ``always run with Mary'' is a more
-distinguishing example of a verb phrase than ``run''. However, if an
-error is found in a sentence with ``always run with Mary'', it would
-be desirable to generate another example with smaller examples, such
-as ``run'', ``always run'' and ``run with Mary'', to help narrow down
-which function introduces the error.
+when working with non-linguist testers. However, if it turns out that
+most testing work is done on application grammars, this step may not
+be as crucial
+
+Another interesting feature is shrinking the test
+sentences. Especially for resource grammars, the generated examples
+are quite long: this is due to the preference for maximally unique
+fields, and ``always run with Mary'' is a more distinguishing example
+of a verb phrase than ``run''. However, if an error is found in a
+sentence with ``always run with Mary'', it would be desirable to
+generate another example with smaller examples, such as ``run'',
+``always run'' and ``run with Mary'', to help narrow down which
+function introduces the error.
+
+\todo{Workflow: language workbench}
 
 In more philosophical terms, we would like the grammar writing
 community to view testing, in terms of \citet{beizer2003software}, as
@@ -249,6 +256,7 @@ grammar itself, combined with treebanks for coverage testing, is an
 even better way to test grammars. It is always a risk that a test
 suite is deprecated when the grammar is changed; with automatic
 generation, the test suite is updated along with the grammar.
+
 
 
 

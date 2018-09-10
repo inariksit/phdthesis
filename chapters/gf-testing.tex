@@ -58,9 +58,11 @@ parallel multiple context-free grammars (\pmcfg) \cite{seki91pmcfg},
 which is the core formalism used by the Grammatical Framework (\gf)
 \cite{ranta2004gf}. However, the general method works for any
 formalism that is at most as expressive as \pmcfg{}, including
-context-free grammars, formalisms such as Tree-Adjoining Grammar
-(\tagGrammar) \cite{joshi1975tag}, and several variants of Categorial
-Grammar \cite{deGroote2004,steedman1988ccg}.
+context-free grammars, multiple context-free grammars, which covers
+formalisms such as Tree-Adjoining Grammar (\tagGrammar)
+\cite{joshi1975tag}) and LFCRS \todo{(LFG can compile into it)}.
+
+and several variants of Categorial Grammar \cite{deGroote2004,steedman1988ccg}.
 
 The following sections assume knowledge of \gf{} and \pmcfg{}
 formalisms; we direct the reader to Section~\ref{sec:gf-intro} for a
@@ -537,8 +539,9 @@ $\textsf{Tree}$s.
                   xtrees} \\
  &              & \textsf{ylins} =  \textsf{syncats} \text{ ++ } \textsf{concatMap linAll
                   ytrees} \\
- & \textbf{in}  & \textsf{and [ ys !! } i  \text{ ==} \textsf{ ys !! } j \\
- &              & \textsf{| } i \leftarrow \textsf{[0..length xs-1], } j \leftarrow \textsf{[0..length xs-1]} \\
+ &              & \textsf{len = min xs ys}
+ & \textbf{in}  & \textsf{and [ ylins !! } i  \text{ ==} \textsf{ ylins !! } j \\
+ &              & \textsf{| } i \leftarrow \textsf{[0..len-1], } j \leftarrow \textsf{[0..len-1]} \\
  &              & \textsf{, xs !! } i == \textsf{ xs !! } j \textsf{ ]} \\
 % \forall i,j : \textbf{ if } \textsf{xlins } ! \, i =
 %    \textsf{xlins } ! \, j,
@@ -561,6 +564,7 @@ For a given $f \in F^C$, we generate all lists of argument trees
 $[A_1, \dots, A_{a(f)}]$.  We keep the ones we need to test $f$, such
 that all forms have a unique string, using the previously defined
 function $\textsf{subsumes}$.
+\todo{Description: where used}
 
 The function $\textsf{generateAllTrees}$ is implemented using the
 \feat{} library \cite{feat}, and generates lazily all vectors of
@@ -577,21 +581,22 @@ unique examples.
 \multicolumn{3}{l}{\textsf{generateAllTrees :: [}N^C\textsf{]} \rightarrow
   \textsf{[[Tree]]}} \\
 \multicolumn{3}{l}{\textsf{generateAllTrees
-  [a}_1,\ldots,\textsf{a}_n\textsf{] = } \textbf{defined in FEAT}}
+  [a}_1,\ldots,\textsf{a}_n\textsf{] = } \textbf{generates lazily all vectors of
+argument trees for the given concrete categories, starting from
+smallest size. (defined in FEAT)}}
 \end{array}
 \end{EmptyItem}
 \end{figure}
 
-The main logic is implemented as a fold over the lazily generated list
-of all lists of argument trees. First we define the function
-$\textsf{keepIfRelevant}$ that the fold takes as its first argument:
-it takes a new tentative test case ($\textsf{t}$), a list of already
-good test cases ($\textsf{ts}$), and checks whether any of the test
-cases in $\textsf{ts}$ subsumes $\textsf{t}$. If yes, we can ignore
-$\textsf{t}$ and keep $\textsf{ts}$ intact; if no, we add $\textsf{t}$
-to the list and remove from $\textsf{ts}$ any test cases that
-$\textsf{t}$ subsumes.  In practice, we stop after examining 10.000
-trees, or whenever we have found a desired combination of trees.
+The main logic, in $\textsf{mostUniqueExamples}$, is implemented as a
+fold over the lazily generated list of all lists of argument
+trees. First we define the function $\textsf{keepIfRelevant}$ that the
+fold takes as its first argument: it takes a new tentative test case
+($\textsf{t}$), a list of already good test cases ($\textsf{ts}$), and
+checks whether any of the test cases in $\textsf{ts}$ subsumes
+$\textsf{t}$. If yes, we can ignore $\textsf{t}$ and keep
+$\textsf{ts}$ intact; if no, we add $\textsf{t}$ to the list and
+remove from $\textsf{ts}$ any test cases that $\textsf{t}$ subsumes.
 
 \begin{figure}[h]
 \begin{EmptyItem}
@@ -607,7 +612,18 @@ trees, or whenever we have found a desired combination of trees.
 
 Finally, we define the function $\textsf{mostUniqueExamples}$, which
 returns a minimal set of arguments that is needed to test the function
-$f$, as a fold over all examples.
+$f$. The argument \todo{vtrees is the list of all trees, given by
+FEAT.generateAll. The algorithm starts from an empty list, and adds a
+new item whenever it finds one that doesn't subsume. When it adds a
+new item, it checks whether any of the old ones is subsumed by it, and
+removes redundant stuff.}
+
+%, as a fold over all examples. 
+
+In practice, we stop after examining 
+10,000 lists of trees, or whenever we have found a desired combination 
+of trees.
+
 
 \begin{figure}[h]
 \begin{EmptyItem}
@@ -629,7 +645,8 @@ the inner lists are of types $[A_1,A_2,\dots,A_{a(f)}]$.
 \multicolumn{4}{l}{\textsf{bestTrees :: } F^C \rightarrow \textsf{[[Tree]]}} \\
 \multicolumn{4}{l}{\textsf{bestTrees} \; f =} \\
  & {\bf let} & \multicolumn{2}{l}{\textsf{args} = \{ \; [A_1,A_2,\dots,A_{a(f)}]}  \\
- &    & &                             | \; p \in P  \textbf{ where } p \textbf{ is the production } A \rightarrow f[A_1,A_2,\dots,A_{a(f)}] \; \} \\
+ &    & &                             | \;A \rightarrow
+          f[A_1,A_2,\dots,A_{a(f)}] is a production in P. \; \} \\
  &  {\bf in} & \multicolumn{2}{l}{\textsf{mostUniqueExamples } f 
                    \textsf{ (generateAllTrees args)}}
 \end{array}
@@ -703,7 +720,7 @@ provide a function with arguments, we need to put the resulting tree
 into a context, so that we can generate a single string from the
 result. By \emph{context}, we mean a tree in the start category (\t{S}
 in our example) with a \emph{hole} of the same type as the function
-under test (denoted by \char`_). 
+under test (denoted by \char`_). \todo{hole is a function}
 
 Figure~\ref{fig:context-general} shows a concrete example for the
 category \t{CN} in our example grammar.
@@ -870,6 +887,8 @@ because we only consider functions whose goal type \emph{already has a
 $H$ in terms of the sets of relevant contexts for other hole types
 $H'$, using the following definition:
 
+\todo{rename filter}
+
 \begin{EmptyItem}
 $\textsf{contexts}(H) = \textsf{filter}(\;\{ C[F(\_)] \; | \; F \in H
 \rightarrow H', \; C \in \textsf{contexts}(H') \}\;)$
@@ -903,8 +922,8 @@ It is important that we do not change the contexts for anything that
 uses fewer or the same amount of fields. In the English example, it
 would not serve any purpose to swap \t{PredAdj} for \t{AdjCN} in the
 context of \t{AP}, because both choose the same (the only)
-field. Furthermore, if we did that on an arbitrary basis, the sets
-would not converge, and we wouldn't find a fixpoint.
+field. Furthermore, if we changed the contexts on an arbitrary basis,
+the sets would not converge, and we wouldn't find a fixpoint.
 
 However, the functions can be replaced in the case that we find a
 function that covers strictly more fields than any of the previously found.
@@ -1062,8 +1081,10 @@ by testing \t{AdjCN} and end up with the following 8 trees, where
              { \t{house)}}.
 \]
 In fact, these 8 trees cover all tests we would've needed for
-\t{PrepNP} itself. Thus, it is possible to shrink the test cases
-effectively, if one wants to test the whole grammar at one go.
+\t{PrepNP} itself. Thus, it is possible to shrink the test cases, 
+if one wants to test the whole grammar at one go. 
+\todo{Drawback: how to interpret the test results: a bug can come from
+  many different functions}.
 
 \paragraph{Deterministic argument generation}
 There is a simple way to detect redundancy in the generated trees. We
@@ -1250,6 +1271,7 @@ seconds to generate the test suite for all languages. For the resource
 grammar, Dutch and Estonian finished in 3--4 minutes. However, the
 Basque resource grammar is noticeably more complex, and creating test
 trees for all functions took almost three hours.
+\todo{Can it be parallelised?}
 
 \subsection{Generated trees}
 
@@ -1446,7 +1468,7 @@ readable test cases.
 
 \subsection{Qualitative analysis} 
 
-The Basque resource grammar is still a work in progress, and the test
+The Basque resource grammar is still work in progress, and the test
 sentences showed serious problems in morphology. We thought it
 premature to get a fluent speaker to evaluate the grammar, because the
 errors in morphology would probably make it difficult to assess syntax
@@ -1457,7 +1479,7 @@ For Estonian, we read through all the Phrasebook test sentences. These
 505 sentences showed a handful of bugs---all coming from Phrasebook
 itself, not from the resource grammar. Most were individual words
 having the wrong inflection paradigm (the right one exists in the
-resource grammar, but wrong one was chosen by the application
+resource grammar, but a wrong one was chosen by the application
 grammarian), but there were also some bugs in more general
 functions: for example, using a wrong form of nationality when applied
 to a human and when to an institution, along the lines of ``Spaniard
@@ -1491,7 +1513,9 @@ though it is just unnatural.  For instance, the function \t{AdvQVP}
 covers constructions such as ``you did \emph{what}?''. However, the
 function itself is completely general and can take any verb phrase and
 any question adverb, thus bizarre combinations like ``you saw the dog
-why'' may appear in the generated test cases. If the grammar is purely
+why'' \todo{real example} may appear in the generated test cases. 
+
+\todo{this is irrelevant} If the grammar is purely
 syntactic, we would need external tools to ensure semantic coherence,
 but if the grammatical categories already include semantic
 distinctions, e.g. limiting the subject and indirect object of
