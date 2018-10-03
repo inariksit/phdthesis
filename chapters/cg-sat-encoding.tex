@@ -75,11 +75,11 @@ than we report in the earlier paper.
 Our work is inspired by previous approaches of encoding \onlycg{} in logic \cite{lager98, lager_nivre01}.
 \citet{lager98} presents a ``CG-like, shallow and reductionist system'' translated into a disjunctive logic program.
 \citet{lager_nivre01} build on that in a study which reconstructs
-four different formalisms in first-order logic. 
-CG is contrasted with Finite-State Intersection Grammar (\fsig) \cite{koskenniemi90} 
-and Brill tagging \cite{brill1995}; all three work on a set of constraint rules 
+four different formalisms in first-order logic.
+CG is contrasted with Finite-State Intersection Grammar (\fsig) \cite{koskenniemi90}
+and Brill tagging \cite{brill1995}; all three work on a set of constraint rules
 which modify the initially ambiguous input, but with some crucial differences.
-On a related note, \citet{yli-jyra2001} explores the structural correspondence 
+On a related note, \citet{yli-jyra2001} explores the structural correspondence
 between \fsig{} and constraint-solving problems.
 In addition, logic programming has been applied for automatically inducing \onlycg{} rules from tagged corpora \cite{lindberg_eineborg98ilp,asfrent14,lager01transformation}.
 
@@ -88,14 +88,14 @@ In addition, logic programming has been applied for automatically inducing \only
 \label{sec:CGSAT}
 
 In this section, we translate the disambiguation of a sentence into a SAT-problem.
-We demonstrate our encoding with an example in Spanish, shown in Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house'). 
+We demonstrate our encoding with an example in Spanish, shown in Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house').
 The first word, {\em la}, is ambiguous between a definite article (`the') or an object pronoun (`her'), and the second word, {\em casa}, can be a noun (`house') or a verb (`(he/she) marries').
-The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
-`the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
+The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$
+`the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'.
 However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whole segment into a noun phrase: `the big house'.
 %
 Firstly, we translate input sentences into variables and rules into clauses.
-Secondly, we disambiguate the sentence by asking for a solution. 
+Secondly, we disambiguate the sentence by asking for a solution.
 Finally, we consider different ordering schemes and conflict handling.
 
 
@@ -106,21 +106,21 @@ Finally, we consider different ordering schemes and conflict handling.
 \centering
 \begin{tabular}{p{0.6cm} l | c | c }
 %\multicolumn{2}{c}{}
-   & \textbf{Original~analysis} 
+   & \textbf{Original~analysis}
                 & \textbf{Variables}
                               & \textbf{Default rule} \\ \hline
 \t{"<la>"}   &   &            &  {\small \defRule} \\
-  & \t{"el" 
+  & \t{"el"
   det def f sg}  & $\laDet$   &  \\
-  & \t{"lo" 
+  & \t{"lo"
   prn p3 f sg}   & $\laPrn$   &   $\laDet \vee \laPrn$ \\
 \t{"<casa>"} &   &            &   \\
-  & \t{"casa" 
+  & \t{"casa"
   n f sg}        & $\casaN$   &  \\
   & \t{"casar"
    v pri p3 sg}  & $\casaV$   & $\casaN \vee \casaV$  \\
 \t{"<grande>"} & &            & \\
-  & \t{"grande" 
+  & \t{"grande"
   adj mf sg}   & $\grandeAdj$ & $\grandeAdj$
 \end{tabular}
 \caption{Ambiguous segment in Spanish: translation into SAT-variables.}
@@ -148,10 +148,10 @@ Finally, we consider different ordering schemes and conflict handling.
 The readings of the word forms make a natural basis for variables.
 We translate a combination of a word form and a reading, such as \texttt{"<la>" ["el" det def f sg]}, into a variable $\laDet$, which represents the possibility that \la{} is a determiner. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
 
-\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: 
-\t{SELECT~"casa"~n} means, in effect, ``remove~$\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
+\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context:
+\t{SELECT~"casa"~n} means, in effect, ``remove~$\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''.
 %
-Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}. 
+Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}.
 These disjunctions ensure that at least one variable in each cohort must be true.
 
 
@@ -175,28 +175,28 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
       \end{itemize}
     \item[\grande:] No target found
   \end{itemize}
-\item Solve with all clauses: 
-  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by the default rule}}, \ 
+\item Solve with all clauses:
+  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by the default rule}}, \
       \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
 \end{enumerate}
 
-In Appendix~\ref{appendix1}
-, we have included a translation of all the rule types that \satcg{} supports: 
+In Section~\ref{sec:encoding}
+, we have included a translation of all the rule types that \satcg{} supports:
 {\sc remove} and {\sc select} rules, with most of the operations from CG-2 \cite{tapanainen1996}, and a couple of features from \vislcg3{} \cite{vislcg3}.
 % In addition, we include a few features from \vislcg3{} \cite{vislcg3}, in order to parse most modern grammars.
-The following examples in this section do not require reading the appendix.
+The following examples in this section do not require reading Section~\ref{sec:encoding}.
 
 \subsection{Applying a rule}
 
-%Finally, we have all we need to solve the disambiguation problem. Given the clauses presented in step 2, SAT-solver returns a model---this is our disambiguated sentence. 
+%Finally, we have all we need to solve the disambiguation problem. Given the clauses presented in step 2, SAT-solver returns a model---this is our disambiguated sentence.
 
 Finally, we have all we need to disambiguate the segment: the sentence and the constraints encoded as SAT-variables and clauses. The SAT-solver returns a model that satisfies all the clauses presented in step 2.
-We started off with all the variables unassigned, and required at least one variable 
+We started off with all the variables unassigned, and required at least one variable
 in each cohort to be true. In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$.
-We can see with a bare eye that this problem will have a solution; in fact, multiple ones, 
+We can see with a bare eye that this problem will have a solution; in fact, multiple ones,
 shown in Figure~\ref{fig:modelsOneRule}.
-The verb analysis is removed in the first two models, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in Models 3--4. 
-We see a third interpretation in Model 5: $\casaV$ may be removed even without 
+The verb analysis is removed in the first two models, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in Models 3--4.
+We see a third interpretation in Model 5: $\casaV$ may be removed even without
 the presence of $\laDet$. This is possible, because $\laDet \Rightarrow \neg \casaV$ is only an implication, not an equivalence.
 
 \begin{figure}[h]
@@ -218,11 +218,11 @@ $$\begin{array}{ c | c | c | c | c}
 It seems like \satcg{} does worse than any standard \onlycg{} implementation:
 the latter would just remove the verb, not give 5 different interpretations for a single rule.
 In fact, the rule \t{REMOVE v IF (-1 det)} alone behaves exactly like \t{REMOVE det IF (1 v)}.
-%This behaviour is explained by simple properties of logical formulas: 
-%the implication $\laDet \Rightarrow \neg \casaV$ can be expressed as a disjunction 
+%This behaviour is explained by simple properties of logical formulas:
+%the implication $\laDet \Rightarrow \neg \casaV$ can be expressed as a disjunction
 %$\neg \laDet \vee \neg \casaV$
 But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN$. The new clause
-%, together with $\laDet \Rightarrow \neg \casaV$, 
+%, together with $\laDet \Rightarrow \neg \casaV$,
 prohibits the combination $\laPrn \ \casaN$, which rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
 
 \begin{figure}[h!]
@@ -241,25 +241,25 @@ $$\begin{array}{ c | c }
 \end{figure}
 
 
-After two rules, we only have two models: one with $\laDet \ \casaN$ and other with $\laPrn \ \casaV$. 
-%This behaviour corresponds to \fsig{}: 
+After two rules, we only have two models: one with $\laDet \ \casaN$ and other with $\laPrn \ \casaV$.
+%This behaviour corresponds to \fsig{}:
 In fact, we have just implemented parallel \onlycg{} (PCG), introduced in Section~\ref{sec:ordering}: the rules act in parallel, and if the sentence cannot be fully disambiguated, the remaining uncertainty is modelled as a disjunction of all possible combinations of readings.
 In contrast, a sequential \onlycg{} (SCG) engine applies each rule individually, and it cannot handle disjunction; its only operation is to manipulate lists of readings in a cohort.
-%remove \footnote{In CG-3, we can also add readings to a cohort, and cohorts to a sentence.} readings from a cohort. 
-The SCG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
+%remove \footnote{In CG-3, we can also add readings to a cohort, and cohorts to a sentence.} readings from a cohort.
+The SCG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb.
 
-To finish our PCG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution. 
-We can see another benefit in allowing connections between rules: none of the three rules has targeted \la{}, still it has become unambiguous. 
+To finish our PCG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution.
+We can see another benefit in allowing connections between rules: none of the three rules has targeted \la{}, still it has become unambiguous.
 
-% Now, this is all very nice, but the present thesis is not called ``Implementing \fsig{} with a SAT-solver''. 
+% Now, this is all very nice, but the present thesis is not called ``Implementing \fsig{} with a SAT-solver''.
 % However, understanding the translation of rules to implications is vital to the rest of this thesis, and \fsig{} provides, arguably, a simpler starting point.
-% In the following sections, we will discuss the concepts of conflict resolution and ordering of the rules. 
-% Firstly, we show two ways to handle conflicts in the parallel setting, 
+% In the following sections, we will discuss the concepts of conflict resolution and ordering of the rules.
+% Firstly, we show two ways to handle conflicts in the parallel setting,
 % and secondly, we consider an alternative method for a sequential SAT-encoding.
 
 
-% We have given a minimal description of SAT-based implementation. 
-% Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering? 
+% We have given a minimal description of SAT-based implementation.
+% Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering?
 
 
 \subsection{Solving conflicts in the parallel scheme}
@@ -273,7 +273,7 @@ order means that we miss significant information in the rule set.  The
 truth is that pure PCG is very brittle: each and every rule in the set
 must fit together, without the notion of order. The rule sequence in
 Figure~\ref{fig:ruleOrder}, taken from a Dutch
-grammar\footnote{\url{https://github.com/apertium/apertium-nld/blob/master/apertium-nld.nld.rlx}, commit d13fdaa}, 
+grammar\footnote{\url{https://github.com/apertium/apertium-nld/blob/master/apertium-nld.nld.rlx}, commit d13fdaa},
 will be well-behaved in an SCG with strict rule order.  The grammar
 will behave as intended also in a heuristic variant of SCG, because
 the rules with a longer context are matched first.  But in PCG, the
@@ -282,7 +282,7 @@ useless.
 
 
 
-The order clearly demonstrates the course of action: ``If a potential imperative starts a sentence and is followed by an object pronoun, select the imperative reading; then, move on to other rules; finally, if any imperative is still ambiguous, remove the imperative reading.'' 
+The order clearly demonstrates the course of action: ``If a potential imperative starts a sentence and is followed by an object pronoun, select the imperative reading; then, move on to other rules; finally, if any imperative is still ambiguous, remove the imperative reading.''
 Comparing the success of SCG to PCG in practical applications, one may speculate that the sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to \fsig{}, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
 If two rules target the same cohort, the first mentioned gets to apply, and removes the target. When the first rule has acted, the second rule is not even considered, because it would remove the last reading.
 
@@ -316,24 +316,24 @@ SECTION
 \end{figure}
 
 
-% In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'. 
+% In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'.
 Ideally, both ways of grammar writing should yield similar results:
 sequential \onlycg{} rules are more imperative, and parallel \onlycg{} rules are more declarative.
-But the problem of conflicts in PCG still remains. 
-In the following, we present two solutions: 
-in the first one, we emulate ordering in choosing which clauses to keep, and in the second one, we maximise the number of rule applications. 
+But the problem of conflicts in PCG still remains.
+In the following, we present two solutions:
+in the first one, we emulate ordering in choosing which clauses to keep, and in the second one, we maximise the number of rule applications.
 
 
 
-\paragraph{Emulating order} 
+\paragraph{Emulating order}
 
 We keep the parallel base, but use ordering as information for solving conflicts.
 This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa}, may still disambiguate \emph{la}, without \emph{la} ever being the target.
-If all the rules play well together, or if the earlier rules do not match any cohorts, 
-then no rule applications need to be removed. 
-However, if we have the grammar from Figure~\ref{fig:ruleOrder}, 
-and imperative is the right analysis for a given context, then the clauses created by 
-\t{REMOVE Imp} would be ignored, in favour of the clauses that are created 
+If all the rules play well together, or if the earlier rules do not match any cohorts,
+then no rule applications need to be removed.
+However, if we have the grammar from Figure~\ref{fig:ruleOrder},
+and imperative is the right analysis for a given context, then the clauses created by
+\t{REMOVE Imp} would be ignored, in favour of the clauses that are created
 by \t{SELECT Imp IF (-1 BOS) (1 (prn obj))}.
 
 
@@ -341,18 +341,18 @@ by \t{SELECT Imp IF (-1 BOS) (1 (prn obj))}.
 % we keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
 %the cohorts are encoded as vectors of variables, and the rules form implications at each application.
 
-In this modified scheme, we introduce the clauses to the SAT-solver one by one, 
-and attempt to solve after each clause. If the SAT-problem after the 50$^{th}$ rule 
+In this modified scheme, we introduce the clauses to the SAT-solver one by one,
+and attempt to solve after each clause. If the SAT-problem after the 50$^{th}$ rule
 has a solution, we accept all the clauses created by rule 50. %, and commit to them.
 If rule 51 causes a conflict, we prioritise the previous, well-behaving subset of
 50 rules, and discard the conflicting clauses created by rule 51.
 
 If a rule matches multiple cohorts, it creates a separate clause for each instance.
-Thus, it is no problem if the rule causes a conflict in only one cohort---say, we 
-have another potential imperative in the sentence, 
-but there is no other rule which targets its other readings. 
-We can discard only the conflicting instances: we prevent 
-\t{REMOVE Imp} from applying to \emph{Zeg} in the sequence \emph{\# Zeg me}, 
+Thus, it is no problem if the rule causes a conflict in only one cohort---say, we
+have another potential imperative in the sentence,
+but there is no other rule which targets its other readings.
+We can discard only the conflicting instances: we prevent
+\t{REMOVE Imp} from applying to \emph{Zeg} in the sequence \emph{\# Zeg me},
 but it still may apply to other ambiguous tokens with imperative reading.
 
 
@@ -365,15 +365,15 @@ Assuming our rule set is $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, 
  \begin{itemize}
     \item Create a clause: $\laDet \Rightarrow \neg \casaV$
     \item Solve with previous clauses:
-  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{default rule}}, \ 
+  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{default rule}}, \
       \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
     \item Solution found: add new clause to the formula
  \end{itemize}
-\item Apply \t{REMOVE v IF (1 adj)} 
+\item Apply \t{REMOVE v IF (1 adj)}
  \begin{itemize}
     \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
     \item Solve with previous clauses:
-  $\{..., \laDet \Rightarrow \neg \casaV, \ 
+  $\{..., \laDet \Rightarrow \neg \casaV, \
       \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}  \}$
     \item Solution found: add new clause to the formula
  \end{itemize}
@@ -381,12 +381,12 @@ Assuming our rule set is $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, 
  \begin{itemize}
     \item Create a clause: $\neg \casaN$
     \item Solve with previous clauses:
-      $\{ ..., \laDet \Rightarrow \neg \casaV, \ 
-      \grandeAdj \Rightarrow \neg \casaV, \ 
+      $\{ ..., \laDet \Rightarrow \neg \casaV, \
+      \grandeAdj \Rightarrow \neg \casaV, \
       \ob{\neg \casaN}^{\t{REMOVE n}} \}$
-  % $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
-  %     \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
-  %     \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
+  % $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \
+  %     \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \
+  %     \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \
     \item No solution: discard clause
  \end{itemize}
 
@@ -394,30 +394,30 @@ Assuming our rule set is $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, 
 
 With this procedure, we use ordering to decide which clauses to include, and
 then apply all of them in parallel.
-After going through all the rules, the final formula to the SAT-solver will contain the clauses  
+After going through all the rules, the final formula to the SAT-solver will contain the clauses
 $\laDet$~$\vee$~$\laPrn$, $\casaN$~$\vee$~$\casaV$,  $\grandeAdj$, $\laDet$~$\Rightarrow$~$\neg$~$\casaV$ and $\grandeAdj$~$\Rightarrow$~$\neg$~$\casaV$.
 
 
-\paragraph{Maximisation} 
+\paragraph{Maximisation}
 
 Solving conflicts means that we have multiple rules that target the same reading, and we must choose which rule to apply.
 Strict ordering substitutes the question with a simpler one: ``which rule comes first in the grammar?''
 Heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
 If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
 
-However, we can ask yet another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?'' 
-As opposed to heuristic or weighted approaches \cite{voutilainen1994designing,oflazer97votingconstraints}, here all the individual rule applications are 
+However, we can ask yet another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+As opposed to heuristic or weighted approaches \cite{voutilainen1994designing,oflazer97votingconstraints}, here all the individual rule applications are
 equally important; we just want to find the largest possible subset of rule applications that can act together without conflict.
 We will explain the procedure in the following.
 
 Each rule application to a concrete cohort produces a clause,
-and the whole rule set applied to the whole sentence produces 
-a large formula. In an ideal case, all the rules are well-behaved, 
-and the whole formula is satisfiable. However, if the whole formula 
-is unsatisfiable, we may still ask for an assignment that satisfies 
-the maximum number of the clauses; that is, rule applications. 
-If the grammar is good, we hope that the interaction between 
-the appropriate rules would make a large set of clauses that 
+and the whole rule set applied to the whole sentence produces
+a large formula. In an ideal case, all the rules are well-behaved,
+and the whole formula is satisfiable. However, if the whole formula
+is unsatisfiable, we may still ask for an assignment that satisfies
+the maximum number of the clauses; that is, rule applications.
+If the grammar is good, we hope that the interaction between
+the appropriate rules would make a large set of clauses that
 fit together, and the inapplicable rule would not ``fit in''.
 
 
@@ -429,7 +429,7 @@ Now the procedure goes as follows:
  \begin{itemize}
     \item Create a clause: $\laDet \Rightarrow \neg \casaV$
  \end{itemize}
-\item Apply \t{REMOVE v IF (1 adj)} 
+\item Apply \t{REMOVE v IF (1 adj)}
  \begin{itemize}
     \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
  \end{itemize}
@@ -439,32 +439,32 @@ Now the procedure goes as follows:
  \end{itemize}
 
 \item Solve with all clauses:
-  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
-      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
-      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
+  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \
+      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \
+      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \
       \ob{\neg \casaN}^{\t{REMOVE n}} \}$
 \item No solution for all clauses: try to find a solution that satisfies maximally many rule applications; however, default rule cannot be overridden.
 \end{enumerate}
 
-Similarly to the previous, order-based scheme, we create a clause for each 
-instance of the rule application. In the case of a conflict, we can 
-only discard the clauses targeting the offending cohort, but the rule may apply 
+Similarly to the previous, order-based scheme, we create a clause for each
+instance of the rule application. In the case of a conflict, we can
+only discard the clauses targeting the offending cohort, but the rule may apply
 elsewhere in the sentence.
 
 
 The problem of satisfying maximum amount of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
 Whereas SAT is a decision problem, MaxSAT is an optimisation problem.
 However, optimisation can be expressed as a sequence of decision problems:
-first, we compute a solution, then we add a constraint ``the solution must be better than the one just found'', and ask for another one. 
-This process repeats until a better solution cannot be found; then we accept the 
+first, we compute a solution, then we add a constraint ``the solution must be better than the one just found'', and ask for another one.
+This process repeats until a better solution cannot be found; then we accept the
 latest solution.
 
 Now let us define how is one solution ``better'' than other,
-by using a simple trick. 
-For each clause $c$, we create a new variable $v$. 
-Instead of the original clause, we give the SAT-solver 
-an implication $v \Rightarrow c$. 
-This means that if $v$ is false, the SAT-solver can ignore the 
+by using a simple trick.
+For each clause $c$, we create a new variable $v$.
+Instead of the original clause, we give the SAT-solver
+an implication $v \Rightarrow c$.
+This means that if $v$ is false, the SAT-solver can ignore the
 actual clause $c$---the part that comes from the rule application.
 Conversely, if $v$ is true, then the SAT-solver must handle
 the original clause.
@@ -472,7 +472,7 @@ Then, we ask for a solution where maximally many of these $v$s are true,
 and the question for improvement becomes ``can we make any more of the $v$s true''?
 The method of maximising the variables is described in \citet{een06minisatplus}.
 
-As a alternative to creating a helper variable, we could also separate the variables into 
+As a alternative to creating a helper variable, we could also separate the variables into
 contexts and targets, and maximise the set of contexts: for $\laDet \Rightarrow \neg \casaV$
 and $\grandeAdj \Rightarrow \neg \casaV$, maximise the set of $\{\laDet, \grandeAdj\}$.
 This variant would bring back the distinction between targets and contexts; given the design of most actually used \onlycg{}s, it may be better suited for a practical implementation.
@@ -483,13 +483,13 @@ This variant would bring back the distinction between targets and contexts; give
 \label{sec:eval}
 
 In this section, we report experiments on the two modifications to the parallel scheme,
-presented in the previous section. 
+presented in the previous section.
 We evaluate the performance against \vislcg3{} in accuracy and running time; in addition, we offer some preliminary observations on the effect of grammar writing.
 
-For these experiments, we implemented another variant for both schemes: 
+For these experiments, we implemented another variant for both schemes:
 we force all the literals that are not targeted by the original rules to be true.
-This modification destroys the ``rules may disambiguate their conditions'' property, 
-which we hypothesised to be helpful; however, turns out that this variation 
+This modification destroys the ``rules may disambiguate their conditions'' property,
+which we hypothesised to be helpful; however, turns out that this variation
 slightly outperforms even \vislcg3{} in terms of precision and recall.
 Conversely, the original \satcg{} scheme, where all variables are left unassigned,
 fares slightly worse for accuracy.
@@ -513,37 +513,37 @@ The results are presented in more detail in the following sections.
 
 \begin{table}[h]
 %   \begin{tabular}{ c | c c | c c | c c }
-%       & \multicolumn{2}{c}{19 rules}  
-%                         &  \multicolumn{2}{c}{99 rules} 
-%                                           & \multicolumn{2}{c}{261 rules} \\ 
+%       & \multicolumn{2}{c}{19 rules}
+%                         &  \multicolumn{2}{c}{99 rules}
+%                                           & \multicolumn{2}{c}{261 rules} \\
 %       & F-score & Time  & F-score & Time  & F-score & Time  \\ \hline
 % \textbf{\vislcg3{}}
 %       & 82.6 \% & 4.2s  & ??? \% & 6.1s  & ??? \% & 10.7s \\
 % \textbf{\satcgOrd}
 %       & 81.5 \% & 22.1s & ??? \% &1m 15s & ??? \% & 2m 32s \\
 % \textbf{\satcgMax}
-%       & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\ 
+%       & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\
 \centering
 \begin{tabular}{l | c c c | p{1.3cm} p{1.3cm}  c}
- 
+
 %           & \multicolumn{3}{c}{\textbf{Spanish: 19 rules}} &  \multicolumn{3}{c}{\textbf{Spanish: 261 rules}} \\
 \multicolumn{1}{r|}{} & \multicolumn{3}{c|}{\textbf{19~rules}} &  \multicolumn{3}{c}{\textbf{261 rules}} \\
-                          & \multicolumn{2}{c}{F-score} 
+                          & \multicolumn{2}{c}{F-score}
                                                & Time   & \multicolumn{2}{c}{F-score} & Time \\ \hline
 %                          & force    & unass.      &  & force     & unass. &  \\ \hline
 
       \textbf{\satcgMax}  & 80.22$^{\textsc{u}}$ \%  & 83.28$^{\textsc{f}}$ \%
                           & 4s
-                          & 78.15$^{\textsc{u}}$ \%  & 79.03$^{\textsc{f}}$ \% 
-                          & 8s \\ 
+                          & 78.15$^{\textsc{u}}$ \%  & 79.03$^{\textsc{f}}$ \%
+                          & 8s \\
 
       \textbf{\satcgOrd}  & 81.14$^{\textsc{u}}$ \% & 83.12$^{\textsc{f}}$ \%
-                          & 4s  
-                          & 79.03$^{\textsc{u}}$ \% & 79.17$^{\textsc{f}}$ \% 
-                          & 8s \\ 
+                          & 4s
+                          & 79.03$^{\textsc{u}}$ \% & 79.17$^{\textsc{f}}$ \%
+                          & 8s \\
 
       \textbf{\vislcg3{}}  & \multicolumn{2}{c}{81.52 \%}  & 0.39s
-                                             & \multicolumn{2}{c}{78.83 \%} & 0.64s\\ 
+                                             & \multicolumn{2}{c}{78.83 \%} & 0.64s\\
   \end{tabular}
 \caption{F-scores and execution times for the subset of the Spanish grammar, tested on a gold standard corpus of 20,000 words.}
   \label{table:fscore}
@@ -570,22 +570,22 @@ the parallel execution.  Some of the rules were selected from the
 original grammar, and some were written by the author.
 
 
-Table~\ref{table:fscore} shows F-scores and execution times for these two grammars. 
+Table~\ref{table:fscore} shows F-scores and execution times for these two grammars.
 \satcgMax{} is the parallel scheme with maximisation, and
 \satcgOrd{} is the parallel scheme where rule applications are introduced one by one; superscript {\sc u} refers to the unassigned variant and {\sc f} to the version where we force non-targeted literals true.
-The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups---even with an empty grammar, the F-score would be around 70 \%. 
-Due to the unrepresentative example, we cannot draw many conclusions. 
-We had access to other grammars of the same size range, such as 
-Portuguese, Dutch and Russian; 
+The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups---even with an empty grammar, the F-score would be around 70 \%.
+Due to the unrepresentative example, we cannot draw many conclusions.
+We had access to other grammars of the same size range, such as
+Portuguese, Dutch and Russian;
 however, no sufficiently large gold standard corpora were available.
 
 The experiment with the 19-rule grammar was more interesting.
-We intended to write a grammar that would perform exceptionally well for the parallel 
-execution; it was heavily tuned to the gold standard corpus, 
+We intended to write a grammar that would perform exceptionally well for the parallel
+execution; it was heavily tuned to the gold standard corpus,
 and tested only with \satcg{} (leaving all variables unassigned) during development.
-To our surprise, this small grammar turned out to outperform the original, 
-261-rule grammar, even when run with \vislcg3{}. 
-The rule ordering was not optimised by automatic means, and sections were not used; hence it is possible that with another order, the numbers could be even better for \vislcg3{} and the ordered scheme. 
+To our surprise, this small grammar turned out to outperform the original,
+261-rule grammar, even when run with \vislcg3{}.
+The rule ordering was not optimised by automatic means, and sections were not used; hence it is possible that with another order, the numbers could be even better for \vislcg3{} and the ordered scheme.
 %We ranked the rules in the order of how much does an individual rule contribute to the whole disambiguation: first try all 19 rules to find the best, then try all 2-rule combinations with the best, then all 3-rule combinations with the two best.
 
 
@@ -597,9 +597,9 @@ The rule ordering was not optimised by automatic means, and sections were not us
   \begin{tabular}{ r | c c | c }
         &  \multicolumn{2}{c|}{Spanish (380k words)} & Finnish (19k words)  \\
            & \textbf{19 rules}  & \textbf{261 rules} & \textbf{1185 rules}\\ \hline
-      \textbf{\satcgMax} & 25s  & 1m 5s  & 4m 56s  \\ 
-      \textbf{\satcgOrd} & 19s  & 1m 2s  & 4m 17s  \\ 
-      \textbf{\vislcg3{}} & 2.7s & 4.8s  & 4.3s \\ 
+      \textbf{\satcgMax} & 25s  & 1m 5s  & 4m 56s  \\
+      \textbf{\satcgOrd} & 19s  & 1m 2s  & 4m 17s  \\
+      \textbf{\vislcg3{}} & 2.7s & 4.8s  & 4.3s \\
    \end{tabular}
   \caption{Execution times for Spanish and Finnish grammars of different sizes, disambiguating Don Quijote (384,155 words) and FinnTreeBank (19,097 words).}
   \label{table:time}
@@ -610,26 +610,26 @@ The rule ordering was not optimised by automatic means, and sections were not us
 
 In addition to the 20,000-word corpus of news text,
 we tested the performance by parsing Don Quijote (384,155 words) with
-the same Spanish grammars as in the previous experiment. 
+the same Spanish grammars as in the previous experiment.
 %
 % Don Quijote contains, on average, longer sentences: the news text has the average sentence length of 14.1 words, median 11 words and maximum 72 words; Don Quijote has, respectively, almost double for each of these numbers: average 25.8, median 22 and maximum 147 words.
 % However, the textual genre is very different: we predicted that on an average sentence,
 % less rules would match, compared to the news text, which means less clauses formed.
 % For both of these texts, sentences are split by full stops, colons and semicolons: the grammar specifies those characters as delimiters.
 %
-More importantly, we wanted to test a grammar of a realistic size, 
-so we took a Finnish grammar, originally written in 1995 for \onecg1{}, 
+More importantly, we wanted to test a grammar of a realistic size,
+so we took a Finnish grammar, originally written in 1995 for \onecg1{},
 and updated into the \vislcg3{} standard by \citet{pirinen2015}.
 We discarded rules and constructions that \satcg{} does not support, and ended up with
 1185 rules. Then, we parsed around 19,000 words of text from FinnTreeBank \cite{voutilainen2011finntreebank}.
 Table~\ref{table:time} shows the results for both Finnish and Spanish tests.
 
-For both systems, the number of rules in the grammar affects the performance 
+For both systems, the number of rules in the grammar affects the performance
 more than the raw word count.
 However, the performance of \satcg{} gets worse faster than \vislcg3{}s.
-From the SAT-solving side, maximisation is the most costly operation. 
-Emulating order performs slightly faster, but still in the same range: 
-maximisation is not needed, but the solve function is performed after 
+From the SAT-solving side, maximisation is the most costly operation.
+Emulating order performs slightly faster, but still in the same range:
+maximisation is not needed, but the solve function is performed after
 each clause---this gets costlier after each rule.
 However, we believe that SAT is not necessary the bottleneck:
 \vislcg3{} is a product of years of engineering effort, whereas \satcg{}
@@ -638,21 +638,21 @@ a rather naive implementation, written in Haskell and BNFC.
 
 % In any case, SAT does not seem to be the bottleneck: with 261 rules,
 % the maximisation function was called 147,253 times, and with 19 rules,
-% 132,255 times, but 
+% 132,255 times, but
 %However, with both rule sets, half of the sentences in Don Quijote
 %needed less than 6 calls of maximise, and 75 \% of the sentences
 %needed less than 14.
 % the differences in the execution times are much larger, which suggests
-% that there are other reasons for the worse performance. 
+% that there are other reasons for the worse performance.
 % This is to be expected, as \satcg{} is a rather naive
 % proof-of-concept implementation with no optimisations.
 
-\paragraph{Sentence length} 
+\paragraph{Sentence length}
 In addition, we explored the effect of sentence length further.
 When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens, %\footnote{The longest sentence in Don Quijote: \ventero}
 including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in four parts, at the semicolons. In Table~\ref{table:time}, it was already split at semicolons.
 We tested the effect of sentence length also for the Finnish grammar.
-All the sentences in FinnTreeBank were very short, so we created an 251-token ``sentence'' 
+All the sentences in FinnTreeBank were very short, so we created an 251-token ``sentence''
 by pasting together 22 short sentences and replacing sentence boundaries with commas.
 
 
@@ -660,11 +660,11 @@ by pasting together 22 short sentences and replacing sentence boundaries with co
   \centering
 \begin{tabular}{ l | c c | c c }
        & \multicolumn{2}{c|}{\textbf{261 rules} } & \multicolumn{2}{c}{\textbf{1185 rules} }  \\
-       & 283 tokens &  Split %51 + 38 + 126 + 68 tokens}  
+       & 283 tokens &  Split %51 + 38 + 126 + 68 tokens}
                                            & 251 tokens & Split \\ \hline
-\textbf{\satcgMax}   & 2.26s   & 2.06s   & 5.34s & 2.36s\\ 
-\textbf{\satcgOrd}   & 2.20s   & 1.99s   & 4.70s & 2.36s \\ 
-\textbf{\vislcg3{}}   & 0.05s   & 0.03s   & 0.04s & 0.04s \\ 
+\textbf{\satcgMax}   & 2.26s   & 2.06s   & 5.34s & 2.36s\\
+\textbf{\satcgOrd}   & 2.20s   & 1.99s   & 4.70s & 2.36s \\
+\textbf{\vislcg3{}}   & 0.05s   & 0.03s   & 0.04s & 0.04s \\
 
    \end{tabular}
   \caption{Experiments with sentence length. On the left, Spanish 261-rule grammar parsing the complete 283-token sentence, parsed as one unit vs. split at semicolons into four parts.
@@ -676,48 +676,48 @@ The results in Table~\ref{table:timeVentero} are promising: the execution time d
 unbearably, even with the unusually long sentence.
 To give some context, let us consider the performances of the sequential CG-2 and the parallel \fsig{} in 1998.
 %, which is another parallel system, 1998, compared to sequential \onlycg{} .
- \citet{voutilainen1998} reports the performance of a 3,500-rule \onlycg{}: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule \fsig{} grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
+ \citet{voutilainen1998} reports the performance of a 3,500-rule \onlycg{}: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule \fsig{} grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.
 As another \onlycg{} result from the late 1990s, \citet{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
 
-Compared to the parsing times of sequential \onlycg{} and \fsig{} nearly 20 years ago, 
+Compared to the parsing times of sequential \onlycg{} and \fsig{} nearly 20 years ago,
 our results demonstrate a smaller difference, and much less steep curve in the execution time
-related to sentence length. 
+related to sentence length.
 Of course, this remark should be taken with caution: to start with, the described experiments were conducted on different systems and different centuries\footnote{Eckhard Bick (personal communication) points out that CG-2 run on a modern system is around 6 times faster than \vislcg3{}.}.
-Importantly, the parallel participants in the experiments were using different grammars---the \fsig{} grammar used in \citet{voutilainen1998} 
-contains much more difficult operations, which makes the constraint problem larger. 
-Our experiments have just shown the lack of blowup for a small grammar. 
+Importantly, the parallel participants in the experiments were using different grammars---the \fsig{} grammar used in \citet{voutilainen1998}
+contains much more difficult operations, which makes the constraint problem larger.
+Our experiments have just shown the lack of blowup for a small grammar.
 Nevertheless, we feel that this experiment could be interesting to conduct properly: try a SAT-based approach for executing the \fsig{} grammars from the 1990s, and compare the results to the current state of the art.
 
 \subsection{Effect on grammar writing}
 
 
-Throughout the implementation of \satcg{}, we have predicted that the more declarative features would influence the way rules are written. 
-We hoped to combine the best parts of SCG and PCG: 
-the rules would be more expressive and declarative, 
-but we could still fall back to heuristics: eventual 
+Throughout the implementation of \satcg{}, we have predicted that the more declarative features would influence the way rules are written.
+We hoped to combine the best parts of SCG and PCG:
+the rules would be more expressive and declarative,
+but we could still fall back to heuristics: eventual
 conflicts would not render the whole grammar useless.
 On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
 Without an actual \onlycg{} writer, it is hard to say whether this prediction holds or not.
 
-As stated earlier, we got the best F-score with a modification which prevents the rules 
-from disambiguating their context: in the case with {\em la casa grande} and the 
+As stated earlier, we got the best F-score with a modification which prevents the rules
+from disambiguating their context: in the case with {\em la casa grande} and the
 three rules which all target {\em casa}, we would assign both $\laDet${} and $\laPrn${} true.
-We tried also a second variant, where we would assign true to only those variables which are 
+We tried also a second variant, where we would assign true to only those variables which are
 neither targets nor conditions to any rule.
 Table~\ref{table:forceOrNot} shows in more detail what happens to the precision and recall with all the three variants, with the 19-rule grammar.
 
 
 
-We notice that the SAT-based solution loses severely in recall, 
+We notice that the SAT-based solution loses severely in recall,
 when all variables are left unassigned. This is understandable: given that
-the grammar is extremely small, only 19 rules, the majority of the tokens will 
-never appear in the clauses, neither as targets nor conditions. So the SAT-solver is free to 
-arbitrarily choose the readings of those free words, whereas \vislcg3{} does nothing to them. 
-There is no universal behaviour what to do if a variable is not included in any of the clauses; it is likely that many solvers would just assign false by default. In our case, we still require at least one reading of every cohort to be true; this applies even for cohorts which do not appear in the clauses. 
+the grammar is extremely small, only 19 rules, the majority of the tokens will
+never appear in the clauses, neither as targets nor conditions. So the SAT-solver is free to
+arbitrarily choose the readings of those free words, whereas \vislcg3{} does nothing to them.
+There is no universal behaviour what to do if a variable is not included in any of the clauses; it is likely that many solvers would just assign false by default. In our case, we still require at least one reading of every cohort to be true; this applies even for cohorts which do not appear in the clauses.
 Given the lack of other information, the SAT-solver is likely to just choose the first one in alphabetical order. It would not be difficult to modify the scheme based on another heuristic, such as the most likely unigram reading, or dispreference for analyses with many compound splits. However, we did not add any heuristics; the results just show the SAT-solver performing its default actions.
 
-%The selection of the SAT-solver does not 
-%f left on its own, the SAT-solver tends to assign many of them false. 
+%The selection of the SAT-solver does not
+%f left on its own, the SAT-solver tends to assign many of them false.
 
 %%%%
 \def\noAss{{\sc NoAss}}
@@ -728,11 +728,11 @@ Given the lack of other information, the SAT-solver is likely to just choose the
 \centering
   \begin{tabular}{l|cc|cc|cc}
 
-                     & \multicolumn{2}{c|}{\noAss} 
-                                    & \multicolumn{2}{c|}{\noAff} 
-                                                     & \multicolumn{2}{c}{\noTar} \\ 
-                     & Prec. & Rec.        & Prec. & Rec.        & Prec. & Rec. \\ \hline 
-\textbf{\satcgMax}   & 79.97 & 80.47       & 77.24 & 82.94       & {\bf 80.36} & {\bf 86.41} \\ 
+                     & \multicolumn{2}{c|}{\noAss}
+                                    & \multicolumn{2}{c|}{\noAff}
+                                                     & \multicolumn{2}{c}{\noTar} \\
+                     & Prec. & Rec.        & Prec. & Rec.        & Prec. & Rec. \\ \hline
+\textbf{\satcgMax}   & 79.97 & 80.47       & 77.24 & 82.94       & {\bf 80.36} & {\bf 86.41} \\
 \textbf{\satcgOrd}   & {\bf 80.96} & 81.31 & {\bf 78.42} & 84.07 & 80.22 & 86.28 \\
 \textbf{\vislcg3{}}  & 78.29 & {\bf 85.02} & 78.29 & {\bf 85.02} & 78.29 & 85.02 \\
 
@@ -743,33 +743,33 @@ Given the lack of other information, the SAT-solver is likely to just choose the
 \end{table}
 
 The precision in \satcg{} is better already in the unassigned scheme.
-The percentage is calculated by overall number of analyses, but even at the level of different words, the advantage is at \satcg{}. Out of the gold standard corpus, \vislcg3{} differs in the analyses of some 4,200 words, whereas \satcg{}, in the unassigned variant, disagrees only on 3700-3900 words. 
+The percentage is calculated by overall number of analyses, but even at the level of different words, the advantage is at \satcg{}. Out of the gold standard corpus, \vislcg3{} differs in the analyses of some 4,200 words, whereas \satcg{}, in the unassigned variant, disagrees only on 3700-3900 words.
 Of course, the differences are still very small, and this effect could also be due to randomness: sometimes the SAT-solver happens to disambiguate correctly just by removing a random analysis.
 
-We move on to the second variant, where the completely unaffected variables are assigned true. 
-Unsurprisingly, the recall grows: we have just added some thousands of true variables, 
-some of which would have been otherwise randomly removed by the SAT-solver. 
+We move on to the second variant, where the completely unaffected variables are assigned true.
+Unsurprisingly, the recall grows: we have just added some thousands of true variables,
+some of which would have been otherwise randomly removed by the SAT-solver.
 The ordered variant resembles most the behaviour of \vislcg3{}, both in precision, recall and the amount of words where the analysis disagrees; now the number is around 4,200 for both.
 
-The third variant, where all non-targeted analyses are assigned true, performs the best. 
-High recall is expected; now we force some more thousands of variables true, 
+The third variant, where all non-targeted analyses are assigned true, performs the best.
+High recall is expected; now we force some more thousands of variables true,
 among them must be some actually true readings.
 But at the same time, this limits the power of rules: they may only disambiguate targets, not conditions---why does precision go up?
-The most plausible explanation for this phenomenon, aside from mere chance, 
-is the particular features of the tested grammar. 
-When tested with the original 261-rule grammar, 
-shown in Table~\ref{table:forceOrNotOrig}, the pattern does not repeat: 
+The most plausible explanation for this phenomenon, aside from mere chance,
+is the particular features of the tested grammar.
+When tested with the original 261-rule grammar,
+shown in Table~\ref{table:forceOrNotOrig}, the pattern does not repeat:
 assigning more variables true just brings the performance closer to \vislcg3{}.
 
 \begin{table}[h]
 \centering
   \begin{tabular}{l | cc | cc | cc}
 
-                     & \multicolumn{2}{c}{\noAss} 
-                                    & \multicolumn{2}{c}{\noAff} 
-                                                     & \multicolumn{2}{c}{\noTar} \\ 
-                     & Prec. & Rec.        & Prec. & Rec.        & Prec. & Rec. \\ \hline 
-\textbf{\satcgMax}   & 77.03 & 79.32       & 70.85 & 86.46       & {\bf 71.91} & 87.72  \\ 
+                     & \multicolumn{2}{c}{\noAss}
+                                    & \multicolumn{2}{c}{\noAff}
+                                                     & \multicolumn{2}{c}{\noTar} \\
+                     & Prec. & Rec.        & Prec. & Rec.        & Prec. & Rec. \\ \hline
+\textbf{\satcgMax}   & 77.03 & 79.32       & 70.85 & 86.46       & {\bf 71.91} & 87.72  \\
 \textbf{\satcgOrd}   & {\bf 77.91} & 80.18 & 70.79 & 86.40        & 71.78 & 87.62  \\
 \textbf{\vislcg3{}}  & 71.17 & {\bf 88.34} & {\bf 71.17} & {\bf 88.34} & 71.17 & {\bf 88.34}  \\
 
@@ -793,27 +793,27 @@ SELECT:i08_s_pro PrnIndep IF (1C VerbFin) ;
 \label{fig:rulesAreBiased}
 \end{figure}
 
-Now, what are these features of the tiny grammar? 
+Now, what are these features of the tiny grammar?
 %Again, the grammar is extremely small, and obviously overfitted just to the data.
 One reason may be that many of the rules come in pairs.
 Figure~\ref{fig:rulesAreBiased} shows an excerpt from the grammar:
 due to these rules, both $\laDet${} and $\laPrn${} would be targeted, and remain unassigned.
-Another peculiarity in the 19-rule grammar is the high number of {\sc select} rules---this 
+Another peculiarity in the 19-rule grammar is the high number of {\sc select} rules---this
 means that all the other readings in the cohort become the actual targets.
-Thus, if a rule addresses some phenomenon, most of the readings in the target cohort 
+Thus, if a rule addresses some phenomenon, most of the readings in the target cohort
 are saved from the forced assignment.
 
 
-To conclude, this experiment has been very inconclusive, due to the extremely low coverage 
+To conclude, this experiment has been very inconclusive, due to the extremely low coverage
 of the tested grammars.
 A high-quality grammar would target significantly more individual words in the test corpus;
-this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help 
+this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help
 such grammar to go that extra mile; however, based on the experiments so far, this is mostly speculation.
 
 
 
 It would be interesting to repeat the experiment in writing a serious, large-scale grammar.
-Some questions to address would be 
+Some questions to address would be
 \begin{inparaenum}
 \item[(a)] do we need less rules;
 \item[(b)] do we need careful context;
@@ -825,14 +825,13 @@ Some questions to address would be
 
 In this section, we started from the known parallels between \onlycg{} and logic:
 the rules express what is true ({\sc select}) and false ({\sc remove}), under certain conditions ({\sc if}).
-Expressing this as a SAT-problem, we get a working \onlycg{} implementation, which executes the rules in a parallel and unordered manner. 
-However, a straight-forward parallel encoding means that the rules of a given grammar should contain no contradictions.  
+Expressing this as a SAT-problem, we get a working \onlycg{} implementation, which executes the rules in a parallel and unordered manner.
+However, a straight-forward parallel encoding means that the rules of a given grammar should contain no contradictions.
 To alleviate the brittleness of PCG, we developed two approaches to discard conflicting rule applications.
-The first one is based on order; introducing clauses one by one, and assuming that the previous clauses are true, 
+The first one is based on order; introducing clauses one by one, and assuming that the previous clauses are true,
 and the second one is based on maximisation; trying to make as many clauses as possible apply.
 
 
 As a conclusion, SAT-solver provides an interesting alternative for a \onlycg{} engine, but loses in practicality: performance and lack of transparency for grammar writers.
-We see more potential in contributing to the \fsig{} community, with a practical implementation and 
+We see more potential in contributing to the \fsig{} community, with a practical implementation and
 novel ways to get around conflicts. It would be interesting to test an actual syntactic \fsig{} grammar encoded in SAT, to see if a SAT-based solution is powerful enough for the more complex constraints.
-

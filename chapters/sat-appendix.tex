@@ -70,29 +70,29 @@
 %%%%%%%%%%%%%%%
 
 \section{SAT-encoding}
+\label{sec:encoding}
 
-
-\noindent In this section, we show the SAT-encoding for all the rule types that 
-SAT-CG supports: 
+\noindent In this section, we show the SAT-encoding for all the rule types that
+SAT-CG supports:
 {\sc remove} and {\sc select} rules, with the contextual tests and set operations described in CG-2 \cite{tapanainen1996}, except for the operators \t{**} (continue search if linked tests fail) and \t{@} (absolute position). In addition, the software SAT-CG supports a couple of new constructions from VISL CG-3: {\sc cbarrier}, which requires the barrier tag to be unambiguous in order to function as a barrier;
 {\sc negate}, which inverts a whole chain of contextual tests; and subreadings, which make it possible to include e.g. a clitic in the same cohort, but distinguish it from the main reading.
 
-The encoding in this appendix is independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables. 
-The purpose of this appendix is to give a full description of the different rule types; the method is introduced with more pedagogical focus in Section~\ref{sec:CGSAT}. 
+The encoding in this section is independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables.
+The purpose of this section is to give a full description of the different rule types; the method is introduced with more pedagogical focus in Section~\ref{sec:CGSAT}.
 %However, the examples in this appendix are self-contained; if you know my previous stuff and want to be bored, just read this!
 
 
 
 \subsection{SAT-encoding of sentences}
 
-As in Section~\ref{sec:CGSAT}, we demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre una aproximación más científica}. 
-It has the virtue of being ambiguous in nearly every word: for instance, \emph{sobre} is either a preposition (`above' or `about') or a noun (`envelope'); \emph{una} can be a pronoun, determiner or a verb. The full analysis, with the initial ambiguities, is shown in Figure~\ref{fig:satEncodingSpanishExample}. 
-
-\begin{figure}[t]
+As in Section~\ref{sec:CGSAT}, we demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre una aproximación más científica}.
+It has the virtue of being ambiguous in nearly every word: for instance, \emph{sobre} is either a preposition (`above' or `about') or a noun (`envelope'); \emph{una} can be a pronoun, determiner or a verb. The full analysis, with the initial ambiguities, is shown in Figure~\ref{fig:satEncodingSpanishExample}.
+\\ 
+\begin{figure}[h]
 \ttfamily
 \centering
 \begin{tabular}{ll @{\hspace{1.5cm}} ll}
-"<sobre>"  &                     &                    &                         \\ 
+"<sobre>"  &                     &                    &                         \\
            & "sobre" pr          &  "<aproximación>"  &                         \\
            & "sobre" n m sg      &                    & "aproximación" n f sg   \\
 "<una>"    &                     &   "<más>"          &                         \\
@@ -107,6 +107,7 @@ It has the virtue of being ambiguous in nearly every word: for instance, \emph{s
 \label{fig:satEncodingSpanishExample}
 \end{figure}
 
+\newpage
 \noindent We transform each reading into a SAT-variable:
 
 \begin{equation}
@@ -120,8 +121,8 @@ It has the virtue of being ambiguous in nearly every word: for instance, \emph{s
 \end{equation}
 
 CG rules may not remove the last reading, even if the conditions hold otherwise.
-To ensure that each cohort contains at least one true variable, we add the clauses in \ref{eq:atleastOneTrue}; later referred to as the ``default rule''. 
-The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned true. 
+To ensure that each cohort contains at least one true variable, we add the clauses in \ref{eq:atleastOneTrue}; later referred to as the ``default rule''.
+The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned true.
 The final assignment of the other variables depends on the constraint rules.
 
 
@@ -140,7 +141,7 @@ The final assignment of the other variables depends on the constraint rules.
 \subsection{SAT-encoding of rules}
 \label{appendix1}
 
-In order to demonstrate the SAT-encoding, we show variants of \textsc{remove} and \textsc{select} rules, with different contextual tests. 
+In order to demonstrate the SAT-encoding, we show variants of \textsc{remove} and \textsc{select} rules, with different contextual tests.
 We try to craft rules that make sense for this segment; however, some variants are not likely encountered in a real grammar, and for some rule types, we modify the rule slightly. We believe this makes the encoding overall more readable, in contrast to using more homogeneous but more artificial rules and input.
 
 %The basis of the rule is \texttt{REMOVE adj}, which will target the word form \emph{más}.
@@ -149,12 +150,12 @@ We try to craft rules that make sense for this segment; however, some variants a
 % \subsubsection{Parallel scheme}
 
 % We begin by introducing the parallel scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and all rules have access to it.
-% and all the rules are applied at the same time. 
+% and all the rules are applied at the same time.
 %In addition, we add rule types that \cite{lager98} does not consider.
 
-\subsubsection{No conditions} 
+\subsubsection{No conditions}
 
-The simplest rule types remove or select a target in all cases. 
+The simplest rule types remove or select a target in all cases.
 A rule can target one or multiple readings in a cohort. We demonstrate the case with one target in rules~\ref{eq:rmAdj}--\ref{eq:slAdj}, and multiple target in rules~\ref{eq:rmVb}--\ref{eq:slVb}. \\
 
 
@@ -169,7 +170,7 @@ A rule can target one or multiple readings in a cohort. We demonstrate the case 
 \end{equation}
 
 \cgrule{SELECT adj} Unconditionally removes all other readings which are in the same cohort with the target.
-We do not add an explicit clause for $\masAdj$ and $\cientificaAdj$: the default rule \ref{eq:atleastOneTrue} already contain $\masAdv \vee \masAdj$ and $\cientificaAdj \vee \cientificaN$, and the combination $\neg\masAdv$  and $\masAdv \vee \masAdj$  implies that $\masAdj$ must be true. 
+We do not add an explicit clause for $\masAdj$ and $\cientificaAdj$: the default rule \ref{eq:atleastOneTrue} already contain $\masAdv \vee \masAdj$ and $\cientificaAdj \vee \cientificaN$, and the combination $\neg\masAdv$  and $\masAdv \vee \masAdj$  implies that $\masAdj$ must be true.
 
 \begin{equation}
 % \begin{array}{r @{~\wedge~} l }
@@ -216,9 +217,9 @@ As previously, we need no explicit clause for $\unaPrsPThree  \vee \unaPrsPOne \
 \end{equation}
 
 
-\subsubsection{Positive conditions} 
+\subsubsection{Positive conditions}
 
-Rules with contextual tests apply to the target, if the conditions hold. 
+Rules with contextual tests apply to the target, if the conditions hold.
 This is naturally represented as implications. We demonstrate both \textsc{remove} and {\sc select} rules with a single condition in \ref{eq:singleCondition}; the rest of the variants only with {\sc remove}. All rule types can be changed to {\sc select} by changing the consequent from $\neg{}\masAdj$ to $\neg{}\masAdv$. %from $\neg{}\masAdj$ to $\masAdv \wedge \neg{}\masAdj$.
 
 
@@ -231,11 +232,11 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 \end{equation}
 
 %
-% \intertext{\cgrule{REMOVE adj IF (1 adj)} Single condition, {\sc remove} variant.} 
+% \intertext{\cgrule{REMOVE adj IF (1 adj)} Single condition, {\sc remove} variant.}
 % \cientificaAdj & \impl  \neg{}\masAdj \\
 % %
 % %
-% \intertext{\cgrule{SELECT adv IF (1 adj)} Single condition, {\sc select} variant. Target is selected, and everything else in the reading is removed.} 
+% \intertext{\cgrule{SELECT adv IF (1 adj)} Single condition, {\sc select} variant. Target is selected, and everything else in the reading is removed.}
 % \cientificaAdj & \impl \masAdv \wedge \neg{}\masAdj \\
 %
 %
@@ -276,7 +277,7 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 $\sobreN$ is a valid condition only if $\unaDet$ is false.}
 %
 (\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
-(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\cientificaAdj 
+(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\cientificaAdj
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier.
 Any noun before the target, up to an unambiguous determiner, is a valid condition.
@@ -290,7 +291,7 @@ Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOn
 \intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context. Any unambiguous noun before the target is a valid condition: $\sobreN$ is a valid condition only if it is the only reading in its cohort, i.e. $\sobrePr$ is false.}
 %
 (\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\masAdj \notag \\
-(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\cientificaAdj 
+(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\cientificaAdj
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.
@@ -300,25 +301,25 @@ $\sobreN$ is a valid condition only if it is the only reading in its cohort ($\s
 %
 %
 (\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
-(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\cientificaAdj 
+(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\cientificaAdj
 %
 \intertext{\cgrule{REMOVE adj IF (-1C* n CBARRIER det)} Scanning with careful context, up to a careful barrier. Like above, but \una{} fails to work as a barrier if it is not unambiguously determiner.}
 %
 %
 (\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
-(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\cientificaAdj 
+(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\cientificaAdj
 \end{align}
 
 
 \subsubsection{Inverted conditions}
 
-In the following, we demonstrate the effect of two inversion operators. 
+In the following, we demonstrate the effect of two inversion operators.
 The keyword {\sc not} inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword {\sc negate} inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, \emph{det noun} would be allowed, as well as \emph{prn adj}, but not \emph{det adj}. %a sequence which matches the whole``
 Inversion cannot be applied to a {\sc barrier} condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, that is, ``try to find a \emph{foo} until you see the first item that is not \emph{bar}'', a set complement operator must be used: \cgrule{(*) - bar}.
 
 There is a crucial difference between matching positive and inverted conditions.
 If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct', matched against our example passage, would not result in any action.
-In contrast, when an inverted condition is out of scope or inapplicable, 
+In contrast, when an inverted condition is out of scope or inapplicable,
 that makes the action happen unconditionally.
 As per VISL CG-3, the condition \cgrule{NOT 10 adj} applies to all sentences where there is no 10th word from target that is adjective; including the case where there is no 10th word at all.
 If we need to actually have a 10th word to the right, but that word may not be an adjective, we can, again, use the set complement: \cgrule{IF (10 (*) - adj)}.
@@ -328,7 +329,7 @@ If we need to actually have a 10th word to the right, but that word may not be a
 
 
 \begin{align}
-\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition. 
+\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition.
 There is no word following \cientifica{}, hence its adjective reading is removed unconditionally.}
 \neg \cientificaAdj & \impl  \neg{}\masAdj \notag \\
                     & \impl \neg \cientificaAdj \\
@@ -363,8 +364,8 @@ There is no word following \cientifica{}, hence its adjective reading is removed
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n CBARRIER det)} Scanning up to a careful barrier. There must be no nouns before the target, up to an unambiguous determiner.}
 %
-\neg ((\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN) & \impl \neg{}\masAdj \notag \\ 
-\neg ((\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN) & \impl \neg{}\cientificaAdj 
+\neg ((\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN) & \impl \neg{}\masAdj \notag \\
+\neg ((\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN) & \impl \neg{}\cientificaAdj
 %
 %
 %
@@ -383,7 +384,7 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 \cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 punct)} Inversion of a conjunction of conditions, some not present in initial analysis.
 
 \begin{equation}
- \impl \neg{}\masAdj 
+ \impl \neg{}\masAdj
 \end{equation}
 
 
@@ -399,4 +400,3 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 %    \caption{Two rules that target the same reading, in different orders.}
 %    \label{fig:orderMatters}
 % \end{figure}
-

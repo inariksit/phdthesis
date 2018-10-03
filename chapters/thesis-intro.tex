@@ -105,7 +105,7 @@ Apart from obvious cases as above, with two rules saying contradicting truths ab
 \item[] \texttt{REMOVE article ;} \\ \texttt{SELECT noun IF (-1 article) ;}
 \end{itemize}
 
-\noindent The first rule removes all articles unconditionally, thus rendering the second rule invalid: it may never apply, because its condition is never matched.
+\noindent The first rule removes all articles unconditionally, thus rendering the second rule invalid: it can never apply, because its condition is never matched.
 
 In real life, these conflicts can be much more subtle, and appear far apart from each other. %Grammar writers keeping track is infeasible.
 The common way of testing grammars is to apply them into some test corpus, with a gold standard, and gather statistics how often the rules apply. While this method can reveal that \texttt{SELECT noun IF (-1 article)} never applied, it cannot tell whether it is just because no sentence in the test corpus happened to trigger the contextual test, or whether some other rule before it made it impossible to ever apply.
@@ -121,7 +121,7 @@ The rules become interconnected, and we can find the reason for a conflict. This
 Grammatical Framework (GF) \cite{ranta2011gfbook} is a generative, multilingual grammar formalism with a high level of abstraction.
 As opposed to CG, where the rules \emph{reduce} the number of possible readings, GF and other generative formalisms use rules to \emph{generate} a language from scratch. In other words, the language corresponding to a grammar is defined as the set of strings that the grammar rules generate.
 
-The most typical example of a generative grammar is a context-free grammar. GF is slightly more complex formalism, and we will present it in Section~\ref{sec:gf-intro}. To quickly illustrate the properties of a generative grammar, we use the following context-free grammar $G$:
+The most typical example of a generative grammar is a context-free grammar. GF is a more complex formalism, and we will present it in Section~\ref{sec:gf-intro}. To quickly illustrate the properties of a generative grammar, we use the following context-free grammar $G$:
 
 \begin{verbatim}
               Sentence ::= Noun Verb | Noun "says that" Sentence
@@ -141,7 +141,7 @@ The problem is relevant for any kind of software testing, and we use existing te
 
 \section{Structure of this thesis}
 
-The thesis is divided in two parts: one about Constraint Grammar (Chapters~\ref{chapterCGSAT} and \ref{chapterCGana}) and other about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapters~\ref{chapterCGSAT}  and \ref{chapterCGana} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015}
+The thesis is divided in two parts: one about Constraint Grammar (Chapters~\ref{chapterCGSAT} and \ref{chapterCGana}) and another about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapters~\ref{chapterCGSAT}  and \ref{chapterCGana} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015}
 and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}.
 A third article, ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, presents a practical application of the method on a Basque CG, and is included in the evaluation section.
 A fourth article, ``Exploring the Expressivity of Constraint Grammar'' \cite{kokke2017expressivity}, presents a novel use for the SAT-encoding.
@@ -151,10 +151,10 @@ Chapter~\ref{chapterGFtest} is an extension of one article, ``Automatic test sui
 For both parts, some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter~\ref{chapterBackground}.
 
 Chapter~\ref{chapterBackground} presents a general introduction to both software testing and computational grammars, aimed for a reader who is unfamiliar with the topics.
-Chapter~\ref{chapterCGSAT} introduces the SAT-encoding of Constraint Grammar, with two different schemes for conflict handling. The chapter is followed by an appendix, which describes the SAT-encoding of every rule in detail.
+Chapter~\ref{chapterCGSAT} introduces the SAT-encoding of Constraint Grammar, with two different schemes for conflict handling.
 Chapter~\ref{chapterCGana}
 describes the method of analysing CG by using symbolic evaluation, along with evaluation on three different grammars.
-Chapter~\ref{chapterGFtest} presents the method of generating test cases for GF grammars, along with evaluation on a large-scale resource grammar and a couple of smaller grammars.
+Chapter~\ref{chapterGFtest} presents the method of generating test cases for GF grammars, along with evaluation on a large-scale resource grammar and a couple of smaller grammars. The user manual of the program is included an appendix.
 Chapter~\ref{chapterConclusions} concludes the thesis.
 
 

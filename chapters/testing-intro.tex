@@ -1,24 +1,32 @@
 \section{Software testing and verification}
-\label{sec:testing-intro} 
+\label{sec:testing-intro}
 
-\begin{itemize}
-\item All software has bugs.
-\item Grammars are software.
-\end{itemize}
-
-\noindent The intelligent reader may complete the syllogism.
+% \begin{itemize}
+% \item All software has bugs.
+% \item Grammars are software.
+% \end{itemize}
+%
+% \noindent The intelligent reader may complete the syllogism.
 
 We can approach the elimination of bugs in two ways: reveal them
 by constructing tests, or build safeguards into the program that
-make it more difficult for bugs to occur in the first place. The
-latter approach is more of a concern for developers of new programming
-languages---the language can impose more checks and constraints on the
-programmer, and thus make it harder to write buggy code. However, we
-approach the problem from particular, existing grammar formalisms that
-already have millions of lines of code written in them. Thus, we want
-to develop methods that help finding bugs in existing software.
-In the present section, we introduce some key concepts from the field of
-software testing, as well as their applications to grammar testing.
+make it more difficult for bugs to occur in the first place.
+In this thesis, we concentrate on the first aspect: our starting point is two particular grammar
+formalisms that already have millions of lines of code written in them.
+Rather than change the design of the programming languages, we want to develop methods that help finding bugs in existing software.
+In the present section, we introduce some key concepts from
+the field of software testing, as well as their applications to grammar
+testing.
+
+%\todo{return to this possibly}
+% The latter approach is more of a concern for developers of new programming
+% languages---the language can impose more checks and constraints on the
+% programmer, and thus make it harder to write buggy code. The two
+% formalisms in this thesis fall in the opposite ends of the spectrum:
+% GF has a very expressive type system,
+
+
+
 % \subsection{Purpose of testing}
 
 % Ammann and Offutt \todo{cite \url{http://assets.cambridge.org/97811071/72012/excerpt/9781107172012_excerpt.pdf}}
@@ -78,11 +86,11 @@ property that says ``for all integers $x$ and $y$, $x+y$ should be
 equal to $y+x$''.  A grammar-related property could be, for instance,
 ``a linearisation of a tree must contain strings from all of its
 subtrees''.  We formulate these properties, and generate a large
-amount of data---pairs of integers in the first case, syntax trees in
+amount of test data---pairs of integers in the first case, syntax trees in
 the second---and assert that the property holds for all of them.
 
 \paragraph{Model-based testing}
-Grammars are models for language. \todo{find references}
+Grammars are models for language. \todo{find references + write a whole subsection}
 
 % Of course, the single property of commutativity is not enough to
 % define that (+) works as intended: if that were the only test, it
@@ -142,9 +150,7 @@ simple task: ``all a tester needs to do is find a graph and cover
 it''. The flow of an imperative program can be modelled as a graph
 with start and end points; multiple branches at conditional statements
 and back edges at loops. Take a simple program that takes a number and
-outputs ``even'' for even numbers and ``odd'' for odd numbers; it has
-two branches, and to test it exhaustively, one needs to supply two
-inputs; one even and one odd number.
+outputs ``even'' for even numbers and ``odd'' for odd numbers. The domain of this program is, in theory, infinite, as there is an infinite number of integers. But in practice, the program only has two branches, one for even and one for odd numbers. Thus in order to test the program exhaustively, i.e. cover both paths, one needs to supply two inputs: one even and one odd number.
 
 Simulating the run of the program with all feasible paths is called
 \emph{symbolic evaluation}, and a constraint solver is often used to

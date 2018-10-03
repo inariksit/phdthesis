@@ -29,7 +29,7 @@ words around it.  Together these rules disambiguate the whole text.
 
 
 In the example below, we show an initially ambiguous sentence ``the bear
-sleeps''. 
+sleeps''.
 It contains three word forms, such as \t{"<bear>"}, each followed by its \emph{readings}.
 A reading contains one lemma, such as \t{"bear"}, and a list of morphological tags, such as \t{noun sg}.
 %Additional lemmas within one word form, such as clitic pronouns, are represented as \emph{subreadings}; each indented one more tab.
@@ -69,7 +69,7 @@ Rule 2 is applied to the word \emph{sleeps}, and it removes the noun
 reading. The finished analysis is shown below:
 
 % \begin{itemize}
-% \item[] 
+% \item[]
 % \begin{verbatim}
 % "<the>"
 %         "the" det def
@@ -81,7 +81,7 @@ reading. The finished analysis is shown below:
 % \end{itemize}
 
 \begin{itemize}
-\item[] 
+\item[]
 \begin{verbatim}
 "<the>"            "<bear>"            "<sleeps>"
      "the" det def      "bear" noun sg      "sleep" verb pres p3 sg
@@ -89,7 +89,7 @@ reading. The finished analysis is shown below:
 \end{itemize}
 
 It is also possible to add syntactic tags and dependency structure within \onlycg{} \cite{vislcg3,bick2015}.
-However, for the remainder of this introduction, we will illustrate the examples with the 
+However, for the remainder of this introduction, we will illustrate the examples with the
 most basic operations, that is, disambiguating morphological tags.
 The syntactic disambiguation and dependency features are not fundamentally
 different from morphological disambiguation: the rules describe an \emph{operation}
@@ -115,12 +115,13 @@ Like \onlycg{}, a \fsig{} grammar contains a set of rules which remove
 impossible readings based on contextual tests, in a parallel manner: a
 sentence must satisfy all individual rules in a given \fsig{}.  Due to
 these similarities, the name Parallel Constraint Grammar was also
-suggested \cite{koskenniemi97}.
-% However, \fsig{} rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than \onlycg{}. 
-% In this thesis, we use the name \fsig{} to refer to the framework that is aimed at producing a full syntactic analysis with the more expressive rules, 
+suggested \cite{koskenniemi97}. Other finite-state based systems include
+\citet{gross1997local} and \citet{grana2003fst}. In addition, there are a number of reimplementations of \onlycg{} using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}.
+% However, \fsig{} rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than \onlycg{}.
+% In this thesis, we use the name \fsig{} to refer to the framework that is aimed at producing a full syntactic analysis with the more expressive rules,
 % and PCG to describe any \onlycg{}-variant which happens to be parallel.
 % Thus, we will call implementations such as \cite{voutilainen1994designing} an \emph{\fsig{} grammar} and a program that parses it an \emph{\fsig{} parser}.
-% Conversely, the \onlycg{} parser in \cite{listenmaa_claessen2015} 
+% Conversely, the \onlycg{} parser in \cite{listenmaa_claessen2015}
 % and the ``\onlycg{}-like'' system in \cite{lager98} are instances of PCG.
 %We return to the comparison with \fsig{} in Sections~\ref{sec:ordering}~and~\ref{sec:expressivity}.
 
@@ -128,15 +129,13 @@ Brill tagging \cite{brill1995} is based on transformation rules: the
 starting point of an analysis is just one tag, the most common one,
 and subsequent rule applications transform one tag into another, based
 on contextual tests. Like \onlycg{}, Brill tagging is known to be efficient
-and accurate. The contextual tests are very similar: 
-\citet{lager01transformation} has automatically learned both Brill rules and \onlycg{} rules, using the same system.
+and accurate. The contextual tests are very similar:
+\citet{lager01transformation} demonstrates a systen that automatically learns both Brill rules and \onlycg{} rules.
+Similar ideas to \onlycg{} have been also explored in other frameworks,
+such as logic programming \cite{oflazer97votingconstraints,lager98},
+constraint satisfaction \cite{padro1996csp},
+and dependency syntax \cite{tapanainen97fdg}.
 
-Similar ideas to \onlycg{} have been also explored in other frameworks, such as finite-state automata \cite{gross1997local,grana2003fst},
-%, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst},
-logic programming \cite{oflazer97votingconstraints,lager98}, 
-constraint satisfaction \cite{padro1996csp}, 
-and dependency syntax \cite{tapanainen97fdg}. 
- In addition, there are a number of reimplementations of \onlycg{} using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
 
 \subsection{Properties of Constraint Grammar}\label{sec:properties}
 
@@ -146,16 +145,16 @@ Here we summarise a set of main features, and relate \onlycg{} to the developmen
 
 \onlycg{} is a \emph{reductionistic} system: the analysis starts from a list of alternatives,
 and removes those which are impossible or improbable.
-\onlycg{} is designed primarily for analysis, not generation; its task is 
+\onlycg{} is designed primarily for analysis, not generation; its task is
 to give correct analyses to the words in given sentences,
 not to describe a language as a collection of ``all and only the grammatical sentences''.
 
 The syntax is decidedly \emph{shallow}: the rules do not aim to
-describe all aspects of an abstract phenomenon such as noun phrase; 
+describe all aspects of an abstract phenomenon such as noun phrase;
 rather, each rule describes bits and pieces with concrete conditions.
-The rules are self-contained and mutually independent---this makes it 
-easy to add exceptions, and exceptions to exceptions, without 
-changing the more general rules.
+The rules are self-contained and do not, in general, refer to other
+rules. This makes it easy to add exceptions, and exceptions to
+exceptions, without changing the more general rules.
 % The rules are self-contained and independent.
 % On the one hand, this provides no guarantee that a grammar is internally consistent.
 % On the other hand, these features provide flexibility that is hard to mimic by a deeper formalism.
@@ -166,20 +165,22 @@ changing the more general rules.
 % is very cheap and does not create a complicated taxonomy of different verb types.
 
 % Most importantly, the independence of rules makes \onlycg{} highly robust.
-% If one of the words is unknown or misspelt, a generative grammar would fail to produce any analysis. 
+% If one of the words is unknown or misspelt, a generative grammar would fail to produce any analysis.
 % \onlycg{} would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
 
 
 There are different takes on how \emph{deterministic} the rules are.
-The current state-of-the-art \onlycg{} parser VISL CG-3 executes the rules strictly 
-based on the order of appearance, but there are other implementations which 
-apply their own heuristics, or remove the ordering completely, 
-applying the rules in parallel. 
+The current state-of-the-art \onlycg{} parser VISL CG-3 executes the
+rules strictly based on the order of appearance, but there are other
+implementations which apply their own heuristics, or remove the ordering
+completely, applying the rules in parallel.
 %---furthermore, there are several implementations of \onlycg{} with different kind of application orders,
 %such as ``apply in the order introduced in the grammar file'' or ``apply in order of longer matching context''.
-A particular rule set may be written with one application order in mind, but another party may 
-run the grammar with another implementation---if there are any conflicting rule pairs, then the behaviour of the grammar is different.
-For that reason, we decided to apply software testing and verification methods to \onlycg{} grammars.
+A particular rule set may be written with one application order in mind,
+but another party may run the grammar with another implementation---if
+there are any conflicting rule pairs, then the behaviour of the grammar
+is different.
+% apply software testing and verification methods to \onlycg{} grammars.
 
 
 \subsection{Ordering and execution of the rules}\label{sec:ordering}
@@ -192,7 +193,7 @@ with different ordering schemes. In the present section, we describe
 the different parameters of ordering and execution: \emph{strict
   vs. heuristic}, and \emph{sequential vs. parallel}.  Throughout the
 section, we will apply the rules to the following ambiguous passage,
-``{\em What question is that}'':
+``{\em What question is that}'': \\
 
 \begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l p{0.6cm} l}
 \t{"<what>"}     &                      &  \t{"<question>"}        &  & \t{"<is>"}         & & \t{"<that>"} \\
@@ -201,47 +202,23 @@ section, we will apply the rules to the following ambiguous passage,
 \end{tabular}
 
 
-\def\satcgMax{SAT-CG\textsubscript{Max}}
-\def\satcgOrd{SAT-CG\textsubscript{Ord}}
-\def\noncg#1{{\em \color{gray} #1}}
-
-\begin{table}[h!]
-\centering
-\resizebox{\textwidth}{!}{
-  \begin{tabular}{r | p{3.5cm} | p{3.5 cm} | p{3.5cm}}
-           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
-\textbf{Sequential}
-           & CG-1 \cite{karlsson1990cgp}   
-                             & CG-2 \cite{tapanainen1996} % (Tapanainen1996, p. 34
-                                                  & --           \\ 
-           & VISL CG-3  \cite{vislcg3}      
-                             & Weighted CG-3 \cite{pirinen2015} & \\ 
-           & \citet{peltonen2011}  &  &\\ %Peltonen2011, p. 80
-           & \citet{yli-jyra2011cg_engine}  & & \\ 
-           & \citet{hulden2011cg_engine} & & \\ \hline
-\textbf{Parallel}
-           & \satcgOrd       & \satcgMax          & \noncg{\citet{lager98}} \\ 
-           &                 & \noncg{FSIG \cite{voutilainen1994designing}} 
-                                                  & \noncg{FSIG \cite{koskenniemi90}} \\
-           &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
-
-
-  \end{tabular}}
-  \caption{Combinations of rule ordering and execution strategy.}
-  \label{table:nelikentta}
-\end{table}
 
 \paragraph{Strict vs. heuristic}
 
 aka. ``In which order are the rules applied to a single cohort?''
 
-An implementation with \emph{strict order} applies each rule in the
-order in which they appear in the file. If a grammar contains the
-rules \t{REMOVE v IF (-1 det)} and \t{REMOVE n IF (-1 pron)} in the
-given order, the rule that removes the verb reading in \emph{question}
+\noindent An implementation with a \emph{strict order} applies each rule in the
+order in which they appear in the file. Suppose that a grammar contains the following rules the given order:
+
+\begin{EmptyItem}
+\t{REMOVE verb IF (-1 det)} \\
+\t{REMOVE noun IF (-1 pron)}
+\end{EmptyItem}
+
+\noindent In a strict ordering, the rule that removes the verb reading in \emph{question}
 will be applied first. After it has finished, there are no verb
 readings available anymore for the second rule to fire.
-					
+
 How do we know which rule is the right one? There can be many rules
 that fit the context, but we choose the one that just happens to
 appear first in the rule file.  A common design pattern is to place
@@ -250,18 +227,18 @@ then try a rule with less conditions. For a similar effect, a
 \emph{careful mode} may be used: ``remove verb after
 \emph{unambiguous} determiner'' would not fire on the first round, but
 it would wait for other rules to clarify the status of \emph{what}.
-					
+
 An alternative solution to a strict order is to use a \emph{heuristic
   order}: when disambiguating a particular word, find the rule that
 has the longest and most detailed match. Now, assume that there is a
-rule with a longer context, such as \t{SELECT n IF (-1 det) (1 v)},
+rule with a longer context, such as \t{SELECT noun IF (-1 det) (1 verb)},
 even if this rule appears last in the file, it would be preferred to
 the shorter rules, because it is a more exact match.  There are also
 methods that use explicit weights to favour certain rules, such as
 \citet{pirinen2015} for CG, and
 \citet{voutilainen1994designing,oflazer97votingconstraints,silfverberg2009conflict}
 for related formalisms.
-					
+
 Both methods have their strengths and weaknesses. A strict order is
 more predictable, but it also means that the grammar writers need to
 pay more thought to rule interaction. A heuristic order frees the
@@ -276,19 +253,17 @@ implementations, CG-1 \cite{karlsson1990cgp} and VISL CG-3
 
 
 
-
-
 \paragraph{Sequential vs. parallel}
 
 aka. ``When does the rule application take effect?''
 %aka. ``Does the context change immediately after each rule is applied?''
 
-The input sentence can be processed in sequential or parallel manner.
+\noindent The input sentence can be processed in sequential or parallel manner.
 In \emph{sequential execution}, the rules are applied to one word at a
 time, starting from the beginning of the sentence. The sentence is
 updated after each application. If the word \emph{what} gets
 successfully disambiguated as a pronoun, then the word \emph{question}
-will not match the rule \t{REMOVE v IF (-1 det)}.
+will not match the rule \t{REMOVE verb IF (-1 det)}.
 
 
 In contrast, a \emph{parallel execution} strategy disambiguates all
@@ -302,14 +277,14 @@ To give a minimal example, assume we have a single rule,
 \begin{tabular}{p{0.5cm} l   p{0.5cm} l    p{0.5cm} l}
 \t{"<can$_1$>"}      &  & \t{"<can$_2$>"}  & & \t{"<can$_3$>"} & \\
    & \t{"can" noun}  &  & \t{"can" noun} & & \t{"can" noun}   \\
-   & \t{"can" verb}  &  & \t{"can" verb} & & \t{"can" verb} 
+   & \t{"can" verb}  &  & \t{"can" verb} & & \t{"can" verb}
 
 \end{tabular}
 \end{figure}
 
 The question of parallel execution becomes more complicated if there
 are multiple rules that apply for the same context.  Both \t{REMOVE v
-  IF (-1 det)} and \t{REMOVE n IF (-1 pron)} would match
+  IF (-1 det)} and \t{REMOVE noun IF (-1 pron)} would match
 \emph{question}, because the original input from the morphological
 analyser contains both determiner and pronoun as the preceding word.
 The result depends on various details: shall all the rules also act in
@@ -332,6 +307,39 @@ list-based and disjunction-based ontologies, corresponding to CG and
 FSIG respectively, is explained with further detail in
 \citet{lager_nivre01}.
 
+
+
+  \def\satcgMax{SAT-CG\textsubscript{Max}}
+  \def\satcgOrd{SAT-CG\textsubscript{Ord}}
+  \def\noncg#1{{\em \color{gray} #1}}
+
+  \begin{table}[t]
+  \centering
+  \resizebox{\textwidth}{!}{
+    \begin{tabular}{r | p{3.5cm} | p{3.5 cm} | p{3.5cm}}
+             & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
+  \textbf{Sequential}
+             & CG-1 \cite{karlsson1990cgp}
+                               & CG-2 \cite{tapanainen1996} % (Tapanainen1996, p. 34
+                                                    & --           \\
+             & VISL CG-3  \cite{vislcg3}
+                               & Weighted CG-3 \cite{pirinen2015} & \\
+             & \citet{peltonen2011}  &  &\\ %Peltonen2011, p. 80
+             & \citet{yli-jyra2011cg_engine}  & & \\
+             & \citet{hulden2011cg_engine} & & \\ \hline
+  \textbf{Parallel}
+             & \satcgOrd       & \satcgMax          & \noncg{\citet{lager98}} \\
+             &                 & \noncg{FSIG \cite{voutilainen1994designing}}
+                                                    & \noncg{FSIG \cite{koskenniemi90}} \\
+             &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
+
+
+    \end{tabular}}
+    \caption{Combinations of rule ordering and execution strategy.}
+    \label{table:nelikentta}
+  \end{table}
+
+
 Table~\ref{table:nelikentta} shows different systems of the constraint
 rule family, with rule order (strict vs. heuristic) on one axis, and
 execution strategy (sequential vs. parallel) on other.  Traditional CG
@@ -340,6 +348,7 @@ cursive font and lighter colour.  \satcgMax and \satcgOrd refer to the
 systems by the author; they are presented in
 \citet{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} of
 this thesis.
+
 
 
 \section{Grammatical Framework}
@@ -352,7 +361,7 @@ library that contains the linguistic details of many natural
 languages.  A \gf{} program consists of an \emph{abstract syntax} (a set
 of functions and their categories) and a set of one or more
 \emph{concrete syntaxes} which describe how the abstract functions and
-categories are linearised (turned into surface strings) in each
+categories are turned into surface strings in each
 respective concrete language. The resulting grammar describes a
 mapping between concrete language strings and their corresponding
 abstract trees (structures of function names).  This mapping is
@@ -364,12 +373,12 @@ a string into a tree and then linearising the obtained tree into a new
 string.
 
 Another main component of \gf{} is the Resource Grammar Library (RGL)
-\cite{ranta2009rgl}, which, as of July 2018, contains the linguistic
-details of 40 natural languages. The library has had over 50
-contributors, and it consists of 1900 program modules and 3 million
-lines of code. As the name suggests, the RGL modules are not meant to
-be used for translation as such; instead, they are used as libraries
-to build smaller, domain-specific application grammars.
+\cite{ranta2009rgl}, which, as of October 2018, contains a range of
+linguistic details for over 40 natural languages. The library has had
+over 50 contributors, and it consists of 1900 program modules and 3
+million lines of code. As the name suggests, the RGL modules are
+primarily used as  libraries to build smaller, domain-specific
+application grammars. In addition, there is experimental work on using the RGL as an interlingua for wide-coverage translation, aided by statistical disambiguation \cite{ranta2014sltc}.
 
 \subsection{Related work}
 
@@ -412,6 +421,7 @@ build smaller applications comes from  CLE (Core Language Engine)
     \DataTypeTok{Mod}\OtherTok{ :} \DataTypeTok{Quality} \OtherTok{->} \DataTypeTok{Kind} \OtherTok{->} \DataTypeTok{Kind} \NormalTok{;                     }\CommentTok{-- Italian wine}
     \DataTypeTok{Wine}\NormalTok{, }\DataTypeTok{Cheese}\NormalTok{, }\DataTypeTok{Fish}\NormalTok{, }\DataTypeTok{Pizza}\OtherTok{ :} \DataTypeTok{Kind} \NormalTok{;}
     \DataTypeTok{Warm}\NormalTok{, }\DataTypeTok{Good}\NormalTok{, }\DataTypeTok{Italian}\NormalTok{, }\DataTypeTok{Vegan}\OtherTok{ :} \DataTypeTok{Quality} \NormalTok{;}
+ \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
   \caption{Abstract syntax of a \gf{} grammar about food}
@@ -421,12 +431,12 @@ build smaller applications comes from  CLE (Core Language Engine)
 \subsection{Abstract syntax}
 
 
-Abstract syntax describes the constructions in our grammar without
+Abstract syntax describes the constructions in a grammar without
 giving a concrete implementation. Figure~\ref{fig:foods}
 shows the abstract syntax of a small example grammar in \gf{}, slightly
 modified from \citet{ranta2011gfbook}, and Figure~\ref{fig:spanish}
 shows a corresponding Spanish concrete syntax. We refer to this
-grammar throughout the chapter. 
+grammar throughout the chapter.
 
 Section~\t{cat} introduces the categories of the grammar: \t{Comment},
 \t{Item},  \t{Quality}, and \t{Kind}.  \t{Comment} is the \emph{start
@@ -439,20 +449,20 @@ stage. \t{Quality} describes properties of foods, such as
 unspecified. In contrast, an \t{Item} is \emph{quantified}: we know if
 it is singular or plural (e.g. `one pizza' vs. `two pizzas'), definite or
 indefinite (`the pizza' vs. `a pizza'), and other such things (`your
-pizza' vs. `my pizza'). 
+pizza' vs. `my pizza').
 
 Section~\t{fun} introduces functions: they are either lexical
 items without arguments, or syntactic functions which manipulate their
 arguments and build new terms. Of the syntactic functions, \t{Pred}
 constructs an \t{Comment} from an \t{Item} and a \t{Quality},
 building trees such as \t{Pred~(This~Pizza)~Good} `this pizza is
-good'. 
+good'.
 \t{Mod}~adds an \t{Quality} to a \t{Kind}, e.g. \t{Mod~Italian~Pizza}
-`Italian pizza'. The functions  \t{This, That, These} 
+`Italian pizza'. The functions  \t{This, That, These}
 and \t{Those} quantify a \t{Kind} into an \t{Item}, for instance,
 \t{That~(Mod~Italian~Pizza)} `that Italian pizza'.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \centering
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -469,7 +479,14 @@ and \t{Those} quantify a \t{Kind} into an \t{Item}, for instance,
     \CommentTok{-- That, Those defined similarly}
     \DataTypeTok{Mod} \NormalTok{ap cn }\FunctionTok{=} \NormalTok{\{ s }\FunctionTok{=} \NormalTok{\textbackslash\textbackslash{}n }\OtherTok{=>} \NormalTok{preOrPost ap}\FunctionTok{.}\NormalTok{p (ap}\FunctionTok{.}\NormalTok{s }\FunctionTok{!} \NormalTok{n }\FunctionTok{!} \NormalTok{cn}\FunctionTok{.}\NormalTok{g) (cn}\FunctionTok{.}\NormalTok{s }\FunctionTok{!} \NormalTok{n) ;}
                   \NormalTok{g }\FunctionTok{=} \NormalTok{cn}\FunctionTok{.}\NormalTok{g \} ;}
-    \CommentTok{--Wine, Cheese, \dots, Italian, Vegan defined as lexical items}
+    \DataTypeTok{Wine} \FunctionTok{=} \NormalTok{\{ s} \FunctionTok{=} \NormalTok{table \{} \DataTypeTok{Sg} \OtherTok{=>} \StringTok{"vino"} ; \DataTypeTok{Sg} \OtherTok{=>} \StringTok{"vinos"} \NormalTok{\} ;}
+             \NormalTok{g} \FunctionTok{=} \DataTypeTok{Masc} \NormalTok{\} ;}
+    \DataTypeTok{Pizza} \FunctionTok{=} \NormalTok{\{ s} \FunctionTok{=} \NormalTok{table \{} \DataTypeTok{Sg} \OtherTok{=>} \StringTok{"pizza"} ; \DataTypeTok{Sg} \OtherTok{=>} \StringTok{"pizzas"} \NormalTok{\} ;}
+              \NormalTok{g} \FunctionTok{=} \DataTypeTok{Fem} \NormalTok{\} ;}
+    \DataTypeTok{Good} \FunctionTok{=} \NormalTok{\{ s} \FunctionTok{=} \NormalTok{table \{} \DataTypeTok{Sg} \OtherTok{=>} \NormalTok{table \{} \DataTypeTok{Masc} \OtherTok{=>} \StringTok{"bueno"} ; \DataTypeTok{Fem} \OtherTok{=>} \StringTok{"buena"} \NormalTok{\} ;}
+                         \DataTypeTok{Pl} \OtherTok{=>} \NormalTok{table \{} \DataTypeTok{Masc} \OtherTok{=>} \StringTok{"buenos"} ; \DataTypeTok{Fem} \OtherTok{=>} \StringTok{"buenas"} \NormalTok{\} \} ;}
+             \NormalTok{p} \FunctionTok{=} \DataTypeTok{Pre} \NormalTok{\} ;}
+    \CommentTok{--Fish, Cheese, Italian, Warm and Vegan defined similarly}
   \NormalTok{param}
     \DataTypeTok{Number} \FunctionTok{=} \DataTypeTok{Sg} \FunctionTok{|} \DataTypeTok{Pl} \NormalTok{;}
     \DataTypeTok{Gender} \FunctionTok{=} \DataTypeTok{Masc} \FunctionTok{|} \DataTypeTok{Fem} \NormalTok{;}
@@ -480,6 +497,7 @@ and \t{Those} quantify a \t{Kind} into an \t{Item}, for instance,
       \KeywordTok{in} \NormalTok{\{ s }\FunctionTok{=} \NormalTok{det }\FunctionTok{++} \NormalTok{cn}\FunctionTok{.}\NormalTok{s }\FunctionTok{!} \NormalTok{num} \NormalTok{;} \NormalTok{n }\FunctionTok{=} \NormalTok{num} \NormalTok{; g }\FunctionTok{=} \NormalTok{cn}\FunctionTok{.}\NormalTok{g \} ;}
     \NormalTok{copula }\FunctionTok{=} \NormalTok{table \{ }\DataTypeTok{Sg} \OtherTok{=>} \StringTok{"es"} \NormalTok{; }\DataTypeTok{Pl} \OtherTok{=>} \StringTok{"son"} \NormalTok{\} ;}
     \NormalTok{preOrPost p x y }\FunctionTok{=} \KeywordTok{case} \NormalTok{p }\KeywordTok{of} \NormalTok{\{ }\DataTypeTok{Pre} \OtherTok{=>} \NormalTok{x }\FunctionTok{++} \NormalTok{y ; }\DataTypeTok{Post} \OtherTok{=>} \NormalTok{y }\FunctionTok{++} \NormalTok{x \} ;}
+ \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
   \caption{Spanish concrete syntax of a \gf{} grammar about food}
@@ -500,7 +518,7 @@ categories are more complex records. For instance, \t{Kind} has a
 field \t{s} which is a table from number to string (\textsc{sg} $\Rightarrow$
 \emph{pizza}, \textsc{pl} $\Rightarrow$ \emph{pizzas}), and another
 field \t{g}, which contains its gender (feminine for \t{Pizza}). We
-say that \t{Kind} has \emph{inherent} gender, and \emph{variable} number. 
+say that \t{Kind} has \emph{inherent} gender, and \emph{variable} number.
 
 The section~\t{lin} contains the concrete implementation of the
 functions, introduced in \t{fun}. Here we handle
@@ -508,7 +526,7 @@ language-specific details such as agreement: when \t{Pred (This Pizza)
   Good} is linearised in Spanish, `esta pizza es buena', the copula must be singular
 (\emph{es} instead of plural \emph{son}), and the adjective must be in singular
 feminine (\emph{buena} instead of masculine \emph{bueno} or plural
-\emph{buenas}), matching the gender of \t{Pizza} and the number of \t{This}. 
+\emph{buenas}), matching the gender of \t{Pizza} and the number of \t{This}.
 If we write an English concrete syntax, then only the number of the copula is
 relevant: this pizza/wine \emph{is} good, these pizzas/wines \emph{are} good.
 
@@ -518,9 +536,9 @@ relevant: this pizza/wine \emph{is} good, these pizzas/wines \emph{are} good.
 
 \gf{} grammars are compiled into parallel multiple context-free
 grammars (\pmcfg), introduced by \citet{seki91pmcfg}. The
-connection between \gf{} and \pmcfg{} was established by \citet{ljunglof2004}, and further developed by \citet{angelov2010phd}. 
+connection between \gf{} and \pmcfg{} was established by \citet{ljunglof2004}, and further developed by \citet{angelov2010phd}.
 After the definition, which follows \citet{angelov2010phd}, we
-explain three key features, which will be used for the test suite generation.
+explain three key features for the test suite generation.
 
 \paragraph{Definition} A \pmcfg{} is a 5-tuple:
 
@@ -536,7 +554,7 @@ explain three key features, which will be used for the test suite generation.
 
 % \begin{EmptyItem}
 % \begin{HighlightingFancy}
-% args f = \{ [A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$] 
+% args f = \{ [A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$]
 %          | p $\leftarrow$ P
 %          , p \CommentTok{is the production} A $\rightarrow$ f[A$_\text{1}$,A$_\text{2}$,\dots,A$_{\text{a(f)}}$] \}
 % \end{HighlightingFancy}
@@ -549,7 +567,7 @@ $$
 A \rightarrow f[A_1,A_2,\dots,A_{a(f)}]
 $$
 where $a(f)$ is the arity of $f$, $A \in N^C$ is called result category, $A_1,A_2,\dots,A_{a(f)} \in N^C$ are called argument categories and $f \in F^C$ is a function symbol.
-\item $L \subset N^C \times F^C$ is a set which defines the default linearisation functions for those concrete categories that have default linearisations. 
+\item $L \subset N^C \times F^C$ is a set which defines the default linearisation functions for those concrete categories that have default linearisations.
 \end{itemize}
 
 
@@ -558,11 +576,11 @@ where $a(f)$ is the arity of $f$, $A \in N^C$ is called result category, $A_1,A_
 
 For each category in the original grammar, the \gf{} compiler
 introduces a new \emph{concrete category} in the \pmcfg{} for each combination of
-inherent parameters.  
+inherent parameters.
 These concrete categories can be linearised to strings or vectors of
 strings. The start category (\t{Comment} in the Foods grammar) is in
 general a single string, but intermediate categories may have to keep
-several options open. 
+several options open.
 
 Consider the categories \t{Item}, \t{Kind} and \t{Quality} in the
 Spanish concrete syntax. Firstly, \t{Item} has inherent number
@@ -580,9 +598,10 @@ four strings.
 %  $\times$ {\stackanchor{\tt \small masc}{\tt \small fem}}).
 
 \paragraph{Concrete functions}
-Just like categories, each syntactic function from the original
+%Just like categories,
+Each syntactic function from the original
 grammar turns into multiple syntactic functions into the
-\pmcfg{}---one for each combination of parameters of its arguments.
+\pmcfg{}: one for each combination of parameters of its arguments.
 
 \begin{itemize}
 \setlength\itemsep{0em}
@@ -602,7 +621,7 @@ adjective is modifying the noun: ``la \emph{buena} pizza'' vs. ``la pizza
 classes of adjectives behave the same: ``la pizza es \emph{buena}''
 and ``la pizza es \emph{vegana}''. As an optimization strategy, the
 grammar creates a {\it coercion}: both \quality{pre} and \quality{post}
-may be treated as \quality{*} when the distinction doesn't matter. 
+may be treated as \quality{*} when the distinction doesn't matter.
 Furthermore, the function \t{Pred : Item $\rightarrow$ Quality $\rightarrow$ S} uses
 the coerced category \quality{*} as its second argument, and thus
 expands only into 4 variants, despite there being 8 combinations of
