@@ -27,8 +27,8 @@ many cases, it is the more feasible approach:
   limited domain to cover. %Grammars are ideal for such use cases.
 %In such a case, a domain-specific grammar %for translation or natural language generation
 %is much more feasible than a general-purpose tool, with wide coverage but limited quality.
-%A user 
-%In contrast, producers of information need strong guarantees that the information they provide is correct in all languages. 
+%A user
+%In contrast, producers of information need strong guarantees that the information they provide is correct in all languages.
 
 \item \textbf{Less language resources needed}. Most of the 6000+
   languages of the world do not have the abundance of data needed for
@@ -43,7 +43,7 @@ many cases, it is the more feasible approach:
 \item \textbf{Grammars are explainable}, and hence, testable. If there
   is a bug in a particular sentence, we can find the reason for it and
   fix it. In contrast, machine learning models are much more opaque,
-  and the user can just tweak some parameters, without guarantees how
+  and the user can just tweak some parameters or add some data, without guarantees how
   it affects the model.
 \end{itemize}
 
@@ -54,13 +54,7 @@ many cases, it is the more feasible approach:
 %In addition, more complex languages benefit proportionately more from rule-based approach. If a single noun or verb can have hundreds of inflection forms (as opposed to English, think \emph{dog} and \emph{dogs}), we would need much more training data in order to cover all of them. A grammar-based approach can be used to synthesize data, in conjunction with a data-driven approach such as deep learning.
 %This benefits even languages that are relatively well-off, such as Finnish.
 
-\todo{Put something like this already here: ``Our work is by no means the first approach to 
-
-grammar testing: for instance, \citet{butt1999lfg} recommend
-frequent use of test suites, as well as extensive documentation of
-grammars.''}
-
-Testing grammars has one big difference from testing software: natural
+Testing grammars has one big difference from testing most software: natural
 language has no formal specification, so ultimately we must involve a
 human oracle. However, we can automate many useful subtasks: detect
 \emph{ambiguous constructions} and \emph{contradictory grammar rules},
@@ -70,6 +64,8 @@ haystack, and we suspect there are a few needles---we cannot promise
 automatic needle-removal, but instead we help the human oracle to
 narrow down the search.
 % In the end, we need a human to confirm and decide what to do with the needles.
+
+Our work is by no means the first approach to grammar testing: for instance, \citet{butt1999lfg} recommend frequent use of test suites, as well as extensive documentation of grammars. However, we automate the process further than our predecessors, using established techniques from the field of software testing, and applying them to a novel use case: natural language grammars.
 
 In the following sections, we present our research on testing
 computational natural language grammars, showcasing two different
@@ -91,12 +87,12 @@ the following rule:
 \item[] \texttt{SELECT noun IF (0 noun/verb) (-1 article) ;}
 \end{itemize}
 
-Wide-coverage CG grammars, containing some thousands of rules, 
-generally achieve very high accuracy: 
-thanks to the flexible formalism, new rules can be written 
+Wide-coverage CG grammars, containing some thousands of rules,
+generally achieve very high accuracy:
+thanks to the flexible formalism, new rules can be written
 to address even the rarest phenomena, without compromising the general tendencies.
 But there is a downside to this flexibility: large grammars are difficult to maintain
-and debug. There is no internal mechanism that prevents rules from contradicting 
+and debug. There is no internal mechanism that prevents rules from contradicting
 each other---the following is a syntactically valid CG grammar, and normal CG compilers will not detect anything strange.
 
 \begin{itemize}
@@ -112,9 +108,9 @@ Apart from obvious cases as above, with two rules saying contradicting truths ab
 \noindent The first rule removes all articles unconditionally, thus rendering the second rule invalid: it may never apply, because its condition is never matched.
 
 In real life, these conflicts can be much more subtle, and appear far apart from each other. %Grammar writers keeping track is infeasible.
-The common way of testing grammars is to apply them into some test corpus, with a gold standard, and gather statistics how often the rules apply. While this method can reveal that \texttt{SELECT noun IF (-1 article)} never applied, it cannot tell whether it is just because no sentence in the test corpus happened to trigger the contextual test, or whether some other rule before it made it impossible to ever apply. 
+The common way of testing grammars is to apply them into some test corpus, with a gold standard, and gather statistics how often the rules apply. While this method can reveal that \texttt{SELECT noun IF (-1 article)} never applied, it cannot tell whether it is just because no sentence in the test corpus happened to trigger the contextual test, or whether some other rule before it made it impossible to ever apply.
 
-We use a method called \emph{symbolic evaluation}: in high level terms, we pretend to apply the grammar to every possible input, and track the consequences of each decision. 
+We use a method called \emph{symbolic evaluation}: in high level terms, we pretend to apply the grammar to every possible input, and track the consequences of each decision.
 The rules become interconnected, and we can find the reason for a conflict. This allows us to answer questions such as ``given this set of 50 rules, is there an input that goes through the first 49 rules and still triggers the 50th rule?''
 
 %This method can give the grammar writer insights about the rules within a grammar. However, it does not tell whether some rule is \emph{useful} for real text, i.e. if it applies often, or if the result of the disambiguation makes any sense. This method is good to complement with other methods: corpus to find out if it applies often, and human grammarian to figure out if it makes sense.
@@ -145,12 +141,12 @@ The problem is relevant for any kind of software testing, and we use existing te
 
 \section{Structure of this thesis}
 
-The thesis is divided in two parts: one about Constraint Grammar (Chapters~\ref{chapterCGSAT} and \ref{chapterCGana}) and other about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapters~\ref{chapterCGSAT}  and \ref{chapterCGana} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} 
-and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. 
+The thesis is divided in two parts: one about Constraint Grammar (Chapters~\ref{chapterCGSAT} and \ref{chapterCGana}) and other about Grammatical Framework (Chapter~\ref{chapterGFtest}). The core of Chapters~\ref{chapterCGSAT}  and \ref{chapterCGana} is based on two articles, which present the SAT-encoding and its application to grammar testing: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015}
+and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}.
 A third article, ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, presents a practical application of the method on a Basque CG, and is included in the evaluation section.
 A fourth article, ``Exploring the Expressivity of Constraint Grammar'' \cite{kokke2017expressivity}, presents a novel use for the SAT-encoding.
 
-Chapter~\ref{chapterGFtest} is an extension of one article, ``Automatic test suite generation for PMCFG grammars'' \cite{listenmaa_claessen2018}. 
+Chapter~\ref{chapterGFtest} is an extension of one article, ``Automatic test suite generation for PMCFG grammars'' \cite{listenmaa_claessen2018}.
 
 For both parts, some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter~\ref{chapterBackground}.
 
@@ -168,11 +164,11 @@ The three articles which present the general methods \cite{listenmaa_claessen201
 In general, the ideas behind the publications were joint effort.
 For the first article \cite{listenmaa_claessen2015}, all of the implementation of SAT-CG is by the author,
 and all of the library SAT+ by Koen Claessen.
-%I was mainly responsible of writing the article. 
+%I was mainly responsible of writing the article.
 The version appearing in this monograph, Chapter~\ref{chapterCGSAT}, is thoroughly rewritten by the author since the initial publication.
 
-For the second article \cite{listenmaa_claessen2016}, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen. 
-%Writing the article was joint effort of both authors. 
+For the second article \cite{listenmaa_claessen2016}, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen.
+%Writing the article was joint effort of both authors.
 The version appearing in Chapter~\ref{chapterCGana} is to large extent the same as the original article, with added detail and examples throughout the chapter. The chapter incorporates material from two additional articles: ``Exploring the Expressivity of Constraint Grammar'' \cite{kokke2017expressivity}, which is joint work between the author and Wen Kokke, and ``Cleaning up the Basque grammar: a work in progress'' \cite{listenmaa2017basque}, co-authored with Jose Maria Arriola, Itziar Aduriz and Eckhard Bick. In \cite{kokke2017expressivity}, the initial idea was developed together, implementation was split in approximately half, and writing was done together. In \cite{listenmaa2017basque}, the author was in a main role in both the implementation and writing.
 
 The work in the third article \cite{listenmaa_claessen2018} was joint effort: both authors participated in all parts of planning and implementation. Both the original article and the version appearing in this monograph, Chapter~\ref{chapterGFtest}, was mainly written by the author.

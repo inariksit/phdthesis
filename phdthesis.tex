@@ -186,16 +186,17 @@
 
 \usepackage{pdfpages}
 
-% Appendix after chapters 3 and 5
-\usepackage{appendix}
+\usepackage[toc,page]{appendix}
 \usepackage{chngcntr}
 \usepackage{etoolbox}
-\AtBeginEnvironment{subappendices}{
-  \chapter*{\appendixname}
-  \addcontentsline{toc}{chapter}{\appendixname}
-  \counterwithin{figure}{section}
-  \counterwithin{table}{section}
-}
+% \AtBeginEnvironment{subappendices}{
+%   \chapter*{\appendixname}
+%   \addcontentsline{toc}{chapter}{\appendixname}
+%   \counterwithin{figure}{section}
+%   \counterwithin{table}{section}
+% }
+% \renewcommand{\appendixname}{Appendix: User manual for gftest}
+
 
 
 %= DOCUMENT ==================================================================
@@ -229,31 +230,23 @@
 \pagestyle{fancy}
 \renewcommand{\chaptermark}[1]{\markboth{{\scshape \chaptername} \thechapter.\ #1}{}}
 
-\include{chapters/thesis-intro}
+  \include{chapters/thesis-intro}
 
   \include{chapters/background}
 
-  %\include{chapters/cg-encoding-and-analysis}
-  % attempt at squeezing encoding and analysis into one chapter
-
-\renewcommand{\appendixname}{Appendix: SAT-encoding}
-
   \include{chapters/cg-sat-encoding}
-\begin{subappendices}
-  \include{chapters/sat-appendix}
-\end{subappendices}
 
   \include{chapters/cg-analysis}
- 
+
   \include{chapters/gf-testing}
 
   \include{chapters/conclusion}
 
-
-
 \backmatter
  % \include{glossary}
-  \include{bibliography}
+\include{bibliography}
+
+
+\include{chapters/manual}
 
 \end{document}
-

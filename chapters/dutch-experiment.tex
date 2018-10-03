@@ -19,8 +19,8 @@ We generated a set of test sentences for each function in Dutch, with
 English translations, and gave them to the native tester to read. The
 tester replied with a list of sentences that were wrong, along with
 suggestions for improvement. Communication between the grammarian and
-the tester was conducted via email. In the future, \todo{less
-  primitive process management might make the process more efficient}.
+the tester was conducted via email. 
+
 
 \subsection{Types of bugs}\label{types-of-bugs}
 
@@ -160,9 +160,11 @@ to the RGL categories, then this bug would have required more work to fix.
 \paragraph{Hard to understand, hard to
 fix}\label{hard-to-understand-hard-to-fix}
 
-As an example of a problem that was hard to understand and hard to fix,
-we take the agreement of a reflexive construction in conjunction with a
-verbal complement. More concretely, consider the following sentences:
+As an example of a problem that was hard to understand and hard to
+fix, we take the agreement of a reflexive construction in conjunction
+with a verbal complement. The example works as well for English, so
+for the convenience of the reader, we use English as an example
+language.  Now, consider the following sentences:
 
 \begin{itemize}
 \itemsep1pt\parskip0pt\parsep0pt
@@ -392,3 +394,7 @@ grammarian wanted quick feedback. Where Tester 1 was instructed to
 read through a long list of sentences (out of which most are correct),
 Tester 2 has been given sentences that Tester 1 already flagged as
 wrong. All in all, Tester 2 has read around 50 sentences.
+
+We found that communication via email was suboptimal, and would be
+hard to scale up to more testers.  In the future, we aim to improve
+the process management with a more efficient workbench.

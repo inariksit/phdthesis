@@ -1,5 +1,5 @@
 tex = phdthesis
-latex = xelatex -interaction=nonstopmode
+latex = /usr/local/texlive/2018/bin/x86_64-darwin/xelatex # -interaction=nonstopmode
 
 all: pdf 
 

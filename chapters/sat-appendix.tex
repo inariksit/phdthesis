@@ -69,10 +69,10 @@
 
 %%%%%%%%%%%%%%%
 
-%\chapter*{Appendix: SAT-encoding}
+\section{SAT-encoding}
 
 
-\noindent In this appendix, we show the SAT-encoding for all the rule types that 
+\noindent In this section, we show the SAT-encoding for all the rule types that 
 SAT-CG supports: 
 {\sc remove} and {\sc select} rules, with the contextual tests and set operations described in CG-2 \cite{tapanainen1996}, except for the operators \t{**} (continue search if linked tests fail) and \t{@} (absolute position). In addition, the software SAT-CG supports a couple of new constructions from VISL CG-3: {\sc cbarrier}, which requires the barrier tag to be unambiguous in order to function as a barrier;
 {\sc negate}, which inverts a whole chain of contextual tests; and subreadings, which make it possible to include e.g. a clitic in the same cohort, but distinguish it from the main reading.
@@ -83,7 +83,7 @@ The purpose of this appendix is to give a full description of the different rule
 
 
 
-\section{SAT-encoding of sentences}
+\subsection{SAT-encoding of sentences}
 
 As in Section~\ref{sec:CGSAT}, we demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre una aproximación más científica}. 
 It has the virtue of being ambiguous in nearly every word: for instance, \emph{sobre} is either a preposition (`above' or `about') or a noun (`envelope'); \emph{una} can be a pronoun, determiner or a verb. The full analysis, with the initial ambiguities, is shown in Figure~\ref{fig:satEncodingSpanishExample}. 
@@ -137,7 +137,7 @@ The final assignment of the other variables depends on the constraint rules.
 \end{equation}
 
 
-\section{SAT-encoding of rules}
+\subsection{SAT-encoding of rules}
 \label{appendix1}
 
 In order to demonstrate the SAT-encoding, we show variants of \textsc{remove} and \textsc{select} rules, with different contextual tests. 
@@ -146,13 +146,13 @@ We try to craft rules that make sense for this segment; however, some variants a
 %The basis of the rule is \texttt{REMOVE adj}, which will target the word form \emph{más}.
 % Its positive counterpart is \texttt{SELECT adv}, which translates into ``remove everything but adv''.
 
-% \subsection{Parallel scheme}
+% \subsubsection{Parallel scheme}
 
 % We begin by introducing the parallel scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and all rules have access to it.
 % and all the rules are applied at the same time. 
 %In addition, we add rule types that \cite{lager98} does not consider.
 
-\subsection{No conditions} 
+\subsubsection{No conditions} 
 
 The simplest rule types remove or select a target in all cases. 
 A rule can target one or multiple readings in a cohort. We demonstrate the case with one target in rules~\ref{eq:rmAdj}--\ref{eq:slAdj}, and multiple target in rules~\ref{eq:rmVb}--\ref{eq:slVb}. \\
@@ -216,7 +216,7 @@ As previously, we need no explicit clause for $\unaPrsPThree  \vee \unaPrsPOne \
 \end{equation}
 
 
-\subsection{Positive conditions} 
+\subsubsection{Positive conditions} 
 
 Rules with contextual tests apply to the target, if the conditions hold. 
 This is naturally represented as implications. We demonstrate both \textsc{remove} and {\sc select} rules with a single condition in \ref{eq:singleCondition}; the rest of the variants only with {\sc remove}. All rule types can be changed to {\sc select} by changing the consequent from $\neg{}\masAdj$ to $\neg{}\masAdv$. %from $\neg{}\masAdj$ to $\masAdv \wedge \neg{}\masAdj$.
@@ -310,7 +310,7 @@ $\sobreN$ is a valid condition only if it is the only reading in its cohort ($\s
 \end{align}
 
 
-\subsection{Inverted conditions}
+\subsubsection{Inverted conditions}
 
 In the following, we demonstrate the effect of two inversion operators. 
 The keyword {\sc not} inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword {\sc negate} inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, \emph{det noun} would be allowed, as well as \emph{prn adj}, but not \emph{det adj}. %a sequence which matches the whole``
@@ -370,7 +370,7 @@ There is no word following \cientifica{}, hence its adjective reading is removed
 %
 \end{align}
 
-\subsubsection{Non-matching inverted conditions}
+\paragraph{Non-matching inverted conditions}
 
 Here we demonstrate a number of inverted rules, in which the contextual test does not match the example sentence. As a result, the action is performed unconditionally.
 
