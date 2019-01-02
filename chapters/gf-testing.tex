@@ -1499,18 +1499,21 @@ grammars need to be \emph{reliable}.
 One problem we have encountered is that the test sentences from
 resource grammars are often nonsensical semantically, and hence a
 native speaker might intuitively say that a sentence is wrong, even
-though it is just unnatural.  For instance, the function \t{AdvQVP}
-covers constructions such as ``you did \emph{what}?''. However, the
-function itself is completely general and can take any verb phrase and
-any question adverb, thus bizarre combinations like ``you saw the dog
-why'' \todo{real example} may appear in the generated test cases.
+though it is just unnatural.  For instance, the function \t{SelfAdVVP}
+covers constructions such as ``the president herself is at
+home''. However, the function itself is completely general and can
+take any verb phrase and add the reflexive pronoun, and furthermore it
+may add any subject NP, or none at all, for context. This means that bizarre
+combinations often appear in the generated test cases, such as
+``to always itself be hungry''--there is no meaningful subject present, but the
+VP requires a reflexive pronoun anyway.
 
-\todo{this is irrelevant} If the grammar is purely
-syntactic, we would need external tools to ensure semantic coherence,
-but if the grammatical categories already include semantic
-distinctions, e.g. limiting the subject and indirect object of
-\emph{give} into humans, that naturally restricts the generated test
-suite.
+%% \todo{this is irrelevant} If the grammar is purely
+%% syntactic, we would need external tools to ensure semantic coherence,
+%% but if the grammatical categories already include semantic
+%% distinctions, e.g. limiting the subject and indirect object of
+%% \emph{give} into humans, that naturally restricts the generated test
+%% suite.
 
 
 So far the only mode of operation is generating test cases for a
