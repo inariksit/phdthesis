@@ -90,7 +90,40 @@ amount of test data---pairs of integers in the first case, syntax trees in
 the second---and assert that the property holds for all of them.
 
 \paragraph{Model-based testing}
-Grammars are models for language. \todo{find references + write a whole subsection}
+The programs we test are often large and complex, and their main logic is hard to
+separate from less central components, such as graphical user interface, or
+dealing with input and output. In order to make testing easier, we can introduce
+a \emph{model} of the real system, which we use to devise tests. To give a concrete
+example, suppose we want to test a goal-line system: a program that checks whether
+a goal has been scored or not, in a game such as football. The real program includes
+complex components such as cameras and motion sensors, but our model can abstract
+away such details, and consider only the bare bones: the ball and the goal line.
+For our model, we define possible \emph{states} for the ball and goal line: the
+ball can be inside or outside the line, and the goal line may be idle or in action.
+Furthermore, we define legal \emph{transitions} between the states: the ball starts
+outside, can stay outside, or go inside, but once it has entered the goal, it must
+get out before another goal can be scored.
+
+With such a model in place, we can query another program, called \emph{model checker},
+for possible outcomes in the model, or ask whether a particular outcome would be
+possible. For our goal-line system, we would like to be assured that it is possible
+to score a goal; on the other hand, when a ball has entered the goal, it is only
+registered as one goal, not repeated goals every millisecond until the ball is
+removed.
+
+What do we gain from building such a model? We describe the (intended) behaviour
+of the real program in form of a simplified model, and ask for logical
+conclusions---sometimes we discover that our original description wasn't quite
+as waterproof as we wanted. Of course, we still need to execute tests for the
+real system---the model (together with model checker) has only given us inspiration
+what to test.
+
+Philosophically speaking, grammars are models for language: what is a grammar rule
+if not a human's best attempt to describe the behaviour of a complex system.
+In Chapter~\ref{chapterCGana}, we will take essentially the approach of a model
+checker: ``you claimed that \emph{X} happens, now let's try applying \emph{X}
+in all possible contexts''.
+
 
 % Of course, the single property of commutativity is not enough to
 % define that (+) works as intended: if that were the only test, it
