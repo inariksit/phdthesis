@@ -124,19 +124,6 @@ In Chapter~\ref{chapterCGana}, we will take essentially the approach of a model
 checker: ``you claimed that \emph{X} happens, now let's try applying \emph{X}
 in all possible contexts''.
 
-
-% Of course, the single property of commutativity is not enough to
-% define that (+) works as intended: if that were the only test, it
-% would happily pass any function with similar property,
-% e.g. multiplication, or some function $f(x, y) = 0$ for any $x$ and
-% $y$. Likewise, some components in a syntax tree may not contribute
-% with a string, but only a parameter to choose the right inflection
-% form from another subtree.
-%  To remedy this, we would need to test other
-% properties of addition, or mix in some unit tests with specific
-% values.
-
-
 \paragraph{Deriving test cases}
 
 Unit tests, as well as properties, can be written by a human or
@@ -144,7 +131,7 @@ derived automatically from some representation of the program. The
 sources of tests can range from informal descriptions, such as
 specifications or user stories, to individual statements in the source
 code. Alternatively, tests can be generated from an abstract model of
-the program, such as a UML diagram.
+the program, as previously explained.
 
 In the context of grammar testing, the specification is the whole
 natural language that the grammar approximates---hardly a formal and
