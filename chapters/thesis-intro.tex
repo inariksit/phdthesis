@@ -67,9 +67,11 @@ narrow down the search.
 
 Our work is by no means the first approach to grammar testing: for instance, \citet{butt1999lfg} recommend frequent use of test suites, as well as extensive documentation of grammars. However, we automate the process further than our predecessors, using established techniques from the field of software testing, and applying them to a novel use case: natural language grammars.
 
-In the following sections, we present our research on testing
-computational natural language grammars, showcasing two different
-types of grammar formalisms and testing methods.
+In the following sections, we present our research on testing computational natural language grammars, showcasing two different types of grammar formalisms and testing methods. 
+The first type of grammars are \emph{reductionistic}: the starting point is all the words in a given sentence, with all possible analyses: for example, in the sentence ``can you can the can'', every \emph{can} has 3 analyses, and \emph{you} has 2. The grammar rules are constraints, whose task is to get rid of inappropriate analyses.
+The second type grammars are \emph{generative}: the starting point is an empty string, and the grammar is a set of rules that generate all grammatical sentences in the language. For example, ``I saw a dog'' would be in the set, because there are rules that construct just that sequence, but ``saw dog I a'' would not, because there are no rules to construct it.
+
+
 
 \section{Symbolic evaluation of a reductionistic formalism}
 

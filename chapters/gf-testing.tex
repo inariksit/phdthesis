@@ -59,10 +59,10 @@ which is the core formalism used by the Grammatical Framework (\gf)
 \cite{ranta2004gf}. However, the general method works for any
 formalism that is at most as expressive as \pmcfg{}, including
 context-free grammars, multiple context-free grammars, which covers
-formalisms such as Tree-Adjoining Grammar (\tagGrammar)
-\cite{joshi1975tag}) and LFCRS \todo{(LFG can compile into it)}.
-
-and several variants of Categorial Grammar \cite{deGroote2004,steedman1988ccg}.
+formalisms such as Tree-Adjoining Grammar 
+\cite{joshi1975tag}, % Head Grammar \cite{pollard1984phd},
+Linear Context-free Rewriting Systems \cite{vijay1987lcfrs} 
+and Combinatory Categorial Grammar \cite{steedman1988ccg}.
 
 The following sections assume knowledge of \gf{} and \pmcfg{}
 formalisms; we direct the reader to Section~\ref{sec:gf-intro} for a
@@ -1261,7 +1261,7 @@ seconds to generate the test suite for all languages. For the resource
 grammar, Dutch and Estonian finished in 3--4 minutes. However, the
 Basque resource grammar is noticeably more complex, and creating test
 trees for all functions took almost three hours.
-\todo{Can it be parallelised?}
+%\todo{Can it be parallelised?}
 
 \subsection{Generated trees}
 
