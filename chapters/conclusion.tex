@@ -142,7 +142,7 @@ previous rules except $r'$.
 % Contrast this with ``we tested 1+3 and got 4, thus we know that
 % addition is implemented correctly''.
 
-\paragraph{GF} On the GF side, we actually are trying to answer the
+\paragraph{GF} On the GF side, we are trying to answer the
 harder question: does the grammar do an adequate job at producing
 some natural language? For that, we need a set of test sentences that
 cover all phenomena in the grammar. In the CG world, we had a natural
@@ -173,7 +173,7 @@ counts the applications, and the program would generate separate test
 cases for one subordinate clause, and $n$ nested subordinate clauses.
 
 But we can still fail to generate a test that reveals the error---the
-failure mode is, simply, not enough parameters.  Consider the
+failure mode is, simply, not enough parameters in the grammar. Consider the
 \t{AdjCN} function for Spanish again, and say that we don’t have the
 parameter for pre- and postmodifier at all, and \t{AdjCN} only comes
 in two variants, one for feminine and one for masculine. Suppose that
@@ -243,7 +243,7 @@ generate another example with smaller examples, such as ``run'',
 ``always run'' and ``run with Mary'', to help narrow down which
 function introduces the error.
 
-\todo{Workflow: language workbench}
+%\todo{Workflow: language workbench}
 
 In more philosophical terms, we would like the grammar writing
 community to view testing, in terms of \citet{beizer2003software}, as

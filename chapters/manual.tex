@@ -366,12 +366,16 @@ Created files TestLangEng-(old|new)-funs.org
 \begin{verbatim}
     * send_V3
 
-    ** UseCl (TTAnt TPres ASimul) PPos (PredVP (UsePron we_Pron) (ReflVP (Slash3V3 ∅ (UsePron it_Pron))))
+    ** UseCl (TTAnt TPres ASimul) PPos
+             (PredVP (UsePron we_Pron)
+                     (ReflVP (Slash3V3 _ (UsePron it_Pron))))
     TestLangDut> we sturen onszelf ernaar
     TestLangDut-OLD> we sturen zichzelf ernaar
 
 
-    ** UseCl (TTAnt TPast ASimul) PPos (PredVP (UsePron we_Pron) (ReflVP (Slash3V3 ∅ (UsePron it_Pron))))
+    ** UseCl (TTAnt TPast ASimul) PPos
+             (PredVP (UsePron we_Pron)
+                     (ReflVP (Slash3V3 _ (UsePron it_Pron))))
     TestLangDut> we stuurden onszelf ernaar
     TestLangDut-OLD> we stuurden zichzelf ernaar
 \end{verbatim}
@@ -508,14 +512,12 @@ The categories \texttt{Ant}, \texttt{Pol}, \texttt{Temp} and
 \texttt{Tense} are as expected empty; there's no string to be added to
 the sentences, just a parameter that \emph{chooses} the right forms of
 the clause.
-
 \texttt{V} having empty fields \texttt{particle} and \texttt{prefix} is
 in this case just an artefact of a small lexicon: we happen to have no
 intransitive verbs with a particle or prefix in the core 300-word
 vocabulary. But a grammarian would know that it's still relevant to keep
 those fields, because in some bigger application such a verb may show
 up.
-
 On the other hand, if some other field is always empty, it might be a
 hint for the grammarian to remove it altogether.
 
@@ -581,12 +583,18 @@ Example:
 * Erased trees:
 
 ** RelCl (ExistNP something_NP) : RCl
-- Tree:  AdvS (PrepNP with_Prep (RelNP (UsePron it_Pron) (UseRCl (TTAnt TPres ASimul) PPos (RelCl (ExistNP something_NP))))) (UseCl (TTAnt TPres ASimul) PPos (ExistNP something_NP))
+- Tree:  AdvS (PrepNP with_Prep
+              (RelNP (UsePron it_Pron)
+                     (UseRCl (TTAnt TPres ASimul) PPos
+                             (RelCl (ExistNP something_NP)))))
+                                    (UseCl (TTAnt TPres ASimul) PPos (ExistNP something_NP))
 - Lin:   ermee is er iets
 - Trans: with it, such that there is something, there is something
 
 ** write_V2 : V2
-- Tree:  AdvS (PrepNP with_Prep (PPartNP (UsePron it_Pron) write_V2)) (UseCl (TTAnt TPres ASimul) PPos (ExistNP something_NP))
+- Tree:  AdvS (PrepNP with_Prep
+              (PPartNP (UsePron it_Pron) write_V2))
+                       (UseCl (TTAnt TPres ASimul) PPos (ExistNP something_NP))
 - Lin:   ermee is er iets
 - Trans: with it written there is something
 \end{verbatim}
@@ -679,7 +687,8 @@ function has to be split into two different functions, one taking
 \texttt{Quality\_before} and other \texttt{Quality\_after}.
 
 Now you know what coercions are, this is how it looks like in the
-program:
+program (just mentally replace 7 with \texttt{before}, 8 with \texttt{after} and
+11 with \texttt{whatever}.):
 
 \begin{verbatim}
 > gftest -g Foods -l Spa --show-coercions
@@ -688,8 +697,6 @@ Quality_7--->_11
 Quality_8--->_11
 \end{verbatim}
 
-(Just mentally replace 7 with \texttt{before}, 8 with \texttt{after} and
-11 with \texttt{whatever}.)
 
 \hypertarget{show-contexts}{%
 \subsubsection{-\/-show-contexts}\label{show-contexts}}
@@ -703,7 +710,7 @@ change the start category of the context.
 \texttt{-\/-show-cats} with \texttt{-\/-debug}: see
 \protect\hyperlink{--show-cats}{\texttt{-\/-show-cats}}.)
 
-Examples:
+\noindent Examples:
 
 \begin{itemize}
 \tightlist
@@ -728,14 +735,14 @@ Examples:
 \begin{verbatim}
     > gftest -g Foods -l Spa --show-contexts 7
 
-    Pred (That (Mod ∅ Wine)) Vegan
-    Pred (That Wine) ∅
-    Pred (These (Mod ∅ Wine)) Vegan
-    Pred (These Wine) ∅
-    Pred (That (Mod ∅ Pizza)) Vegan
-    Pred (That Pizza) ∅
-    Pred (These (Mod ∅ Pizza)) Vegan
-    Pred (These Pizza) ∅
+    Pred (That (Mod _ Wine)) Vegan
+    Pred (That Wine) _
+    Pred (These (Mod _ Wine)) Vegan
+    Pred (These Wine) _
+    Pred (That (Mod _ Pizza)) Vegan
+    Pred (That Pizza) _
+    Pred (These (Mod _ Pizza)) Vegan
+    Pred (These Pizza) _
 \end{verbatim}
 
 \begin{itemize}
@@ -753,10 +760,10 @@ Examples:
 \begin{verbatim}
     > gftest -g Foods -l Spa --show-contexts 11
 
-    Pred (That Wine) ∅
-    Pred (These Wine) ∅
-    Pred (That Pizza) ∅
-    Pred (These Pizza) ∅
+    Pred (That Wine) _
+    Pred (These Wine) _
+    Pred (That Pizza) _
+    Pred (These Pizza) _
 \end{verbatim}
 
 \hypertarget{count-trees}{%

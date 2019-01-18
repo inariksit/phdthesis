@@ -20,7 +20,7 @@ We generated a set of test sentences for each function in Dutch, with
 English translations, and gave them to the native tester to read. The
 tester replied with a list of sentences that were wrong, along with
 suggestions for improvement. Communication between the grammarian and
-the tester was conducted via email. 
+the tester was conducted via email.
 
 
 \subsection{Types of bugs}\label{types-of-bugs}
@@ -32,12 +32,16 @@ fluent in Dutch would have easy time pinpointing the error from the
 generated test cases, having both intuition and technical names for
 things. Ease of fixing is relative to the grammar: a given grammatical
 phenomenon can be implemented in a variety of ways, some of which are
-harder to understand. Say that relative clauses are implemented as
-terrible spaghetti code in a Dutch grammar, but very elegantly in a
-German grammar, and both have a bug that results in a similar
-ungrammatical sentences. In such a case, the problem would be equally
-easy to understand in both languages, but fixing the bug would be easier
-in the German grammar. \todo{does it break more easily for german?}
+harder to understand.
+
+% Say that relative clauses are implemented as
+% terrible spaghetti code in a Dutch grammar, but very elegantly in a
+% German grammar, and both have a bug that results in a similar
+% ungrammatical sentences. In such a case, the problem would be equally
+% easy to understand in both languages, but fixing the bug could arguably
+% be easier in one of the languages: in the language with neat abstractions,
+% changing one line fixes that one bug and any similar ones. On
+% in the German grammar. \todo{does it break more easily for german?}
 
 In more concrete terms, \emph{easy to fix} means just some local changes
 in a single function. In contrast, bugs that are \emph{hard to fix}
@@ -93,7 +97,7 @@ definitely OK\\eet niet 5 wormen - definitely OK
 clauses with indefinite noun phrases (\emph{a} worm, \emph{worms}) use
 noun phrase negation, but if the noun phrase has any other determiner
 (\emph{these} worms, \emph{five} worms), then clausal negation is
-appropriate. 
+appropriate.
 
 In the grammar, this fix required changes to 13 categories. Not all
 categories had to be changed manually, but e.g.~a change in \texttt{NP}
