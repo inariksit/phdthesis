@@ -680,13 +680,13 @@ To give some context, let us consider the performances of the sequential CG-2 an
 As another \onlycg{} result from the late 1990s, \citet{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
 
 Compared to the parsing times of sequential \onlycg{} and \fsig{} nearly 20 years ago,
-our results demonstrate a smaller difference, and much less steep curve in the execution time
+our results demonstrate a smaller difference, and much less steep growth in the execution time
 related to sentence length.
-Of course, this remark should be taken with caution: to start with, the described experiments were conducted on different systems and different centuries\footnote{Eckhard Bick (personal communication) points out that CG-2 run on a modern system is around 6 times faster than \vislcg3{}.}.
+Of course, this remark should be taken with caution: to start with, the described experiments were conducted on different systems and in different centuries\footnote{Eckhard Bick (personal communication) points out that CG-2 run on a modern system is around 6 times faster than \vislcg3{}.}.
 Importantly, the parallel participants in the experiments were using different grammars---the \fsig{} grammar used in \citet{voutilainen1998}
 contains much more difficult operations, which makes the constraint problem larger.
 Our experiments have just shown the lack of blowup for a small grammar.
-Nevertheless, we feel that this experiment could be interesting to conduct properly: try a SAT-based approach for executing the \fsig{} grammars from the 1990s, and compare the results to the current state of the art.
+Nevertheless, it would be interesting to conduct this experiment properly: try a SAT-based approach for executing the \fsig{} grammars from the 1990s, and compare the results to the current state of the art.
 
 \subsection{Effect on grammar writing}
 
@@ -803,19 +803,18 @@ means that all the other readings in the cohort become the actual targets.
 Thus, if a rule addresses some phenomenon, most of the readings in the target cohort
 are saved from the forced assignment.
 
-
-To conclude, this experiment has been very inconclusive, due to the extremely low coverage
-of the tested grammars.
-A high-quality grammar would target significantly more individual words in the test corpus;
-this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help
-such grammar to go that extra mile; however, based on the experiments so far, this is mostly speculation.
-
-
+To conclude, this experiment has been very inconclusive, due to the extremely
+low coverage of the tested grammars. A high-quality grammar would target
+significantly more individual words in the test corpus; this means less risk for
+the SAT-solver to randomly decide the values for untargeted readings. We would
+hope that the power of rules disambiguating their condition would help such a
+grammar to go that extra mile; however, based on the experiments so far, this is
+mostly speculation.
 
 It would be interesting to repeat the experiment in writing a serious, large-scale grammar.
 Some questions to address would be
 \begin{inparaenum}
-\item[(a)] do we need less rules;
+\item[(a)] do we need fewer rules;
 \item[(b)] do we need careful context;
 \item[(c)] do we write more {\sc select} rules; and
 \item[(d)] will a grammar that performs well with parallel \onlycg{} also perform well with sequential \onlycg{}?

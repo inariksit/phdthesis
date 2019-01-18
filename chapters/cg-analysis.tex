@@ -18,7 +18,7 @@
 In the current chapter, we will solve a problem.
 
 
-Recall the design principles of CG from Section~\ref{sec:properties}: 
+Recall the design principles of CG from Section~\ref{sec:properties}:
 by design, the grammars are shallow and low-level.
 There is no particular hierarchy between lexical, morphological,
 syntactic or even semantic tags: individual rules can be written to address any
@@ -32,12 +32,12 @@ the general rule (``if noun'') later.
 
 However, this design is not without problems. As CGs grow larger, it
 gets harder to keep track of all the rules and their interaction.
-Despite this well-known issue, there has not been a tool that would help 
+Despite this well-known issue, there has not been a tool that would help
 grammar writers to detect conflicting rules.
-Following the idea further, the tool could give feedback that is not 
-restricted to conflicts, but also other features that are helpful 
+Following the idea further, the tool could give feedback that is not
+restricted to conflicts, but also other features that are helpful
 in the process of writing grammar.
-Given the rules in Figure~\ref{fig:infrules}, a grammar writer may 
+Given the rules in Figure~\ref{fig:infrules}, a grammar writer may
 ask the following questions.
 
 
@@ -47,7 +47,7 @@ ask the following questions.
 \item Could two or more rules be merged? (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
 \item What is the best order for the rules?
 \item Can the Finnish rule on the left be rewritten in the form shown on the right?
-\item Generate an example sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
+\item Generate an example sequence that triggers rule(s) $R$ but not rule(s) $R'$.
 \end{itemize}
 
 %%%%%
@@ -67,7 +67,7 @@ SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} 
 
 \end{tabular}
 
-\caption{Left: rules to select infinitive in Portuguese. 
+\caption{Left: rules to select infinitive in Portuguese.
         Right: two versions of a condition in Finnish.}
 
 \label{fig:infrules}
@@ -116,15 +116,19 @@ Hand-annotated corpora are commonly used in the development of CGs, because they
 \citet{voutilainen2004} gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
 For a language with no free or tagset-compatible corpus available, \citet{tyers_reynolds2015} describe a method where they apply their rules to unannotated Wikipedia texts and pick 100 examples at random for manual check.
 
-CG rules are usually arranged in sections, and run in the following manner. 
-First apply rules from section 1, and repeat until nothing changes in the text. Then apply rules from sections 1--2, then 1--3 and so on, until the set includes all rules.
-The best strategy is to place the safest and most effective rules in the first sections,
-so that they make way for the following, more heuristic and less safe rules to act on.
-A representative corpus is arguably the best way to get concrete numbers---how many times a rule applied and how often it was correct---and to arrange the rules in sections based on that feedback.
+CG rules are usually arranged in sections, and run in the following manner.
+First apply rules from section 1, and repeat until nothing changes in the text.
+Then apply rules from sections 1--2, then 1--3 and so on, until the set includes
+all rules. The best strategy is to place the safest and most effective rules in
+the first sections, and leave the more heuristic (i.e. less safe) rules as a
+last resort; only to act on the parts that haven't been disambiguated yet by
+the safer rules. A representative corpus is arguably the best way to get concrete
+numbers---how many times a rule applied and how often it was correct---and to
+arrange the rules in sections based on that feedback.
 
-\citet{voutilainen2004} states that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
+\citet{voutilainen2004} states that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development.
 This figure is very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms.
-However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve; neither does it guarantee a coherent whole of rules. 
+However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve; neither does it guarantee a coherent whole of rules.
 While the coverage information is easy to obtain from a corpus, there is no tool that would aid grammar writers in including wide coverage of different linguistic phenomena.
 
 
@@ -132,7 +136,7 @@ While the coverage information is easy to obtain from a corpus, there is no tool
 
 The corpus-based method can tell the effect of each single rule at their place in the rule sequence, and leaves the grammar writer to make changes in the grammar.
 As a step further, \citet{bick2013tuning} modifies the grammar automatically, by trying
-out different rule orders and altering the contexts of the rules. 
+out different rule orders and altering the contexts of the rules.
 Bick reports error reduction of 7--15\% compared to the original grammars.
 This is a valuable tool, especially for grammars that are so big that it's hard to keep track manually. A program can try all combinations whereas trying to make sense out of a huge set of rules would be hard for humans.
 As a downside, the grammar writer will likely not know why exactly does the tuned grammar perform better.
@@ -140,8 +144,8 @@ As a downside, the grammar writer will likely not know why exactly does the tune
 
 \paragraph{Expressivity and complexity of CG}
 \citet{tapanainen1999phd} gives an account of the expressivity of
-the contextual tests for 4 different constraint formalisms, including CG. 
-In addition, parsing complexity can be easily defined for a given variant and 
+the contextual tests for 4 different constraint formalisms, including CG.
+In addition, parsing complexity can be easily defined for a given variant and
 implementation of CG; see for instance \citet{nemeskey14}.
 \citet{ylijyra2017} relates CG to early formal language theory, and
 provides a proof of non-monotonic\footnote{A monotonic
@@ -155,11 +159,11 @@ We start by defining a conflict, and present requirements for a solution.
 Then, we introduce a logical translation of sequential CG, corresponding to \citet{lager_nivre01}, and modify it into a SAT-problem about the \emph{original} sentence before applying the rules.
 %this will tell us if it is possible for a senten
 We refine our solution by restricting what kind of sentences we can create.
-The whole method requires only a morphological lexicon, no corpus. 
+The whole method requires only a morphological lexicon, no corpus.
 
 \paragraph{Conflict}
 
-We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input. 
+We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input.
 Some examples of conflicts follow:
 
 \begin{itemize}
@@ -171,7 +175,7 @@ Some examples of conflicts follow:
 tag combination, or contradictory requirements for a context word
 \end{itemize}
 
-This definition is very similar to the concept \emph{bleeding order} in generative phonology \cite{kiparsky1968}; however, since we are talking about an explicit list of 
+This definition is very similar to the concept \emph{bleeding order} in generative phonology \cite{kiparsky1968}; however, since we are talking about an explicit list of
 human-written rules, we include also rule-internal conflicts in our classification.
 The conflicting (or ``bleeding'') $R$ can be a single rule or a list of rules: for instance, if one rule removes a verb in
 context $C$, and another in context $\neg C$, together these rules
@@ -185,25 +189,25 @@ targets verbs.
 % the possible sentences at each step. After each rule, we have two
 % possibilities: the rule fires, or it does not fire. In case the rule does
 % not fire, we have again two options: either its conditions are not met,
-% or its target is the only remaining analysis. 
+% or its target is the only remaining analysis.
 
 \paragraph{Solution}
 
-How do we find out if a rule $r$ can act? 
-We could apply the grammar to a large corpus and count the number of times 
-each rule fires; if some rule never fires, we can suspect there is something wrong 
-in the rule itself, or in the interaction with previous rules. 
+How do we find out if a rule $r$ can act?
+We could apply the grammar to a large corpus and count the number of times
+each rule fires; if some rule never fires, we can suspect there is something wrong
+in the rule itself, or in the interaction with previous rules.
 But it can also be that $r$ just targets a rare phenomenon, and there was no sentence in the corpus that would trigger it.
 
 Of course, tagged corpora are extremely useful for many questions in CG analysis.
-A corpus can show which rules are the most used, or which rules give false analyses. 
-Luckily, we have already methods for finding such statistics---the question 
-about conflicts is orthogonal to those, and the solution needs to address only 
+A corpus can show which rules are the most used, or which rules give false analyses.
+Luckily, we have already methods for finding such statistics---the question
+about conflicts is orthogonal to those, and the solution needs to address only
 the part about conflicts, not about rules being frequent or accurate.
 Therefore, we can take a more artificial approach. % generate our own sentences.
 Remember the definition of conflict: ``applying $R$ makes it impossible to apply $r$ \emph{regardless of input}''.
-In a nutshell, we are going to show the absence of a conflict by trying to create 
-a sequence where $r$ can apply after $R$; conversely, we detect a conflict by 
+In a nutshell, we are going to show the absence of a conflict by trying to create
+a sequence where $r$ can apply after $R$; conversely, we detect a conflict by
 showing that such sequence cannot be created.
 
 
@@ -221,21 +225,21 @@ showing that such sequence cannot be created.
 \paragraph{SAT-encoding of sequential CG}
 \label{sec:orderedScheme}
 
-In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
+In order to analyse real-life CGs, we need to model the semantics of sequential CG:
 rule application takes effect immediately, is irreversible\footnote{As pointed out by Eckhard Bick, VISL CG-3 allows reference to deleted readings. In principle, this would not be an obstacle for our implementation, because no variables are removed.}, and only allows changes in the target.
-We restrict ourselves to the operations on morphological disambiguation, and only {\sc select} and {\sc remove} rules. 
-The following encoding does not support dependency relations, nor rule types which add readings or cohorts. 
+We restrict ourselves to the operations on morphological disambiguation, and only {\sc select} and {\sc remove} rules.
+The following encoding does not support dependency relations, nor rule types which add readings or cohorts.
 Last time, we only used ordering as a way to choose the which rules to apply.
-But there was no state: all clauses operated in parallel, on the same variables. 
-Now, we need a new variable for a reading every time when it is targeted; 
+But there was no state: all clauses operated in parallel, on the same variables.
+Now, we need a new variable for a reading every time when it is targeted;
 that is, when its state potentially changes.
 As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
 At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
-The new variable \newVar{} is true iff 
+The new variable \newVar{} is true iff
 
 \begin{figure}[h]
 \begin{tabular}{l l}
-(a) \oldVar{} was true, and 
+(a) \oldVar{} was true, and
                              & (b) the rule cannot apply: this can be because \\
                                      & ~~~~-- its conditions do not hold, or \\
                                      & ~~~~-- it would remove the last reading.
@@ -245,16 +249,16 @@ The new variable \newVar{} is true iff
 \noindent We keep the same example sequence from Chapter~\ref{chapterCGSAT}, {\em la casa grande}. In the following, we apply the rule \t{REMOVE v IF (-1 det)} to it.
 
 $$\begin{array}{r l}
-\text{New variable } \casa{}'_\v 
-      & \Longleftrightarrow \quad \casaV\ 
-        \wedge\: ( \; \ob{\neg\laDet}^{\invConds} 
+\text{New variable } \casa{}'_\v
+      & \Longleftrightarrow \quad \casaV\
+        \wedge\: ( \; \ob{\neg\laDet}^{\invConds}
         \vee  \ob{(\casaV \wedge \neg \casaN) }^{\onlyTrgLeft} ) \\
 \end{array}$$
 
 
-\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. 
-For example, if we apply two rules which target verbs and one which targets pronouns, 
-the sentence vector will look like the following. 
+\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged.
+For example, if we apply two rules which target verbs and one which targets pronouns,
+the sentence vector will look like the following.
 
 
 %\begin{figure}
@@ -269,10 +273,10 @@ $$\begin{array}{r @{~\rightarrow~} l}
 
 \paragraph{Symbolic sentence}
 
-We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
+We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$.
 %If there is a pronoun in its conditions, and the rule which targest
 But what is the status of the variables in the beginning?
-%We have not specified yet what is the status of the variables in the beginning. 
+%We have not specified yet what is the status of the variables in the beginning.
 In fact, that decision makes a crucial difference. If all variables
 start off as true, then we have, in effect, reimplemented the logical
 encoding by \citet{lager_nivre01}.  This option would not make an
@@ -288,13 +292,13 @@ $\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em
 %There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
 
 
-%However, when all the readings start off as unassigned, the SAT-problem becomes 
+%However, when all the readings start off as unassigned, the SAT-problem becomes
 %``Which readings were true before any rule applications?''
 In order to turn this problem into a SAT-problem, we will have the readings start off
 unassigned. All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
-For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser. 
-But our task now is to {\em generate} the original sentence, which will pass through the rules. 
-Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}. 
+For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser.
+But our task now is to {\em generate} the original sentence, which will pass through the rules.
+Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}.
 Every cohort, called {\em symbolic word}, contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
 
 % Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
@@ -311,19 +315,19 @@ of readings has ranged from about 300 to about 9000.
 Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule \t{REMOVE v IF (-1 det)}, the width is 2.
 
 If the context contains a \t{*} (context word can be anywhere),
-we need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis; this indeed happened in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the implementation, we tried for each \t{*} multiple variants of the sentence. 
-For example, given the rule \t{REMOVE~v~IF~(-1*~det)}, 
-we tried first a sentence of width 2; if there was a conflict, we tried width 3, and then 4. For a rule with multiple \t{*}s, we create combinations in the range of $\pm$ 2 symbolic words for each \t{*}-condition; 
-in addition, we need to specify where the target is in the symbolic sentence. 
-For instance, the rule \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested 
+we need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis; this indeed happened in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the implementation, we tried for each \t{*} multiple variants of the sentence.
+For example, given the rule \t{REMOVE~v~IF~(-1*~det)},
+we tried first a sentence of width 2; if there was a conflict, we tried width 3, and then 4. For a rule with multiple \t{*}s, we create combinations in the range of $\pm$ 2 symbolic words for each \t{*}-condition;
+in addition, we need to specify where the target is in the symbolic sentence.
+For instance, the rule \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested
 with the following combinations, where C means condition and T means target:
-% in a range of 3--7 symbolic words: both \t{1*} and \t{-1*} can be interpreted as \t{}. 
-% For the rule with two \t{*}s, we tried all the following combinations: 
-(C,T,C); 
-(C,C,T,C); 
-(C,T,C,C); 
-(C,C,T,C,C); 
-(C,C,C,T,C,C); 
+% in a range of 3--7 symbolic words: both \t{1*} and \t{-1*} can be interpreted as \t{}.
+% For the rule with two \t{*}s, we tried all the following combinations:
+(C,T,C);
+(C,C,T,C);
+(C,T,C,C);
+(C,C,T,C,C);
+(C,C,C,T,C,C);
 (C,C,T,C,C,C) and
 (C,C,C,T,C,C,C).
 
@@ -331,7 +335,7 @@ with the following combinations, where C means condition and T means target:
 %we create sentences that are up to 3 words wider than the context without \t{*}, and try them all.
 
 \paragraph{Rule application}
-Finally, we define what does it mean for a sentence to ``pass through'' a rule. 
+Finally, we define what does it mean for a sentence to ``pass through'' a rule.
 Let us enumerate the cases:
 \begin{enumerate}
 \item The sentence is out of scope; target not removed
@@ -340,11 +344,11 @@ Let us enumerate the cases:
 \item The target was never in place
 \item The target is removed
 \end{enumerate}
-%In a symbolic sentence, we cannot properly distinguish between the last two cases. 
-Let us illustrate the difference between the last two cases with a rule that targets pronouns, say, \t{REMOVE prn IF (1 v)}. 
-If the target was never in place, then both the original $\laPrn$ and the newly created $\la{}'_\prn$ end up as false. 
+%In a symbolic sentence, we cannot properly distinguish between the last two cases.
+Let us illustrate the difference between the last two cases with a rule that targets pronouns, say, \t{REMOVE prn IF (1 v)}.
+If the target was never in place, then both the original $\laPrn$ and the newly created $\la{}'_\prn$ end up as false.
 If the target is removed, then $\laPrn$ will be true and $\la{}'_\prn$ false.
-This means that a rule with the condition \t{IF (-1 prn)} behaves differently depending on where in the rule sequence it is placed: 
+This means that a rule with the condition \t{IF (-1 prn)} behaves differently depending on where in the rule sequence it is placed:
 if it is applied before \t{REMOVE prn IF (1 v)}, then it will match the original reading $\laPrn$. Any rule applied after that will get the newly created variable $\la{}'_\prn$.
 
 %that is, whether the new variable depends on $\laPrn$ or  $\la{}'_\prn$.
@@ -365,7 +369,7 @@ r2 = REMOVE verb IF (-1 det) (1 noun) ;
 \end{verbatim}
 
 
-We want to know if the last rule is able to apply, after going through the rules that come before it---in this case, there is only one such rule. 
+We want to know if the last rule is able to apply, after going through the rules that come before it---in this case, there is only one such rule.
 The width of the last rule is three: one condition to the left of the target, one to the right, so we create a symbolic sentence of three words. Below, we show the symbolic sentence, consisting of the symbolic words {\em w1, w2} and {\em w3}.
 
 \begin{figure}[h]
@@ -380,13 +384,13 @@ The width of the last rule is three: one condition to the left of the target, on
 \end{tabular}
 \end{figure}
 
-After applying the first rule, we have a situation which looks much like the one in the previous chapter, Figure~\ref{fig:modelsOneRule}. 
-If the symbolic word {\em w1} is a determiner, then {\em w2} cannot be a verb; 
-the only exception is the case where verb is the only analysis of {\em w2}. 
-As before, the verb analysis {\em w2} can also be false, even if {\em w1} 
-is not a determiner. The exact same dependencies are created between the 
+After applying the first rule, we have a situation which looks much like the one in the previous chapter, Figure~\ref{fig:modelsOneRule}.
+If the symbolic word {\em w1} is a determiner, then {\em w2} cannot be a verb;
+the only exception is the case where verb is the only analysis of {\em w2}.
+As before, the verb analysis {\em w2} can also be false, even if {\em w1}
+is not a determiner. The exact same dependencies are created between the
 symbolic words {\em w2} and {\em w3}.
-The first word {\em w1} is out of scope of the condition, because it has no preceding word. 
+The first word {\em w1} is out of scope of the condition, because it has no preceding word.
 Below we see the affected readings after the first rule application, with newly created variables:
 
 \begin{figure}[h]
@@ -397,7 +401,7 @@ $$\begin{array}{l @{~\rightarrow~} l}
 \end{array}$$
 \end{figure}
 
-There is no ``final sentence'' yet, simply constraints on the possible combinations of determiners and verbs. If we asked for a solution now, it could be anything; for instance, all three words are determiners. Just asking for a freely chosen sequence is not very interesting; there are so many possibilities, and even after applying more rules, most of the combinations are not explicitly prohibited. 
+There is no ``final sentence'' yet, simply constraints on the possible combinations of determiners and verbs. If we asked for a solution now, it could be anything; for instance, all three words are determiners. Just asking for a freely chosen sequence is not very interesting; there are so many possibilities, and even after applying more rules, most of the combinations are not explicitly prohibited.
 
 We want to know if there is a sequence that can trigger the last rule.
 In order to trigger the rule, the sequence must have the following three features:
@@ -408,24 +412,24 @@ In order to trigger the rule, the sequence must have the following three feature
 \end{itemize}
 
 
-We can see that some of these requirements can be fulfilled: the first rule allows models where {\em w2} contains \emph{target readings}. If the rule had been \t{REMOVE verb}, that is, unconditionally remove all verbs, then this requirement could not be fulfilled. But so far we have not run into the wall. 
+We can see that some of these requirements can be fulfilled: the first rule allows models where {\em w2} contains \emph{target readings}. If the rule had been \t{REMOVE verb}, that is, unconditionally remove all verbs, then this requirement could not be fulfilled. But so far we have not run into the wall.
 The second requirement, for \emph{ambiguity} is no problem either: other readings of {\em w2} have not been targeted, so we are free to choose anything.
 
 As for \emph{conditions}, the part about \t{(1 noun)} can be fulfilled; nothing prevents {\em w3} from being a noun. But the first condition, \t{(-1 det)}, cannot be true, if the target {\em w2} has to be a verb---the first rule has prohibited exactly that combination.
-Therefore, when we try to ask for a solution where all these requirements hold, we will get a conflict. The result shows us that the rule \t{REMOVE~verb~IF~(-1~det)~(1~noun)} cannot ever apply, if the rule \t{REMOVE~verb~IF~(-1~det)} has been already applied. 
+Therefore, when we try to ask for a solution where all these requirements hold, we will get a conflict. The result shows us that the rule \t{REMOVE~verb~IF~(-1~det)~(1~noun)} cannot ever apply, if the rule \t{REMOVE~verb~IF~(-1~det)} has been already applied.
 %For any pair of two rules \t{REMOVE x IF C1} and \t{REMOVE x IF C2}, if $C2 \subseteq C1$, then the latter rule will not have a chance to apply; simply because there is no condition that would fulfil C2 but not C1.
 % As we see later from the evaluation, recognising such pairs is not always easy.
 
 \paragraph{Example 2: no conflict}
-The previous was a simple example of a conflict: two rules target the same reading, and the first one had broader conditions. 
+The previous was a simple example of a conflict: two rules target the same reading, and the first one had broader conditions.
 %and the conditions were chosen such that the first rule applies in more cases than the second.
 Since we had only one preceding rule, we could not demonstrate why is it important to apply all the rules in order---even with a longer list of rules, the previous example could have also worked unordered, as long as the last rule is separated from rules before it.
 %two rules had the same target, and the first mentioned had a broader set of conditions.
-%Furthermore, the order was not really crucial. 
+%Furthermore, the order was not really crucial.
 Now we will show another example, where we illustrate why is it important to create new variables, and how conditions can affect the state of the variables, but in a more limited way. The set of readings is the same, and the rules are as follows.
 
 \begin{itemize}
-\item[] 
+\item[]
 \begin{verbatim}
 r1 = REMOVE verb IF (-1C det) ;
 r2 = SELECT det  IF ( 1 verb) ;
@@ -463,19 +467,19 @@ The following is an example of such sequence (false readings not shown). %---if 
 \end{figure}
 
 
-So far, we have passed through {\em r1} with the case ``condition does not hold, target not removed''. Now, let us add {\em r2}: \t{SELECT det IF (1 verb)}. 
-We must, in fact, select the determiner and remove everything else: 
-the condition of {\em r2} happens to be the target of {\em r3}, so it must hold. 
+So far, we have passed through {\em r1} with the case ``condition does not hold, target not removed''. Now, let us add {\em r2}: \t{SELECT det IF (1 verb)}.
+We must, in fact, select the determiner and remove everything else:
+the condition of {\em r2} happens to be the target of {\em r3}, so it must hold.
 %if the condition of $r2$ did not hold, then $r3$ would not have its target.
 But we have the notion of state now, so this is no problem.
-On arriving to {\em r1}, the symbolic word {\em w1} had to be ambiguous---that is, one of the variables $w1_{\noun\sg}, \  w1_{\noun\pl}, \ w1_{\verb\sg}, \ w1_{\verb\pl}$ must be true. 
+On arriving to {\em r1}, the symbolic word {\em w1} had to be ambiguous---that is, one of the variables $w1_{\noun\sg}, \  w1_{\noun\pl}, \ w1_{\verb\sg}, \ w1_{\verb\pl}$ must be true.
 But after passing through {\em r2}, the state of {\em w1} has changed:
 it contains a set of new variables $w1'_{\noun\sg}, \ w1'_{\noun\pl}, \ w1'_{\verb\sg}, \ w1'_{\verb\pl}$, and all of them must be false.
 Since the clauses formed by {\em r1} and {\em r3} get access to different variables, there is no conflict.
 
-% Thanks to the distinction, the initial {\em w1}, with the primeless variables, does not trigger {\em r1}. 
-% The {\em w1} changed by {\em r2} is not visible to {\em r1}, so 
-% We have arrived to the situation where {\em w1} at time {\em t1} does not trigger {\em r1}, 
+% Thanks to the distinction, the initial {\em w1}, with the primeless variables, does not trigger {\em r1}.
+% The {\em w1} changed by {\em r2} is not visible to {\em r1}, so
+% We have arrived to the situation where {\em w1} at time {\em t1} does not trigger {\em r1},
 % but {\em w1} at time {\em t3} triggers {\em r3}.
 
 
@@ -485,7 +489,7 @@ Since the clauses formed by {\em r1} and {\em r3} get access to different variab
 
 
 
-% In the system of interconnected clauses, application of rule number 100 may not only affect the target of rule number 1, but conditions as well. 
+% In the system of interconnected clauses, application of rule number 100 may not only affect the target of rule number 1, but conditions as well.
 % A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
 
 
@@ -502,7 +506,7 @@ Earlier we have shown an example with 5 readings (``det def'', ``noun
 sg'', ...). In a realistic case, we operate between hundreds and
 thousands of possible readings.  In order to find the set of readings,
 we expand a morphological lexicon\footnote{We used the lexica from
- Apertium, found in \url{https://github.com/apertium/apertium-languages}.}, 
+ Apertium, found in \url{https://github.com/apertium/apertium-languages}.},
 ignore the word forms and lemmas, and take all distinct analyses.
 However, many grammar rules target a specific lemma or word form.  A
 simple solution is to retain the lemmas and word forms only for those
@@ -518,7 +522,7 @@ out. For example, the Dutch grammar contains the following rule:
 find \emph{zijn} in the following entries:
 
 \begin{itemize}
- \item[] 
+ \item[]
 \begin{verbatim}
 zijn:zijn<det><pos><mfn><pl>     zijn:zijn<vbser><inf>
 zijn:zijn<det><pos><mfn><sg>     zijn:zijn<vbser><pres><pl>
@@ -526,7 +530,7 @@ zijn:zijn<det><pos><mfn><sg>     zijn:zijn<vbser><pres><pl>
 \end{itemize}
 
 \noindent Thus we add special entries for these: in addition to the anonymous
-``det pos mfn pl'' reading, we add ``\emph{zijn} det pos mfn pl''. 
+``det pos mfn pl'' reading, we add ``\emph{zijn} det pos mfn pl''.
 The lemma is treated as just another tag.
 
 However, for languages with more readings, this approach is not
@@ -550,9 +554,9 @@ the tag combinations specified in the grammar directly as our
 readings, and we could insert them into the symbolic sentences as well.
 The shortcut works most of the time, but if we only take the readings
 from the grammar and ignore the lexicon, it is possible to
-miss some cases: e.g. the rule \texttt{SELECT (pron rel) IF (0 nom)} 
+miss some cases: e.g. the rule \texttt{SELECT (pron rel) IF (0 nom)}
 may require ``pron rel nom'' in one reading, but this method only gives
-``pron rel'' and ``nom'' separately. 
+``pron rel'' and ``nom'' separately.
 
 
 In addition, we found that the tag lists in the grammars sometimes
@@ -570,9 +574,9 @@ the underspecified readings from the grammar may be an adequate solution.
 \centering
 \begin{tabular}{ c|c|c|c|c}
              & \t{n nt sg}  & \t{n f pl}  & \t{vblex sep inf} & \t{det pos mfn}  \\ \hline
- uitgaven    & 0        & 1       & 1             & 0    \\ 
- toespraken  & 0        & 1       & 1             & 0    \\ 
- haar        & 1        & 0       & 0             & 1    \\ 
+ uitgaven    & 0        & 1       & 1             & 0    \\
+ toespraken  & 0        & 1       & 1             & 0    \\
+ haar        & 1        & 0       & 0             & 1    \\
 \end{tabular}
 \caption{Ambiguity classes}
 \label{table:ambclass}
@@ -609,7 +613,7 @@ Firstly, we can create more realistic example sentences, which should help the g
 Secondly, we can possibly detect some more conflicts. Assume that the grammar contains the following rules:
 
  \begin{itemize}
- \item[] 
+ \item[]
 \begin{verbatim}
  REMOVE adj IF (-1 aux) ;
  REMOVE pp  IF (-1 aux) ;
@@ -618,32 +622,32 @@ Secondly, we can possibly detect some more conflicts. Assume that the grammar co
 
  With our symbolic sentence, these rules will be no problem; to apply the latter, we only need to construct a target that has a realistic ambiguity with a past participle; the adjective will be gone already.
 However, it could be that past participles (\t{pp}) only ever get confused with adjectives---in that case, the above rules would contradict each other.
- By removing the \t{adj} reading, the first rule effectively selects the \t{pp} reading, making it an instance of ``$r$ selects something in a context, $r'$ removes~it''. 
+ By removing the \t{adj} reading, the first rule effectively selects the \t{pp} reading, making it an instance of ``$r$ selects something in a context, $r'$ removes~it''.
 The additional constraints will prevent the SAT-solver from creating an ambiguity outside the allowed classes, and such a case would be caught as a conflict.
 
 \subsection{Use cases}
 
-In the beginning of this chapter, we gave a list of questions, regarding the rules in Figure~\ref{fig:infrules}. After describing our implementation, we return to these questions, and explain how a SAT-solver can answer them. 
-Section~\ref{sec:eval} shows the evaluation of the conflict detection, which we tried out for four grammars of different sizes. 
+In the beginning of this chapter, we gave a list of questions, regarding the rules in Figure~\ref{fig:infrules}. After describing our implementation, we return to these questions, and explain how a SAT-solver can answer them.
+Section~\ref{sec:eval} shows the evaluation of the conflict detection, which we tried out for four grammars of different sizes.
 The use cases presented in this section have not been tried in practice; however, our setup makes them fairly straight-forward to implement.
 
 \paragraph{Are all the rules distinct?} We gave the example of two rules in the Portuguese grammar, where one had the condition \t{(-1 Prep)} and the other \t{(-1 Para OR De)}. A grammarian who has some knowledge of Portuguese could tell that {\em para} and {\em de} are both prepositions, so these two rules seem to do almost the same thing.
 
 How can we verify this? To start, we apply all candidate rules to the same initial symbolic sentence. For the resulting symbolic sentence, we can ask for solutions with certain requirements.
 For instance, ``give me a model where a reading $a \notin \t{Inf}$ is true''.
-There are less such models allowed after \t{SELECT Inf IF (-1 Prep)}---if 
-a non-infinitive reading is in place, it means that the previous word cannot be any determiner---and 
+There are fewer such models allowed after \t{SELECT Inf IF (-1 Prep)}---if
+a non-infinitive reading is in place, it means that the previous word cannot be any determiner---and
 they are all in the set of models allowed \t{SELECT Inf IF (-1 Para OR De)}. Thus, we can show that the first rule implies the second. It is in the hands of the grammar writer to decide whether to keep the stronger or the weaker rule, or if they should be placed in different sections.
 
 
-\paragraph{Could two or more rules be merged?} This example concerns two or more rules with the same target but different conditions in the same position. 
+\paragraph{Could two or more rules be merged?} This example concerns two or more rules with the same target but different conditions in the same position.
 All the six rules in Figure~\ref{fig:infrules} have conditions in position -1; four of them also in 0. Some of them have an additional careful context, and some do not.
-A grammar writer might think that \t{IF (-1C Vbmod) (0C V)} and \t{IF (-1C Vbmod) (0 Ser)} are very similar, and could be merged into \t{SELECT Inf IF (-1C Vbmod) (0C V OR Ser)}. But could there be some unintended side effects in merging these two rules? Why is there a C in the first rule, but not in the second rule? 
+A grammar writer might think that \t{IF (-1C Vbmod) (0C V)} and \t{IF (-1C Vbmod) (0 Ser)} are very similar, and could be merged into \t{SELECT Inf IF (-1C Vbmod) (0C V OR Ser)}. But could there be some unintended side effects in merging these two rules? Why is there a C in the first rule, but not in the second rule?
 
-The procedure is similar to the previous one. We initialise two symbolic sentences; on one we run the original rules in a sequence, and on the other the merged rule. 
-Then, we can perform tests on the resulting symbolic sentences. Assuming that the ambiguity class constraints are in place, the result may show that C is not needed for the condition about {\em ser}, simply because {\em ser} is not ambiguous with anything else in the lexicon; hence the merged rule can safely have the condition \t{(0C V OR Ser)}. However, if {\em ser} can be ambiguous with something else, then this merged rule is stricter than the two original rules. If the grammar writer is still unsure whether there would be any meaningful sequences that would be missed, they can ask the SAT-solver to generate all those cases---this requires that the ambiguity classes are implemented, 
+The procedure is similar to the previous one. We initialise two symbolic sentences; on one we run the original rules in a sequence, and on the other the merged rule.
+Then, we can perform tests on the resulting symbolic sentences. Assuming that the ambiguity class constraints are in place, the result may show that C is not needed for the condition about {\em ser}, simply because {\em ser} is not ambiguous with anything else in the lexicon; hence the merged rule can safely have the condition \t{(0C V OR Ser)}. However, if {\em ser} can be ambiguous with something else, then this merged rule is stricter than the two original rules. If the grammar writer is still unsure whether there would be any meaningful sequences that would be missed, they can ask the SAT-solver to generate all those cases---this requires that the ambiguity classes are implemented,
 otherwise the number of solutions would blow up due to all the readings that are irrelevant to the rules in question.
-%\formulation{otherwise the number of solutions would be exponential on all possible readings in the lexicon.} 
+%\formulation{otherwise the number of solutions would be exponential on all possible readings in the lexicon.}
 
 \paragraph{Generate a sequence that triggers rule(s) $R$ but not rule(s) $R'$.}
 For any given rule, we can extract three requirements that would make it trigger. We illustrate them for the rule \t{REMOVE v IF (-1 det)}. In order to trigger the rule, the sequence must have
@@ -660,7 +664,7 @@ For a small number of rules, we can generate variants of the rule order, and run
 As a variant, we may be interested in the placement of just one rule in the sequence.
 
 \paragraph{Does a rewritten rule correspond to the original?}
-We can initialise two symbolic sentences, then run the original rule and the rewritten rule, and check if they allow the same models. 
+We can initialise two symbolic sentences, then run the original rule and the rewritten rule, and check if they allow the same models.
 
 \section{Evaluation}
 \label{sec:eval}
@@ -670,7 +674,7 @@ Section~\ref{sec:realistic_language}: readings as combinations of
 lexical and morphological tags, and ambiguity class constraints in place.
 These grammars were very small:
 Dutch\footnote{\scriptsize{\url{https://github.com/apertium/apertium-nld/blob/master/apertium-nld.nld.rlx}, commit d13fdaa}},
-with 59 rules and 
+with 59 rules and
 Spanish\footnote{\scriptsize{\url{https://github.com/apertium/apertium-spa/blob/master/apertium-spa.spa.rlx}, commit 1d4f290d}},
 with 279 rules.
 
@@ -687,14 +691,14 @@ types introduced in CG-3, and only tested \textsc{remove} and \textsc{select} ru
 The results for Dutch and Spanish are shown in Table~\ref{table:res},
 and the results for Finnish in Table~\ref{table:resFin}. For Basque,
 we were unable to analyse the whole grammar; instead we worked in
-smaller batches. 
+smaller batches.
 
 
 The experiments revealed problems in all grammars. For the smaller
 grammars, we were able to verify manually that nearly all detected conflicts were
 true positives---we found one false positive and one false negative,
-when trying out different setups for the Spanish grammar. 
-%The results for the Finnish grammar are inconclusive, 
+when trying out different setups for the Spanish grammar.
+%The results for the Finnish grammar are inconclusive,
 % For the Finnish grammar, we did not have time to
 % investigate all of them, but among those we could, we found both true and false negatives.
 We did not systematically check for false negatives in any of the
@@ -704,7 +708,7 @@ As the tool matures and we add new features, a more in-depth analysis
 will be needed.
 Another natural follow-up evaluation will be to compare the accuracy of the
 grammar in the original state, and after removing the conflicts found
-by our tool. 
+by our tool.
 %We aim to perform such evaluation, when the toolset is more mature.
 
 
@@ -718,25 +722,25 @@ by our tool.
 \# rules           & 59            & 279       & 279     \\ \hline
 \# readings        & 336           & 3905      & 1735    \\ \hline
 \# true~positives~\textsuperscript{AC}% with~amb.~classes
-                   & 7             & 45        & 44      \\ 
+                   & 7             & 45        & 44      \\
 {\small (internal~+~interaction)}
                    & {\small
-                      (6~+~1)}     & {\small 
+                      (6~+~1)}     & {\small
                                     (21~+~24)} & {\small (20~+~24)} \\ \hline
 
-\# true~positives~\textsuperscript{no AC}  & 7             & 43        & 42      \\ 
+\# true~positives~\textsuperscript{no AC}  & 7             & 43        & 42      \\
 {\small (internal~+~interaction)}
                    & {\small
-                      (6~+~1)}     & {\small 
+                      (6~+~1)}     & {\small
                                     (18~+~25)} & {\small (17~+~25)} \\ \hline
-\# false positives 
+\# false positives
                    & 0             & 0        & 1  \\ \hline
 
-\clock{} with amb. 
+\clock{} with amb.
            classes & 7 s        & 1h 46m   &  23 min  \\ \hline
 
-\clock{} no amb. 
-           classes & 3 s        & 44 min       & 16 min     \\ \hline 
+\clock{} no amb.
+           classes & 3 s        & 44 min       & 16 min     \\ \hline
 
 
 \end{tabular}
@@ -744,11 +748,11 @@ by our tool.
 \label{table:res}
 \end{table}
 
-\subsection{Dutch} The Dutch grammar had two kinds of errors: rule-internal and rule interaction. As for rule-internal conflicts, one was due to a misspelling in the list definition for personal pronouns, which rendered 5 rules ineffective. The other was about subreadings: the genitive \emph{s} is analysed as a subreading in the Apertium morphological lexicon, but it appeared in one rule as the main reading. 
+\subsection{Dutch} The Dutch grammar had two kinds of errors: rule-internal and rule interaction. As for rule-internal conflicts, one was due to a misspelling in the list definition for personal pronouns, which rendered 5 rules ineffective. The other was about subreadings: the genitive \emph{s} is analysed as a subreading in the Apertium morphological lexicon, but it appeared in one rule as the main reading.
 There was one genuine conflict with rule interaction, shown below:
 
 \begin{itemize}
-\item[\textsc{d$_1$.}] 
+\item[\textsc{d$_1$.}]
 \begin{verbatim}
 REMOVE Adv IF (1 N) ;
 REMOVE Adv IF (-1 Det) (0 Adj) (1 N) ;
@@ -756,9 +760,9 @@ REMOVE Adv IF (-1 Det) (0 Adj) (1 N) ;
 \end{itemize}
 
 % These two rules both remove an adverb, but the first one has a broader condition:
-% remove adverb if followed by a noun. In contrast, the second rule has a stricter condition: only remove adverb if it is preceded by a determiner, the adverb itself is ambiguous with an adjective, and followed by a noun. 
+% remove adverb if followed by a noun. In contrast, the second rule has a stricter condition: only remove adverb if it is preceded by a determiner, the adverb itself is ambiguous with an adjective, and followed by a noun.
 \noindent These two rules share a target: both remove an adverb.
-The problem is that the first rule has a broader condition than the second, hence the second will not have any chance to act. 
+The problem is that the first rule has a broader condition than the second, hence the second will not have any chance to act.
 If the rules were in the opposite order, then there would be no problem.
 
 
@@ -767,9 +771,9 @@ We also tested rules individually, in a way that a grammar writer might use our 
 The following rule was one of them:
 
 \begin{itemize}
-\item[\textsc{d$_2$.}] 
+\item[\textsc{d$_2$.}]
 \texttt{SELECT DetPos IF (-1 (vbser pres p3 sg)) (0 "zijn") (1 Noun);}
-\end{itemize} 
+\end{itemize}
 
 \noindent As per VISL CG-3, the condition \texttt{(0 "zijn")} does not require
  \emph{zijn} to be in the same reading with the target \t{DetPos}.
@@ -804,21 +808,21 @@ To catch them more systematically, we could add a feature that alerts in all cas
 
 \subsection{Spanish} The Spanish grammar had proportionately the
 highest number of errors. The grammar we ran is like the one
-found in the Apertium repository (linked on the previous page), 
+found in the Apertium repository (linked on the previous page),
 apart from two changes: we fixed some typos (capital O for 0) in order to make it compile, and
 commented out two rules that used regular expressions, because we did not implement the support for them yet.
 For a full list of found conflicts, see the annotated log of running
-our program in \url{https://github.com/inariksit/cgsat/blob/master/data/spa/conflicts.log}. 
+our program in \url{https://github.com/inariksit/cgsat/blob/master/data/spa/conflicts.log}.
 
 
-We include two versions of the Spanish grammar in Table~\ref{table:res}: in column \textsc{spa}, we added the lemmas and word forms as described in Section~\ref{sec:realistic_readings}, and in column \textsc{spa}\textsuperscript{sep.~lem.}, we just added each word form and lemma as individual readings, allowed to combine with any other reading. 
-This latter version ran much faster, but failed to detect an internal conflict for one rule, and reported a false positive for another. 
-% FAIL TO DETECT: SELECT:pr_cnjadv_3 cnjadv IF (0 "después de") 
+We include two versions of the Spanish grammar in Table~\ref{table:res}: in column \textsc{spa}, we added the lemmas and word forms as described in Section~\ref{sec:realistic_readings}, and in column \textsc{spa}\textsuperscript{sep.~lem.}, we just added each word form and lemma as individual readings, allowed to combine with any other reading.
+This latter version ran much faster, but failed to detect an internal conflict for one rule, and reported a false positive for another.
+% FAIL TO DETECT: SELECT:pr_cnjadv_3 cnjadv IF (0 "después de")
 % FALSE POSITIVE: SELECT:este_1 det IF (0 "este" + (m sg)|(m sp)|(mf sg)|(mf sp))
 
 When we added ambiguity class constraints, we found three more internal conflicts.
-Interestingly, the version with ambiguity classes fails to detect an interaction conflict, which the simpler version reports, because one of the rules is first detected as an internal conflict. 
-We think that neither of these versions is a false positive or negative; it is just a matter of priority. Sometimes we prefer to know that the rule cannot apply, given the current lexicon. 
+Interestingly, the version with ambiguity classes fails to detect an interaction conflict, which the simpler version reports, because one of the rules is first detected as an internal conflict.
+We think that neither of these versions is a false positive or negative; it is just a matter of priority. Sometimes we prefer to know that the rule cannot apply, given the current lexicon.
 However, we may know that the lexicon is about to be updated, and would rather learn about all potential interaction conflicts.
 
 As an example of internal conflict, there are two rules that use \texttt{SET Cog = (np cog)}: the problem is that the tag ``cog'' does not exist in the lexicon. As another example, four rules require a context word tagged as NP with explicit number, but the lexicon does not indicate any number with NPs. It is likely that this grammar has been written for an earlier version, where such tags have been in place.
@@ -829,7 +833,7 @@ In fact, we can reduce these 9 rules further into 3 different groups: 4~+~4~+~1,
 An example of such conflict is below (gender and number omitted for readability):
 
 \begin{itemize}
-\item[\textsc{s$_{1}$.}] 
+\item[\textsc{s$_{1}$.}]
 \begin{verbatim}
 # NOM ADJ ADJ
 SELECT A OR PP IF (-2 N) (-1 Adj_PP) (0 Adj_PP) (NOT 0 Det);
@@ -849,7 +853,7 @@ set definitions that are not used in any rule.
 For instance, the following definition requires the word to be all of
 the listed parts of speech at the same time---most likely, the grammar writer meant \t{OR} instead of +:
 \begin{itemize}
-\item[\textsc{s$_2$.}] 
+\item[\textsc{s$_2$.}]
 \texttt{SET NP\_Member = N + A + Det + PreAdv + Adv + Pron ;}
 \end{itemize}
 
@@ -866,7 +870,7 @@ are multiple interpretations, such as whether two analyses for a
 context word should be in the same reading or different readings.
 We observed also cases where the grammar writer has specified desired
 behaviour in comments, but the rule does not do what the grammar
-writer intended. 
+writer intended.
 
 \begin{itemize}
 \item[\textsc{s$_3$.}] \t{REMOVE Sentar IF (0 Sentar) (..) ;}
@@ -905,7 +909,7 @@ to trigger.
 
 
 
-\subsection{Finnish} 
+\subsection{Finnish}
 \label{sec:finnishEval}
 
 The results for the Finnish grammar are shown separately, in
@@ -962,31 +966,31 @@ ambiguities, instead of relying on the output in text.
                               & \multicolumn{2}{c|}{\twoClLG}
                                               & \multicolumn{2}{c|}{\oneClRG}      				   & \multicolumn{2}{c|}{\allRG} \\ \hline
 \multicolumn{2}{|l|}{\# readings}
-              & \multicolumn{2}{c|}{5851}         
-              				  & \multicolumn{2}{c|}{9494} 
+              & \multicolumn{2}{c|}{5851}
+              				  & \multicolumn{2}{c|}{9494}
               				  				  & \multicolumn{2}{c|}{6657}                & \multicolumn{2}{c|}{2394} \\
 lexicon &
 grammar   & 4263 & 1588 &  7906 & 1588  & 4263 & 2394  & 0 & 2394  \\ \hline
 \multicolumn{2}{|l|}{\#~conflicts}
-              & \multicolumn{2}{c|}{214}   
+              & \multicolumn{2}{c|}{214}
               				  & \multicolumn{2}{c|}{214}
               				                  & \multicolumn{2}{c|}{22}
               				                                  & \multicolumn{2}{c|}{22} \\
-internal & 
+internal &
  interaction & 211 & 3  & 211 & 3  & 19 & 3   &  19 & 3   \\ \hline
 
-\multicolumn{2}{|l|}{\clock{} all 
+\multicolumn{2}{|l|}{\clock{} all
        rules (approx.)}
              & \multicolumn{2}{c|}{\~{}4h 30min}
              		          & \multicolumn{2}{c|}{\~{}9h 30min}
-             		          			     & \multicolumn{2}{c|}{\~{}7h 45min} 
+             		          			     & \multicolumn{2}{c|}{\~{}7h 45min}
              		          			     				&  \multicolumn{2}{c|}{\~{}2h 30min} \\ \hline
 
 
 \end{tabular}
-\caption{Results for Finnish (1185 rules). 
-(\oneClLG) 1 clitic + lemmas from the grammar; 
-(\twoClLG) 2 clitics + lemmas from the grammar;  
+\caption{Results for Finnish (1185 rules).
+(\oneClLG) 1 clitic + lemmas from the grammar;
+(\twoClLG) 2 clitics + lemmas from the grammar;
 (\oneClRG) 1 clitic + all readings from the grammar;
 (\allRG) all readings from the grammar. }
 \label{table:resFin}
@@ -998,7 +1002,7 @@ In the first column, we included only possessive suffixes. In the second column,
 Both of these readings include the 1588 lemmas and word forms from the grammar.
 In the third column, we included all the tag combinations specified in the grammar, and in the fourth, we took only those, ignoring the morphological lexicon.
 
-The first two variants reported a high number of internal conflicts. 
+The first two variants reported a high number of internal conflicts.
 These are almost all due to nonexisting tags. The grammar was written in 1995, and updated by \cite{pirinen2015}; such a high number of internal conflicts indicates that possibly something has gone wrong in the conversion, or in our expansion of the morphological lexicon.
 As for accuracy, adding the question clitics did not change anything: they were already included in some of the 1588 sets with word forms or lemmas, and that was enough for the SAT-solver to find models with question clitics.
 We left the result in the table just to demonstrate the change in the running time.
@@ -1027,9 +1031,9 @@ The following two examples are interaction conflicts:
 
 \begin{itemize}
 \item[\textsc{f$_2$}.]\begin{verbatim}
-REMOVE A (0 Der) ; 
-REMOVE N (0 Der) ; 
-REMOVE A/N (0 Der) ; 
+REMOVE A (0 Der) ;
+REMOVE N (0 Der) ;
+REMOVE A/N (0 Der) ;
 \end{verbatim}
 \end{itemize}
 
@@ -1048,20 +1052,20 @@ The conflict lies in the fact that \texttt{Comma} is a subset of \texttt{Comma/N
 there is no way to trigger the second rule without placing a comma in position -1, and thereby triggering the first rule.
 
 
-\subsection{Performance} 
-The running time of the grammars ranges from seconds to hours. 
-Note that the times in the Finnish table are not entirely comparable with each other: we were forced to run the tests in smaller batches, and it is possible that there are different overheads, unrelated to the size of the SAT-problem, from testing 50 or 500 rules at a time. 
-Despite the inaccuracies, we can see that increasing the number of readings 
+\subsection{Performance}
+The running time of the grammars ranges from seconds to hours.
+Note that the times in the Finnish table are not entirely comparable with each other: we were forced to run the tests in smaller batches, and it is possible that there are different overheads, unrelated to the size of the SAT-problem, from testing 50 or 500 rules at a time.
+Despite the inaccuracies, we can see that increasing the number of readings
 and adding the ambiguity class constraints
 slow the program down significantly.
-%In order to understand the effect of each feature more precisely, we should run our tests on grammars that differ on only one of the variables. 
+%In order to understand the effect of each feature more precisely, we should run our tests on grammars that differ on only one of the variables.
 
 However, many of the use cases do not require running the whole
 grammar. Testing the interaction between 5--10 rules takes just
-seconds in all languages, if the ambiguity class constraints are not included. 
-A downside in the ambiguity classes is that generating them takes a long time, 
+seconds in all languages, if the ambiguity class constraints are not included.
+A downside in the ambiguity classes is that generating them takes a long time,
 and while the overhead may be acceptable when checking the full grammar,
-it is hardly so when analysing just a handful of rules. 
+it is hardly so when analysing just a handful of rules.
 We are working on an option to store and reuse the ambiguity class constraints.
 
 \section{Experiments on a Basque grammar}
@@ -1132,10 +1136,10 @@ some that would have been found by saner readings.
 In addition, we applied a tool for automatically tuning grammars
 \cite{bick2013tuning}: the tool modifies and reorders rules, testing
 against a gold standard to keep only those changes which improve the results.
-Our initial hypothesis is that the human-cleaned version will benefit more 
-from tuning than the original grammar. Some bad rules may have only a minor 
-problem, such as a single tag name having changed meaning, and they would be 
-better fixed by updating the obsolete tag, instead of the whole rule being 
+Our initial hypothesis is that the human-cleaned version will benefit more
+from tuning than the original grammar. Some bad rules may have only a minor
+problem, such as a single tag name having changed meaning, and they would be
+better fixed by updating the obsolete tag, instead of the whole rule being
 demoted or killed. To test our assumptions, we tune both the original
 grammar and the human-cleaned versions, continuously comparing the new
 versions to the original.
@@ -1194,12 +1198,12 @@ seems to block many rules from firing. We could have done the
 preliminary fixes on the grammar in the old format, to get more
 representative scores after the initial cleanup, but we found it easier to work
 on the grammar directly after grouping and sorting the rules, as shown
-in Figure~\ref{fig:basqueSorted}. 
+in Figure~\ref{fig:basqueSorted}.
 Tuning the cleaned grammar brings the precision up, indicating that
 more rules get to fire in the tuned order. The difference is most
 dramatic in the sorted and grouped grammar on the 4th level: the
 original precision drops from 62 \% to 56 \%, and goes up to 68 \%
-with the tuning. 
+with the tuning.
 
 The fairest test at this stage is to compare the
 tuned results of the original and the cleaned grammar.
@@ -1216,15 +1220,15 @@ the difference is not large, but we see it as a promising start.
 \centering
 \begin{tabular}{l|l|l|l|l|l|l|}
 \cline{2-7}
-                                                 & \multicolumn{3}{l|}{\textbf{All tags} (Level 4)}            & \multicolumn{3}{l|}{\textbf{48 main categories} (Level 2)}  \\ \cline{2-7} 
+                                                 & \multicolumn{3}{l|}{\textbf{All tags} (Level 4)}            & \multicolumn{3}{l|}{\textbf{48 main categories} (Level 2)}  \\ \cline{2-7}
                                                  & \textit{Rec.} & \textit{Prec.} & \textit{F-score} & \textit{Rec.} & \textit{Prec.} & \textit{F-score} \\ \hline
-\multicolumn{1}{|l|}{\textbf{Original grammar}}     
+\multicolumn{1}{|l|}{\textbf{Original grammar}}
 					    & \textbf{95.61}  & 62.99         &  75.94         & \textbf{97.48}  &  84.37           &  90.45           \\ \hline
-\multicolumn{1}{|l|}{\textbf{Tuned original}}    
+\multicolumn{1}{|l|}{\textbf{Tuned original}}
 					    & 93.87          & 68.06             &  78.91              & 96.66          &  86.82           &  91.48            \\ \hline
-\multicolumn{1}{|l|}{\textbf{Preliminary cleanup}}  
+\multicolumn{1}{|l|}{\textbf{Preliminary cleanup}}
 					   & 94.81           & 56.56             & 70.85               &  96.82         &  84.13           &  90.03           \\ \hline
-\multicolumn{1}{|l|}{\textbf{Tuned prel.cleanup}}      
+\multicolumn{1}{|l|}{\textbf{Tuned prel.cleanup}}
 					   & 93.41           & \textbf{68.61}  & \textbf{79.11}   &  96.41        &  \textbf{87.19}   &  \textbf{91.57}           \\ \hline
 \end{tabular}
 \caption{Preliminary evaluation on words, excluding punctuation, for levels 4 and 2 of granularity.}
@@ -1233,8 +1237,8 @@ the difference is not large, but we see it as a promising start.
 
 \paragraph{Conflict check}
 
-%We have worked on a reduced set of 21,000 readings, tailored to address this particular grammar. 
-%Unfortunately, 21,000 readings is at the limit of practical: the program can check up to 200 rules at a time, before it uses too much memory on a 4-year-old Macbook Air (1,7 GHz Intel Core i7, 8 GB memory). 
+%We have worked on a reduced set of 21,000 readings, tailored to address this particular grammar.
+%Unfortunately, 21,000 readings is at the limit of practical: the program can check up to 200 rules at a time, before it uses too much memory on a 4-year-old Macbook Air (1,7 GHz Intel Core i7, 8 GB memory).
 
 Our main problem is the size of the tag set: all possible combinations of tags on level 4 amount to millions of readings,
 and that would make the SAT-problems too big.
@@ -1253,9 +1257,9 @@ redundancies, such as the following:
 \item[]
 \begin{verbatim}
   SELECT ADB IF
-    (0 POSTPOSIZIOAK-9) 
+    (0 POSTPOSIZIOAK-9)
     (-1 IZE-DET-IOR-ADJ-ELI-SIG + INE) ;
-  SELECT ADB IF  
+  SELECT ADB IF
     (0 ("<barrena>")) (-1 INE) ;
 \end{verbatim}
 \end{itemize}
@@ -1283,10 +1287,10 @@ or near-duplicates in the whole grammar, such as the following:
 \item[]
 \begin{verbatim}
 SELECT IZE IF 	 # line 817
-  (0 POSTPOSIZIOAK-10IZE LINK 0 IZE_ABS_MG) 
-  (-1 IZE-DET-IOR-ADJ-ELI-SIG + GEN) ; 
+  (0 POSTPOSIZIOAK-10IZE LINK 0 IZE_ABS_MG)
+  (-1 IZE-DET-IOR-ADJ-ELI-SIG + GEN) ;
 SELECT IZE IF 	 # line 829
-  (0 POSTPOSIZIOAK-10IZE + IZE_ABS_MG) 
+  (0 POSTPOSIZIOAK-10IZE + IZE_ABS_MG)
   (-1 IZE-DET-IOR-ADJ-ELI-SIG + GEN) ;
 \end{verbatim}
 \end{itemize}
@@ -1328,44 +1332,45 @@ flagged as an internal conflict.
 \paragraph{Tuning}
 
 So far, the most important use of the tuning has been to overcome
-the differences in ordering. 
+the differences in ordering.
 Given the preliminary nature of the work, we have not tried multiple
 variations. We used a development corpus of 61,524
 tokens and a test corpus of 65,153 tokens; the same which we used to
 obtain the scores in Table~\ref{table:res}. We stopped the tuning
 after 5 iterations, and used an error threshold of 25 \% to consider a
-rule as ``good'' or ``bad''. 
+rule as ``good'' or ``bad''.
 
 In the future, as the grammar cleanup advances, we are interested in
 trying out different settings.
-% as we approach the task of finding an optimal order. 
+% as we approach the task of finding an optimal order.
 Already in our current stage, tuning has clearly improved the
 precision, for both original and preliminarily cleaned grammars, and
 for both levels of granularity; it is likely that experimenting with
 different parameters, we would find a combination that would also
 improve the recall, like \citet{bick2013tuning} and
 \citet{bick_hagen2015obt} report.  However, while tuning improves the
-grammar's performance, it makes it less readable for human eyes, and
-continuing the development is harder. It might make sense to keep two
-versions of the grammar: one for maintenance, and other for running,
-created automatically from the former.
+grammar's performance, it makes the grammar less human-readable, and
+continuing the development is harder. Keeping two versions of the grammar
+might be sensible: one for maintenance, kept in a human-readable order,
+and other for running, created automatically from the former.
 
 \input{chapters/cg-expressivity}
 
 \section{Conclusions and future work}
 
-We set out to design and implement an automatic analysis of constraint grammars that can find problematic rules and rule combinations, without the need for a corpus.
+We set out to design and implement an automatic analysis of constraint grammars 
+that can find problematic rules and rule combinations, without the need for a corpus.
 Our evaluation indicates that the tool indeed finds non-trivial conflicts and dead rules
-from actual grammars. 
+from actual grammars.
 
 We did not have a volunteer to test the tool in
 the process of grammar writing, so we cannot conclude whether the
 constructed examples are useful for getting new insights on the rules.
 In any case, there are still a number of features to improve and add.
-Future work can be divided in roughly three categories: 
+Future work can be divided in roughly three categories:
 \begin{inparaenum}
 \item[(a)] general improvement of the tool
-\item[(b)] evaluation with users, and 
+\item[(b)] evaluation with users, and
 \item[(c)] integration as a part of CG development framework.
 \end{inparaenum}
 
@@ -1385,7 +1390,7 @@ it miss actual conflicts, or suggest false positives) is left for
 future work.
 
 
-\paragraph{Heuristic checks for common issues} 
+\paragraph{Heuristic checks for common issues}
 As mentioned earlier, some grammar design choices are common sources
 of misinterpretation.  Many of these issues concern the case where the
 conditions include the target cohort---does \t{SELECT foo IF (0 bar)}
@@ -1432,7 +1437,7 @@ conditions, and eliminate one at a time, in order to find the
 reason(s) for the conflict.
 
 
-\paragraph{Suggesting alternative orders} 
+\paragraph{Suggesting alternative orders}
 On a speculative note, it could be interesting to identify pairs for a
 potential ``feeding order'' that is missed in the grammar. Say we have
 the following rule sequence:
