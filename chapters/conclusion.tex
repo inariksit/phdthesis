@@ -102,7 +102,7 @@ classes. % All of
 % guaranteed to be infallible.
 This means that reliability of our CG analysis tool depends on the
 consistency of the CG grammar and the morphological lexicon where the
-tags and the readings come from. Quite simply, if the morphological
+tags and the readings come from. If the morphological
 lexicon contains a word with the wrong tag, or the specifications for
 how tags can combine into readings are outdated, our tool may do the
 wrong thing: report a false conflict or fail to detect a real error.
@@ -165,16 +165,17 @@ take arguments of finitely many different types.
 
 How about repeating the same function arbitrarily many times? Could it
 be that the tree for {\em you think that X} is linearised correctly,
-but {\em I know that you think that X} introduces an error?  Luckily,
-we can answer this definitely.  In the \pmcfg{} format, all variation
-is encoded as parameters: if the $n^{th}$ repetition of some function
-would cause different behaviour, then there would be a parameter that
-counts the applications, and the program would generate separate test
-cases for one subordinate clause, and $n$ nested subordinate clauses.
+but {\em I know that you think that X} introduces an error? We can
+answer this definitely, and the answer is no. In the \pmcfg{} format,
+all variation is encoded as parameters: if the $n^{th}$ repetition of
+some function would cause different behaviour, then there would be a
+parameter that counts the applications, and the program would generate
+separate test cases for one subordinate clause, and $n$ nested
+subordinate clauses.
 
 But we can still fail to generate a test that reveals the error---the
 failure mode is, simply, not enough parameters in the grammar. Consider the
-\t{AdjCN} function for Spanish again, and say that we don’t have the
+\t{AdjCN} function for Spanish again, and say that we don't have the
 parameter for pre- and postmodifier at all, and \t{AdjCN} only comes
 in two variants, one for feminine and one for masculine. Suppose that
 all adjectives are, incorrectly, postmodifiers. Then we would notice
@@ -186,7 +187,7 @@ likely that we catch the error even with missing parameters. This was
 the case with, for example, Dutch preposition contraction (from
 Section~\ref{gf-testing-examples}). Originally, none of the
 prepositions contracted, but this is the most common behaviour---only a
-handful of prepositions don’t contract. Thus we got some test cases
+handful of prepositions don't contract. Thus we got some test cases
 which showed the error, and went on to fix the grammar. After the
 fixes, the system created separate test cases for contracting and
 non-contracting prepositions.
@@ -231,7 +232,9 @@ As we mention in Section~\ref{gf-future}, there is no semantic
 coherence in the generated sentences---this is particularly important
 when working with non-linguist testers. However, if it turns out that
 most testing work is done on application grammars, this step may not
-be as crucial
+be as crucial as for testing resource grammars. Furthermore, resource
+grammarians are often linguists themselves, and are more capable of
+distinguishing between semantic and syntactic weirdness.
 
 Another interesting feature is shrinking the test
 sentences. Especially for resource grammars, the generated examples
@@ -243,6 +246,25 @@ generate another example with smaller examples, such as ``run'',
 ``always run'' and ``run with Mary'', to help narrow down which
 function introduces the error.
 
+As we mention in Section~\ref{dutch-experiment}, communication with
+the testers via email is not a scalable solution. We would like to
+use the tool as a part of a more general language workbench, where
+the tester can read test sentences along with a linearisation in another
+language they know. The tester can then comment on the sentences, and
+give a correct linearisation in cases where the grammar outputs an incorrect
+sentence. Then when the grammar is updated, the grammarian could see immediately
+whether the produced sentences are the same as the tester specified or not.
+
+% The tool could also be used for developing a new grammar: instead of a tester
+% who judges existing linearisations, a language informant can input completely new
+% sentences, and the grammarian can write a grammar that linearises just those sentences.
+%
+% can type in sentences, a
+%
+% and comment on them, as well as
+% give the correct linearisation of a tree. After the
+% grammarian has updated  the grammar based on the feedback, the sentences
+% are generated again and
 %\todo{Workflow: language workbench}
 
 In more philosophical terms, we would like the grammar writing
@@ -261,5 +283,5 @@ generation, the test suite is updated along with the grammar.
 
 
 % What are some factors that would help a development organization move
-% from Beizer’s testing level 2 (testing is to show errors) to testing level 4
+% from Beizer's testing level 2 (testing is to show errors) to testing level 4
 % (a mental discipline that increases quality)?

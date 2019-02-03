@@ -809,8 +809,9 @@ To catch them more systematically, we could add a feature that alerts in all cas
 \subsection{Spanish} The Spanish grammar had proportionately the
 highest number of errors. The grammar we ran is like the one
 found in the Apertium repository (linked on the previous page),
-apart from two changes: we fixed some typos (capital O for 0) in order to make it compile, and
-commented out two rules that used regular expressions, because we did not implement the support for them yet.
+apart from two changes: we fixed some typos (capital O for 0) in
+order to make it compile, and commented out two rules that used
+regular expressions, because support for these had not been implemented.
 For a full list of found conflicts, see the annotated log of running
 our program in \url{https://github.com/inariksit/cgsat/blob/master/data/spa/conflicts.log}.
 
@@ -881,8 +882,8 @@ The comments make it clear that the first rule is meant to
 disambiguate between \emph{sentar} and \emph{sentir}, but the rule
 does not mention anything about \emph{sentir}.  Even with the
 ambiguity class constraints, the SAT-solver only created an ambiguity
-where \emph{sentar} in 1st person plural is ambiguous with an
-anonymous 1st person plural reading.  This does not reflect the
+where \emph{sentar} in 1st person plural is ambiguous with a lexically
+unspecified 1st person plural reading.  This does not reflect the
 reality, where the target is only ambiguous with certain verbs, and in
 certain conjugated forms.
 
@@ -891,7 +892,7 @@ $estado_{W}$ can be either a noun ($estado_{L}$, `state'), or the past
 participle of the verb $estar_{L}$.  The condition, however, addresses
 the lemma of the noun, $estado_L$, whereas the lemma of the PP is
 $estar_{L}$.  This means that, in theory, there can be a case where
-the condition to select the PP is already removed. As for now, the
+the condition to select the PP is already removed. Currently, the
 lexicon does not contain other ambiguities with the word form
 $estado_{W}$, but we could conceive of a scenario where someone adds
 e.g. a proper noun $Estado_{L}$ to the lexicon. Then, if some rule
@@ -1358,7 +1359,7 @@ and other for running, created automatically from the former.
 
 \section{Conclusions and future work}
 
-We set out to design and implement an automatic analysis of constraint grammars 
+We set out to design and implement an automatic analysis of constraint grammars
 that can find problematic rules and rule combinations, without the need for a corpus.
 Our evaluation indicates that the tool indeed finds non-trivial conflicts and dead rules
 from actual grammars.
